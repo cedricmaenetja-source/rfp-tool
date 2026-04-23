@@ -1,0 +1,56 @@
+:root{
+  --nav-color: #555;
+  --heading-color: #6b7280;
+  --heading-color2: #707070;
+  --border-color: #dfdfdf;
+  --title-color: #191f24;
+  --table-header-color: #424242;
+  --table-body-color: #525252;
+  --lightwhite-color: #fcfcfc;
+  --subtext-color: #6b7280;
+}
+
+.swal2-confirm,
+.swal2-deny{
+  border: 1px solid var(--border-color);
+  color: var(--title-color);
+  background: white;
+}
+
+.swal2-confirm:hover,
+.swal2-deny:hover{
+  border: 1px solid var(--title-color);
+  background: white;
+}
+
+.swal2-title{
+  font-size: 18px;
+}
+
+.note {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  background: #f0f9ff;
+  border-left: 4px solid #0ea5e9;
+  padding: 14px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #0f172a;
+  margin: 20px 0;
+}
+
+.note strong {
+  color: #0369a1;
+  white-space: nowrap;
+}
+
+.vendor-responses{
+    margin-bottom: 24px;
+}
+.vendor-responses hr {
+  border: none;
+  height: 1px;
+  background-color: var(--border-color); 
+  margin: 10px 0;
+}

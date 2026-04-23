@@ -1,0 +1,103 @@
+.skeleton {
+    background: linear-gradient(
+      90deg,
+      #e0e0e0 25%,
+      #f0f0f0 37%,
+      #e0e0e0 63%
+    );
+    background-size: 400% 100%;
+    animation: shimmer 1.4s ease infinite;
+    border-radius: 6px;
+  }
+
+  @keyframes shimmer {
+    0% { background-position: 100% 0; }
+    100% { background-position: -100% 0; }
+  }
+
+  /* ===== Layout ===== */
+  .skeleton-container {
+    padding: 20px;
+  }
+
+  /* Top Nav */
+  .skeleton-nav {
+    height: 44px;
+    background: #efefef;
+    border-radius: 6px;
+    margin-bottom: 20px;
+  }
+
+  /* Dashboard Card */
+  .skeleton-dashboard {
+    background: #fff;
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 20px;
+  }
+
+  .skeleton-dash-title {
+    width: 140px;
+    height: 18px;
+    margin-bottom: 16px;
+  }
+
+  .dash-metrics {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
+  }
+
+  .metric {
+    height: 24px;
+  }
+
+  /* Main Content */
+  .skeleton-content {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 20px;
+  }
+
+  /* Sidebar */
+  .skeleton-sidebar {
+    background: #fff;
+    border-radius: 10px;
+    padding: 16px;
+    margin-left:50px
+  }
+
+  .skeleton-sidebar-title {
+    width: 160px;
+    height: 16px;
+    margin-bottom: 16px;
+  }
+
+  .skeleton-sidebar-item {
+    height: 18px;
+    margin-bottom: 12px;
+  }
+
+  /* Main Panel */
+  .skeleton-main {
+    background: #fff;
+    border-radius: 10px;
+    padding: 16px;
+    margin-right:50px
+  }
+
+  .skeleton-main-title {
+    width: 120px;
+    height: 18px;
+    margin-bottom: 16px;
+  }
+
+  .skeleton-main-line {
+    height: 14px;
+    margin-bottom: 10px;
+    width: 100%;
+  }
+
+  .skeleton-main-line.short {
+    width: 60%;
+  }

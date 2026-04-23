@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>RFP Tool - Dashboard</title>
+  <link rel="stylesheet" type="text/css" href="../assets/css/site.css" />
+  <link rel="stylesheet" type="text/css" href="../assets/css/main.css" />
+  <link rel="stylesheet" type="text/css" href="../assets/css/skeleton.css" />
+  <link rel="stylesheet" type="text/css" href="../assets/css/form-fields-skeleton.css" />
+    <!-- <link rel="stylesheet" type="text/css" href="css/dataTables.responsive.css" /> -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <!-- <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script> -->
+    <!-- <script type="text/javascript" src="js/site.js"></script>	
+    <script type="text/javascript" src="js/dataTables.responsive.min.js"></script> -->
+    <link href="https://cdn.datatables.net/responsive/2.2.3/css/responsive.dataTables.min.css" rel="stylesheet" />
+        <link href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css" rel="stylesheet" />
+        <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+        <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+        <script src="https://cdn.datatables.net/responsive/2.2.3/js/dataTables.responsive.min.js"></script>
+    <script src="../assets/js/core/main.js"></script>	
+    <style>
+      /*  */
+      /* ===== CARD (TOP) ===== */
+  .pay-card {
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    margin-bottom: 24px;
+  }
+
+  .pay-card-header {
+    display: flex;
+    justify-content: space-between;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .badge {
+    background: #eef2ff;
+    color: #4338ca;
+    font-size: 12px;
+    padding: 2px 8px;
+    border-radius: 6px;
+  }
+
+  .btn-outline {
+    border: 1px solid #d1d5db;
+    background: #fff;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+  }
+
+  .pay-card-body {
+    padding: 16px;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
+  }
+
+  /* label {
+    font-size: 12px;
+    color: #6b7280;
+  } */
+
+  /* ===== LAYOUT BELOW ===== */
+  .layout {
+    display: flex;
+    gap: 24px;
+  }
+
+  /* ===== SIDEBAR ===== */
+  .sidebar {
+    width: 260px;
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 10px 0;
+    height: fit-content;
+  }
+
+  .sidebar h4 {
+    font-size: 12px;
+    padding: 10px 16px;
+    margin: 0;
+    text-transform: uppercase;
+  }
+
+  .menu-item {
+    padding: 10px 16px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-left: 3px solid transparent;
+  }
+
+  .menu-item:hover {
+    background: #f9fafb;
+  }
+
+  .menu-item.active {
+    background: #f3f4f6;
+    border-left: 3px solid #7c3aed;
+    font-weight: 600;
+  }
+
+  /* ===== CONTENT AREA ===== */
+  .content {
+    flex: 1;
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 20px;
+  }
+
+  .content-section {
+    display: none;
+  }
+
+  .content-section.active {
+    display: block;
+  }
+
+  .content h3 {
+    margin-top: 0;
+    font-size: 18px;
+  }
+
+  .status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+  }
+
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+
+  .pending { background: #facc15; }
+  .signed { background: #22c55e; }
+  .sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0 0 15px 0;
+    font-size: 16px;
+    font-weight: bold;
+  }
+
+  .add-btn-vendor {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    font-size: 18px;
+    font-weight: bold;
+    color: #000;
+    background-color: #fff;
+    border: 1px solid #d1d5db !important;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .add-btn-vendor:hover {
+    background-color: #0056b3;
+    color: white;
+  }
+  .hide{
+    display: none !important;
+  }
+  .show{
+    display: inline-block;
+  }
+  /* Slide-out panel */
+  #vendorPanel {
+    position: fixed;
+    top: 0;
+    right: -350px; /* Hidden by default */
+    width: 350px;
+    height: 100%;
+    background: #fff;
+    box-shadow: -2px 0 5px rgba(0,0,0,0.2);
+    padding: 20px;
+    box-sizing: border-box;
+    transition: right 0.3s ease;
+    z-index: 1000;
+    overflow-y: auto;
+  }
+
+  #vendorPanel.active {
+    right: 0; /* Slide in */
+  }
+
+  #vendorPanel h4 {
+    margin-top: 0;
+  }
+
+  #vendorSearch {
+    width: 100%;
+    padding: 5px;
+    margin-bottom: 10px;
+    box-sizing: border-box;
+  }
+
+  .vendor-item {
+    margin-bottom: 5px;
+  }
+
+  .vendor-panel-actions {
+    margin-top: 15px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+
+  .vendor-panel-actions button {
+    padding: 6px 12px;
+    cursor: pointer;
+  }
+  #vendorList > input, 
+  #vendorList > textarea{
+    width: -webkit-fill-available;
+    margin-bottom: 10px;
+  }
+  button:disabled{
+    background: #ddd;
+  }
+  .form-section {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    font-size: 14px;
+    margin-bottom: 6px;
+    font-weight: 600;
+}
+
+.form-group input {
+    padding: 10px 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 14px;
+    width: 45%;
+    outline: none;
+}
+
+.form-group input:focus {
+    border-color: #007bff;
+}
+    </style>
+</head>
+<body>
+  <div class="modal-wizard" id="wizardModal">
+    <div class="modal-wizard-content">
+        <button class="close-modal-wizard" id="closeWizard">&times;</button>
+
+        <div class="wizard-wrapper">
+
+            <div class="steps">
+                <div class="step active">1</div>
+                <div class="step">2</div>
+                <div class="step">3</div>
+            </div>
+
+            <div class="wizard-content">
+                <div class="step-label">Step 1</div>
+                <h2></h2>
+                <p class="description"></p>
+
+                <div class="card-group">
+                    <div class="card-modal-wizard active"></div>
+                    <div class="card-modal-wizard"></div>
+                    <div class="card-modal-wizard"></div>
+                </div>
+
+                <div class="wizard-buttons">
+                    <button class="back-btn" id="backBtn">Restart</button>
+                    <button class="next-btn" id="nextBtn" disabled>Next</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+  <div class="skeleton-container">
+
+    <!-- NAV -->
+    <div class="skeleton-nav skeleton"></div>
+
+    <!-- DASHBOARD -->
+    <div class="skeleton-dashboard">
+      <div class="skeleton-dash-title skeleton"></div>
+
+      <div class="dash-metrics">
+        <div class="metric skeleton"></div>
+        <div class="metric skeleton"></div>
+        <div class="metric skeleton"></div>
+        <div class="metric skeleton"></div>
+        <div class="metric skeleton"></div>
+      </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="skeleton-content">
+
+      <!-- SIDEBAR -->
+      <div class="skeleton-sidebar">
+        <div class="skeleton-sidebar-title skeleton"></div>
+
+        <div class="skeleton-sidebar-item skeleton"></div>
+        <div class="skeleton-sidebar-item skeleton"></div>
+        <div class="skeleton-sidebar-item skeleton"></div>
+        <div class="skeleton-sidebar-item skeleton"></div>
+        <div class="skeleton-sidebar-item skeleton"></div>
+        <div class="skeleton-sidebar-item skeleton"></div>
+        <div class="skeleton-sidebar-item skeleton"></div>
+      </div>
+
+      <!-- MAIN PANEL -->
+      <div class="skeleton-main">
+        <div class="skeleton-main-title skeleton"></div>
+
+        <div class="skeleton-main-line skeleton"></div>
+        <div class="skeleton-main-line skeleton"></div>
+        <div class="skeleton-main-line skeleton"></div>
+        <div class="skeleton-main-line skeleton short"></div>
+      </div>
+
+    </div>
+  </div>
+  <div class="container hide" id="mainPage">
+
+    <!-- Header -->
+    <div class="header">
+      RFP Tool - <span>ADMIN</span>
+    </div>
+
+    <!-- Navigation -->
+    <div class="nav">
+    </div>
+    <div class="card loader-container">
+      <div class="loader">
+      </div>
+    </div>
+
+    <div class="main">
+      <div id="requirements" class="page">
+            <div class="container">
+                <div class="pay-card">
+                    <div class="pay-card-header">
+                        <div class="title">
+                            <span class="header-tab active" data-tab="drafts">CLIENT REVIEW</span>
+                            <span class="header-tab" data-tab="requirements">VENDOR REVIEW</span>
+                            <!-- <span class="header-tab" data-tab="completed">VENDOR REVIEW</span> -->
+                            <span class="header-tab" data-tab="resources">RESOURCES</span>
+                            <span class="badge"></span>
+                        </div>
+                    <div></div>
+                </div>
+
+                <div class="pay-card-body">
+                    <div><label><a href="javascript:void(0)" id="createNewRequirement">+create new</a></label><div></div></div>
+                    <div><label>-</label><div id=""></div></div>
+                    <div><label>-</label><div id="client_phone"></div></div>
+                    <div><label>-</label><div id="created_at"></div></div>
+                    <div><label><strong>-</strong></label><div id="client_timeline" style="font-weight: bold;"></div></div>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="tab-requirements">
+                    <!-- Card -->
+                    <div class="card">
+                        <!-- Table -->
+                        <table id="mytable" class="display nowrap" style="width:100%;border-collapse: collapse;">
+                            <thead>
+                            <tr>
+                                <th></th>
+                                <th>Submitted On</th>
+                                <th>Company Name</th>
+                                <th>Title</th>
+                                <th>Contact Person</th>
+                                <th>Email Address</th>
+                                <th>Phone Number</th>
+                                <th>Country</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="tab-content active" id="tab-drafts">
+                    <div class="card">
+                        <table class="display nowrap" style="width:100%;border-collapse: collapse;">
+                            <thead>
+                            <tr>
+                                <th>Company Name</th>
+                                <th>Title</th>
+                                <th>Contact Person</th>
+                                <th>Email Address</th>
+                                <th>Phone Number</th>
+                                <th>Country</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="tab-completed">
+                    <div class="card">
+                        <table class="display nowrap" style="width:100%;border-collapse: collapse;">
+                            <thead>
+                            <tr>
+                                <th>Submitted On</th>
+                                <th>Company Name</th>
+                                <th>Title</th>
+                                <th>Contact Person</th>
+                                <th>Email Address</th>
+                                <th>Phone Number</th>
+                                <th>Country</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="tab-content" id="tab-resources">
+                    <div class="pay-card">
+                        <div class="pay-card-header">
+                            <div class="title">
+                                <span id="" style="font-weight: bold;">Resources</span>
+                                <span class="badge" id="">Find all requirement resources here.</span>
+                            </div>
+                        </div>
+                        <div class="tile-grid">
+                            <div class="tile">
+                                <h3>Template</h3>
+                                <p>File template for uploading new requirements.</p>
+                                <a href="../resources/template.xlsx" download class="btn-outline" style="color:black">Download</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="vendors" class="page">
+            <div class="container">
+                <!-- Card -->
+                <div class="card">
+                    <h2>VENDORS</h2>
+
+                    <div class="actions">
+                    <button class="btn-outline" id="add-btn-vendor">Add Vendor</button>
+                    </div>
+
+                    <!-- Table -->
+                    <table id="vendors-table" width="100%">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>Company Name</th>
+                                <th>Description</th>
+                                <th>Hq Location</th>
+                                <th>Contact Person</th>
+                                <th>Email Address</th>
+                                <th>Phone Number</th>
+                                <th>Verified by Udder</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Slide-out vendor panel -->
+                    <div id="vendorPanel">
+                    <h4>Vendor Information</h4>
+                    <div id="vendorList" class="form-fields">
+                        <h4 style="margin-top:20px">Company Information</h4>
+                        <input type="text" id="company_name" placeholder="Enter company name *" />
+                        <textarea id="description" rows="3" placeholder="Brief company description"></textarea>
+                        <input type="text" id="hq_location" placeholder="City, Country" />
+                        <div class="multi-select">
+                            <div class="multi-select__control">
+                                <span class="multi-select__placeholder">Select system parts *</span>
+                                <span class="multi-select__arrow">▾</span>
+                            </div>
+                            <div class="multi-select__dropdown">
+                            </div>
+                        </div>
+
+                        <h4 style="margin-top:20px">Contact Person</h4>
+                        <input type="text" id="contact_person" placeholder="Contact person (full name)*" />
+                        <input type="email" id="email_address" placeholder="Contact person (email)*" />
+                        <input type="tel" id="phone_number" placeholder="Contact person (phone)" />
+                    </div>
+                    <div class="vendor-panel-actions">
+                        <button id="addVendorBtn" class="btn-outline">Add <i class="fa-solid fa-spin fa-spinner hide" id="addVendorSpinner"></i></button>
+                        <button id="closeVendorPanel" class="btn-outline">Cancel</button>
+                    </div>
+                    </div>
+                </div>
+        </div>
+
+        <div id="popupModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Edit Vendor</h2>
+                <form id="editForm">
+                </form>
+            </div>
+        </div>
+      <div id="home" class="page active">
+            <div id="requirements_summary">
+        <div class="container">
+
+            <!-- PAY CARD -->
+            <div class="pay-card">
+                <div class="pay-card-header">
+                <div class="title">
+                    <span id="" style="font-weight: bold;">OVERVIEW</span>
+                    <span class="badge" id="client_country"></span>
+                </div>
+                <div>
+                    <!-- <button class="btn-outline">✓ Mark As Done</button>
+                    <button class="btn-outline">View history</button> -->
+                </div>
+                </div>
+
+                <div class="pay-card-body" style="text-align: center;">
+                  <div style="color: var(--heading-color);border-right: 1px solid var(--border-color);"><label id="tot_active_req" style="font-size:28px;">0</label><div>active requirements</div></div>
+                  <div style="color: var(--heading-color);border-right: 1px solid var(--border-color);"><label id="tot_draft_req" style="font-size:28px;">0</label><div>draft requirements</div></div>
+                  <div style="color: var(--heading-color);border-right: 1px solid var(--border-color);"><label id="tot_completed_req" style="font-size:28px;">0</label><div>completed requirements</div></div>
+                  <div style="color: var(--heading-color);border-right: 1px solid var(--border-color);"><label id="tot_vendors" style="font-size:28px;">0</label><div>total vendors</div></div>
+                  <div><label><strong>-</strong></label><div id="" style="font-weight: bold;"></div></div>
+                </div>
+            </div>
+
+            <!-- BELOW CARD -->
+            <div class="layout">
+
+                <!-- SIDEBAR -->
+                <div class="sidebar">
+                  
+                </div>
+
+                <!-- CONTENT -->
+                <div class="content">
+                </div>
+            </div>
+            </div>
+            </div>
+            </div>
+
+            <div id="configurations" class="page">
+            <div id="">
+              <div class="container">
+
+                  <!-- PAY CARD -->
+                  <div class="pay-card">
+                      <div class="pay-card-header">
+                        <div class="title">
+                            <span id="" style="font-weight: bold;">Configurations</span>
+                            <span class="badge" id=""></span>
+                        </div>
+                        <div>
+                            <!-- <button class="btn-outline">✓ Mark As Done</button>
+                            <button class="btn-outline">View history</button> -->
+                        </div>
+                      </div>
+
+                      <div class="" style="padding: 10px;">
+                        <div class="tabs">
+                          <button class="tab active" data-tab="all-areas-fields">Form Fields</button>
+                        </div>
+                        <div class="tab-content active" data-tab="all-areas-fields">
+                            <div class="section-header">
+                              <!-- <h2>Form Field Configuration</h2> -->
+                              <p>
+                                Use this section to define custom form fields. 
+                                These fields will be used across vendor and requirement submission workflows..
+                              </p>
+                            </div>
+                            <div class="grid-configurations skeleton-grid-form-fields">
+                              <!-- Skeleton Card -->
+                              <div class="card-configurations skeleton-form-fields">
+                                <div class="skeleton-title-form-fields"></div>
+
+                                <div class="skeleton-input-form-fields"></div>
+                                <div class="skeleton-textarea-form-fields"></div>
+                                <div class="skeleton-button-form-fields"></div>
+
+                                <div class="skeleton-list-form-fields">
+                                  <div class="skeleton-item-form-fields"></div>
+                                  <div class="skeleton-item-form-fields"></div>
+                                  <div class="skeleton-item-form-fields"></div>
+                                </div>
+                              </div>
+
+                              <div class="card-configurations skeleton-form-fields">
+                                <div class="skeleton-title-form-fields"></div>
+                                <div class="skeleton-input-form-fields"></div>
+                                <div class="skeleton-textarea-form-fields"></div>
+                                <div class="skeleton-button-form-fields"></div>
+                                <div class="skeleton-list-form-fields">
+                                  <div class="skeleton-item-form-fields"></div>
+                                  <div class="skeleton-item-form-fields"></div>
+                                  <div class="skeleton-item-form-fields"></div>
+                                </div>
+                              </div>
+
+                              <div class="card-configurations skeleton-form-fields">
+                                <div class="skeleton-title-form-fields"></div>
+                                <div class="skeleton-input-form-fields"></div>
+                                <div class="skeleton-textarea-form-fields"></div>
+                                <div class="skeleton-button-form-fields"></div>
+                                <div class="skeleton-list-form-fields">
+                                  <div class="skeleton-item-form-fields"></div>
+                                  <div class="skeleton-item-form-fields"></div>
+                                  <div class="skeleton-item-form-fields"></div>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div class="grid-configurations hide" id="formFieldsPage">
+                              <div class="card-configurations">
+                                <h3>Area/Category Values</h3>
+                                <div class="input-row-configurations">
+                                  <input type="text" id="formFieldArea" placeholder="Add area..." />
+                                  <button class="btn-outline add-configurations-btn">Add</button>
+                                </div>
+                                <div class="list-configurations" id="areaFormFieldList"></div>
+                              </div>
+
+                              <div class="card-configurations">
+                                <h3>System Part Values</h3>
+                                <div class="input-row-configurations">
+                                  <input type="text" id="formFieldSystemPart" placeholder="Add system part..." />
+                                  <button class="btn-outline add-configurations-btn">Add</button>
+                                </div>
+                                <div class="list-configurations" id="systemPartFormFieldList"></div>
+                              </div>
+
+                              <div class="card-configurations">
+                                <h3>Vendor Feedback Values</h3>
+                                <div class="input-row-configurations">
+                                  <input type="text" id="formFieldVendorFeedback" placeholder="Add vendor feedback..." disabled />
+                                  <button class="btn-outline add-configurations-btn" disabled>Add</button>
+                                </div>
+                                <div class="list-configurations" id="vendorFeedbackFormFieldList"></div>
+                              </div>
+
+                            </div>
+                        </div>
+                      </div>
+                  </div>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+  </div>
+  <footer class="app-footer">
+    <div class="footer-content">
+      <span>© <span id="footerYear"></span> Udder</span>
+      <span class="footer-separator">•</span> ADMIN <span class="footer-separator">•</span>
+      <span>All rights reserved</span>
+    </div>
+  </footer>
+  <script src="../assets/js/vendor/xlsx.full.min.js"></script>
+  <script type="module" src="../assets/js/core/dashboard.js"></script>
+  <script type="module" src="../assets/js/core/requirements.js"></script>
+  <script type="module" src="../assets/js/core/vendors.js"></script>
+  <script>
+    $(function(){
+      $('#footerYear').text(new Date().getFullYear());
+    });
+  </script>
+  <script>
+    function exportExcel(tableId, name){
+        console.info('tableId', tableId);
+        //const tableId = $(this).data(íd);
+        const table = document.getElementById(tableId);
+        const wb = XLSX.utils.table_to_book(table, { sheet: "Sheet1" });
+        XLSX.writeFile(wb, `${name}.xlsx`);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Analytics Dashboard</title>
+    <link rel="stylesheet" type="text/css" href="../assets/css/presentation.css" />
+    <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="module" src="../assets/js/core/presentation.js"></script>	
+</head>
+
+<body>
+ <div id="xloader"></div> 
+<div class="main" id="main">
+    <div class="header">
+        <h1>Dashboard Overview</h1>
+    </div>
+
+    <div class="cards">
+        <div class="card">
+            <h3>Total Revenue</h3>
+            <p>$48,250</p>
+        </div>
+        <div class="card">
+            <h3>Sales</h3>
+            <p>1,240</p>
+        </div>
+        <div class="card">
+            <h3>Customers</h3>
+            <p>845</p>
+        </div>
+        <div class="card">
+            <h3>Conversion Rate</h3>
+            <p>5.6%</p>
+        </div>
+    </div>
+
+    <div class="charts">
+        <div class="chart-box">
+            <h3>Revenue Trend</h3>
+            <div id="chart_div"></div>
+        </div>
+        <div class="chart-box">
+            <h3>Match Scores</h3>
+            <div id="piechart_div"></div>
+        </div>
+    </div>
+
+    <div class="bottom-charts">
+        <div class="chart-box">
+            <h3>Monthly Sales</h3>
+            <div id="barchart_div"></div>
+        </div>
+        <div class="chart-box">
+            <h3>Customer Growth</h3>
+            <div id="areachart_div"></div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    google.charts.load('current', {'packages':['corechart']});
+    google.charts.setOnLoadCallback(drawCharts);
+
+    function drawCharts() {
+        drawLineChart();
+        drawPieChart();
+        drawBarChart();
+        drawAreaChart();
+    }
+
+    function drawLineChart() {
+        const data = google.visualization.arrayToDataTable([
+            ['Month', 'Revenue'],
+            ['Jan', 12000],
+            ['Feb', 19000],
+            ['Mar', 15000],
+            ['Apr', 22000],
+            ['May', 18000],
+            ['Jun', 25000]
+        ]);
+
+        const options = {
+            title: 'Revenue Trend',
+            curveType: 'function',
+            legend: { position: 'bottom' }
+        };
+
+        const chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+        chart.draw(data, options);
+    }
+
+    function drawPieChart() {
+        const data = google.visualization.arrayToDataTable([
+            ['Category', 'Percentage'],
+            ['Products', 55],
+            ['Services', 30],
+            ['Subscriptions', 15]
+        ]);
+
+        const options = {
+            title: 'Sales Distribution'
+        };
+
+        const chart = new google.visualization.PieChart(document.getElementById('piechart_div'));
+        chart.draw(data);
+    }
+
+    function drawBarChart() {
+        const data = google.visualization.arrayToDataTable([
+            ['Month', 'Sales'],
+            ['Jan', 300],
+            ['Feb', 450],
+            ['Mar', 380],
+            ['Apr', 520],
+            ['May', 410],
+            ['Jun', 600]
+        ]);
+
+        const options = {
+            title: 'Monthly Sales',
+            hAxis: { title: 'Month' },
+            vAxis: { title: 'Sales' },
+            legend: { position: 'none' }
+        };
+
+        const chart = new google.visualization.BarChart(document.getElementById('barchart_div'));
+        chart.draw(data, options);
+    }
+
+    function drawAreaChart() {
+        const data = google.visualization.arrayToDataTable([
+            ['Month', 'Customers'],
+            ['Jan', 200],
+            ['Feb', 300],
+            ['Mar', 450],
+            ['Apr', 600],
+            ['May', 700],
+            ['Jun', 850]
+        ]);
+
+        const options = {
+            title: 'Customer Growth',
+            hAxis: { title: 'Month' },
+            vAxis: { title: 'Customers' },
+            legend: { position: 'none' },
+            isStacked: true
+        };
+
+        const chart = new google.visualization.AreaChart(document.getElementById('areachart_div'));
+        chart.draw(data, options);
+    }
+</script>
+
+</body>
+</html>

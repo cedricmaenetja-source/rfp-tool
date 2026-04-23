@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>RFP Tool - Requirement Information</title>
+  <link rel="stylesheet" type="text/css" href="../assets/css/site.css" />
+  <link rel="stylesheet" type="text/css" href="../assets/css/skeleton.css" />
+  <link rel="stylesheet" type="text/css" href="../assets/css/details.css" />
+    <link rel="stylesheet" type="text/css" href="../assets/css/dataTables.responsive.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script type="text/javascript" src="../assets/js/vendor/site.js"></script>	
+    <script type="text/javascript" src="../assets/js/vendor/dataTables.responsive.min.js"></script>
+    <script type="text/javascript" src="../assets/js/core/main.js"></script>
+    <script type="module" src="../assets/js/requirements/details.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #f5f5f5;
+      color: #333;
+    }
+
+    /* Page container */
+    .container {
+      width: 95%;
+      margin: 20px auto;
+    }
+
+    /* Header */
+    .header {
+      font-size: 28px;
+      margin-bottom: 10px;
+    }
+
+    .header span {
+      color: #9acd32;
+      font-weight: bold;
+    }
+
+    /* Nav */
+    .nav {
+      background: #eee;
+      padding: 10px 15px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+    }
+
+    .nav a {
+      text-decoration: none;
+      color: #555;
+      margin-right: 18px;
+      font-size: 14px;
+    }
+
+    .nav a:hover {
+      text-decoration: underline;
+    }
+
+    /* Card */
+    .card, .vendor-responses {
+      background: #fff;
+      border-radius: 6px;
+      padding: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .card h2, .vendor-responses h2 {
+      margin: 0 0 10px 0;
+      font-weight: normal;
+    }
+
+    .actions {
+      margin-bottom: 15px;
+      font-size: 14px;
+    }
+
+    .actions a {
+      color: #9acd32;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .actions a:hover {
+      text-decoration: underline;
+    }
+
+    /* Table controls */
+    .table-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+
+    select, input[type="text"] {
+      padding: 4px 6px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+    }
+
+    /* Table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    th, td {
+      padding: 8px;
+      border-bottom: 1px solid #ddd;
+      text-align: left;
+    }
+
+    th {
+      font-weight: bold;
+      background: #fafafa;
+    }
+
+    /* Add button */
+    .add-btn {
+      width: 20px;
+      height: 20px;
+      background: #3cb371;
+      color: #fff;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    /* Footer */
+    .table-footer {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+      font-size: 13px;
+      color: #555;
+    }
+
+    .pagination a {
+      margin-left: 8px;
+      text-decoration: none;
+      color: #333;
+      padding: 4px 8px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+    }
+
+    .pagination a.active {
+      background: #eee;
+      font-weight: bold;
+    }
+    .page {
+        display: none;
+    }
+
+    .page.active {
+        display: block;
+    }
+    .container {
+    max-width: 1300px;
+    margin: 40px auto;
+    padding: 0 20px;
+  }
+
+  /* ===== CARD (TOP) ===== */
+  .pay-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    margin-bottom: 24px;
+  }
+
+  .pay-card-header {
+    display: flex;
+    justify-content: space-between;
+    padding: 14px 16px;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .badge {
+    background: #eef2ff;
+    color: #4338ca;
+    font-size: 12px;
+    padding: 2px 8px;
+    border-radius: 6px;
+  }
+
+  .btn-outline {
+    border: 1px solid #d1d5db;
+    background: #fff;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+  }
+
+  .pay-card-body {
+    padding: 16px;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
+  }
+
+  label {
+    font-size: 12px;
+    color: #6b7280;
+  }
+
+  /* ===== LAYOUT BELOW ===== */
+  .layout {
+    display: flex;
+    gap: 24px;
+  }
+
+  /* ===== SIDEBAR ===== */
+  .sidebar {
+    width: 260px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 10px 0;
+    height: fit-content;
+  }
+
+  .sidebar h4 {
+    font-size: 12px;
+    color: #6b7280;
+    padding: 10px 16px;
+    margin: 0;
+    text-transform: uppercase;
+  }
+
+  .menu-item {
+    padding: 10px 16px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-left: 3px solid transparent;
+  }
+
+  .menu-item:hover {
+    background: #f9fafb;
+  }
+
+  .menu-item.active {
+    background: #f3f4f6;
+    border-left: 3px solid #7c3aed;
+    font-weight: 600;
+  }
+
+  /* ===== CONTENT AREA ===== */
+  .content {
+    flex: 1;
+    background: transparent;
+    /* border: 1px solid #e5e7eb; */
+    border-radius: 8px;
+    /* padding: 20px; */
+  }
+
+  .content-section {
+    display: none;
+  }
+
+  .content-section.active {
+    display: block;
+  }
+
+  .content h3 {
+    margin-top: 0;
+    font-size: 18px;
+  }
+
+  /* ===== DOCUMENT TABLE ===== */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 16px;
+  }
+
+  th, td {
+    padding: 12px;
+    border-bottom: 1px solid #e5e7eb;
+    font-size: 14px;
+    text-align: left;
+  }
+
+  th {
+    color: #6b7280;
+    font-size: 12px;
+    text-transform: uppercase;
+  }
+
+  .status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+  }
+
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+
+  .pending { background: #facc15; }
+  .signed { background: #22c55e; }
+  .sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0 0 15px 0;
+    font-size: 16px;
+    font-weight: bold;
+  }
+
+  .add-btn-vendor {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    font-size: 18px;
+    font-weight: bold;
+    color: #000;
+    background-color: #fff;
+    border: 1px solid #d1d5db !important;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .add-btn-vendor:hover {
+    background-color: #0056b3;
+    color: white;
+  }
+  /* Slide-out panel */
+  #vendorPanel {
+    position: fixed;
+    top: 0;
+    right: -350px; /* Hidden by default */
+    width: 350px;
+    height: 100%;
+    background: #fff;
+    box-shadow: -2px 0 5px rgba(0,0,0,0.2);
+    padding: 20px;
+    box-sizing: border-box;
+    transition: right 0.3s ease;
+    z-index: 1000;
+    overflow-y: auto;
+  }
+
+  #vendorPanel.active {
+    right: 0; /* Slide in */
+  }
+
+  #vendorPanel h4 {
+    margin-top: 0;
+  }
+
+  #vendorSearch {
+    width: 100%;
+    padding: 5px;
+    margin-bottom: 10px;
+    box-sizing: border-box;
+  }
+
+  .vendor-item {
+    margin-bottom: 5px;
+  }
+
+  .vendor-panel-actions {
+    margin-top: 15px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+
+  .vendor-panel-actions button {
+    padding: 6px 12px;
+    cursor: pointer;
+  }
+  .hide{
+    display: none;
+  }
+  .show{
+    display: block;
+  }
+  </style>
+</head>
+<body>
+<div class="skeleton-container">
+    <!-- NAV -->
+    <div class="skeleton-nav skeleton"></div>
+
+    <!-- DASHBOARD -->
+    <div class="skeleton-dashboard">
+      <div class="skeleton-dash-title skeleton"></div>
+
+      <div class="dash-metrics">
+        <div class="metric skeleton"></div>
+        <div class="metric skeleton"></div>
+        <div class="metric skeleton"></div>
+        <div class="metric skeleton"></div>
+        <div class="metric skeleton"></div>
+      </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="skeleton-content">
+
+      <!-- SIDEBAR -->
+      <div class="skeleton-sidebar">
+        <div class="skeleton-sidebar-title skeleton"></div>
+
+        <div class="skeleton-sidebar-item skeleton"></div>
+        <div class="skeleton-sidebar-item skeleton"></div>
+        <div class="skeleton-sidebar-item skeleton"></div>
+        <div class="skeleton-sidebar-item skeleton"></div>
+        <div class="skeleton-sidebar-item skeleton"></div>
+        <div class="skeleton-sidebar-item skeleton"></div>
+        <div class="skeleton-sidebar-item skeleton"></div>
+      </div>
+
+      <!-- MAIN PANEL -->
+      <div class="skeleton-main">
+        <div class="skeleton-main-title skeleton"></div>
+
+        <div class="skeleton-main-line skeleton"></div>
+        <div class="skeleton-main-line skeleton"></div>
+        <div class="skeleton-main-line skeleton"></div>
+        <div class="skeleton-main-line skeleton short"></div>
+      </div>
+
+    </div>
+  </div>
+  <div class="container hide" id="mainPage">
+
+    <!-- Header -->
+    <div class="header">
+      RFP Tool - <span>ADMIN</span>
+    </div>
+    
+    <div id="requirements_summary">
+      <div class="container">
+  <nav class="breadcrumb">
+    <a href="../dashboard/">Home</a>
+    <span>/</span>
+    <span class="active">Requirement Details</span>
+  </nav>
+  </div>
+  <div class="note hide">
+    <strong style="color:red">Note:</strong>
+    <span>
+      This requirement has been marked as completed. No further changes can be made.
+    </span>
+  </div>
+  <!-- PAY CARD -->
+  <div class="pay-card">
+    <div class="pay-card-header">
+      <div class="title">
+        <span id="client_company" style="font-weight: bold;"></span> (<span id="title" style="font-weight: bold;"></span>)
+        <span class="badge" id="client_country"></span>
+      </div>
+      <div>
+        <!-- <button class="btn-outline" id="sendToClientBtn">✉ Send to Client</button> -->
+        <button class="btn-outline" id="markAsDoneBtn">✓ Mark As Done</button>
+      </div>
+    </div>
+
+    <div class="pay-card-body">
+      <div><label>Contact Name</label><div id="client_name"></div></div>
+      <div><label>Contact Email</label><div id="client_email"></div></div>
+      <div><label>Contact Phone</label><div id="client_phone"></div></div>
+      <div><label>Created At</label><div id="created_at"></div></div>
+      <div><label><strong>Timeline</strong></label><div id="client_timeline" style="font-weight: bold;"></div></div>
+    </div>
+  </div>
+
+  <!-- BELOW CARD -->
+  <div class="layout">
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <h4 class="sidebar-header">
+        ASSIGNED VENDORS
+        <button class="add-btn-vendor" title="assign a vendor">+</button>
+      </h4>
+      <div class="menu-item active" onclick="showSection('requirements')">Requirements Overview</div>
+    </div>
+
+    <!-- Slide-out vendor panel -->
+    <div id="vendorPanel">
+      <h4>Select Vendors <i class="fa fa-circle-info" title="The vendors listed below are those with a designated contact person."></i></h4>
+      <input type="text" id="vendorSearch" placeholder="Search vendors..." />
+      <div id="vendorList"></div>
+      <div style="text-align: center;margin-bottom: 40px;" id="xloader"></div>
+      <div class="vendor-panel-actions">
+        <button id="inviteVendorsBtn" class="btn-outline">Invite</button>
+        <button id="closeVendorPanel" class="btn-outline">Cancel</button>
+      </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content">
+
+      <!-- DOCUMENTS -->
+      <div id="requirements" class="content-section active">
+        <div class="vendor-responses">
+          <h3>Requirements Overview</h3>
+          <hr/>
+          <span></span>
+          <table>
+            <thead>
+              <tr>
+                <th>Area</th>
+                <th>Description</th>
+                <th>Priority</th>
+                <th>System Parts</th>
+              </tr>
+            </thead>
+            <tbody>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- <div id="personal" class="content-section">
+        <h3>Personal Information</h3>
+        <p>Employee personal details will appear here.</p>
+      </div>
+
+      <div id="jobs" class="content-section">
+        <h3>Jobs</h3>
+        <p>Job roles, titles and history.</p>
+      </div>
+
+      <div id="expenses" class="content-section">
+        <h3>Expenses</h3>
+        <p>Expense claims and reimbursements.</p>
+      </div>
+
+      <div id="devices" class="content-section">
+        <h3>Devices</h3>
+        <p>Assigned company devices.</p>
+      </div> -->
+
+    </div>
+  </div>
+      </div>
+
+      <script>
+        function showSection(id) {
+          document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+          document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+
+          document.getElementById(id).classList.add('active');
+          event.target.classList.add('active');
+        }
+      </script>
+        
+      </div>
+    </div>
+</body>
+</html>

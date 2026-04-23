@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RFP Tool - Vendor Requirements Review</title>
+
+  <!-- jQuery -->
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script type="module" src="../assets/js/requirements/vendor_review.js"></script>
+
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --primary: #4f46e5;
+      --text: #111827;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      padding: 40px;
+    }
+
+    .card {
+      background: var(--card);
+      max-width: 100%;
+      margin: auto;
+      padding: 24px;
+      border-radius: 14px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    }
+
+    h2 {
+      margin: 0 0 6px;
+      color: var(--text);
+    }
+
+    p {
+      margin: 0 0 20px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    thead {
+      background: #f9fafb;
+    }
+
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+    }
+
+    th {
+      color: var(--muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 12px;
+    }
+
+    select, input, textarea {
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      font-size: 13px;
+      background: white;
+      width: 100%;
+    }
+
+    .actions {
+      margin-top: 20px;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    button {
+      padding: 12px 18px;
+      border-radius: 8px;
+      border: none;
+      background: var(--primary);
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    button:hover {
+      opacity: 0.95;
+    }
+    .loader {
+      width: 48px;
+      height: 48px;
+      border: 5px solid #FFF;
+      border-bottom-color: #FF3D00;
+      border-radius: 50%;
+      display: inline-block;
+      box-sizing: border-box;
+      animation: rotation 1s linear infinite;
+    }
+
+    @keyframes rotation {
+      0% {
+          transform: rotate(0deg);
+      }
+      100% {
+          transform: rotate(360deg);
+      }
+    } 
+    .hide{
+      display: none !important;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="card">
+    <h2 id="title"></h2>
+    <p id="company_info"></p>
+    <p>Review each requirement and indicate how it will be handled.</p>
+    <div style="text-align: center;">
+        <div class="loader" id="loader"></div>
+    </div>
+    <table width="100%" class="hide">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th width="10%">Area</th>
+          <th width="30%">Decision</th>
+          <th width="15%">Priority</th>
+          <th width="20%">Feedback</th>
+          <th width="20%">Comments</th>
+        </tr>
+      </thead>
+      <tbody id="requirementsTable"></tbody>
+    </table>
+
+    <div class="actions">
+      <button id="saveDecisions">Submit</button>
+    </div>
+  </div>
+  <footer style="margin-bottom: 12px;">
+    <span style="color: lightslategray;font-size: 10px;">Powered by Udder.</span>
+  </footer>
+</body>
+</html>

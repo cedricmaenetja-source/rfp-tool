@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>RFP Tool - Requirement Information (Draft)</title>
+  <link rel="stylesheet" type="text/css" href="../assets/css/site.css" />
+  <link rel="stylesheet" type="text/css" href="../assets/css/main.css" />
+  <link rel="stylesheet" type="text/css" href="../assets/css/skeleton.css" />
+    <link rel="stylesheet" type="text/css" href="../assets/css/dataTables.responsive.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script type="text/javascript" src="../assets/js/vendor/site.js"></script>	
+    <script type="text/javascript" src="../assets/js/vendor/dataTables.responsive.min.js"></script>
+    <script type="module" src="../assets/js/requirements/draft.js"></script>
+  <style>
+    /* Page container */
+    .container {
+      width: 95%;
+      margin: 20px auto;
+    }
+
+    /* Header */
+    .header {
+      font-size: 28px;
+      margin-bottom: 10px;
+    }
+
+    .header span {
+      color: #9acd32;
+      font-weight: bold;
+    }
+
+    /* Nav */
+    .nav {
+      background: #eee;
+      padding: 10px 15px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+    }
+
+    .nav a {
+      text-decoration: none;
+      color: #555;
+      margin-right: 18px;
+      font-size: 14px;
+    }
+
+    .nav a:hover {
+      text-decoration: underline;
+    }
+
+    /* Card */
+    .card {
+      background: #fff;
+      border-radius: 6px;
+      padding: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .card h2 {
+      margin: 0 0 10px 0;
+      font-weight: normal;
+    }
+
+    .actions {
+      margin-bottom: 15px;
+      font-size: 14px;
+    }
+
+    .actions a {
+      color: #9acd32;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .actions a:hover {
+      text-decoration: underline;
+    }
+
+    /* Table controls */
+    .table-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+
+    select, input[type="text"] {
+      padding: 4px 6px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+    }
+
+    /* Table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    th, td {
+      padding: 8px;
+      border-bottom: 1px solid #ddd;
+      text-align: left;
+    }
+
+    th {
+      font-weight: bold;
+      background: #fafafa;
+    }
+
+    /* Add button */
+    .add-btn {
+      width: 20px;
+      height: 20px;
+      background: #3cb371;
+      color: #fff;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    /* Footer */
+    .table-footer {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+      font-size: 13px;
+      color: #555;
+    }
+
+    .pagination a {
+      margin-left: 8px;
+      text-decoration: none;
+      color: #333;
+      padding: 4px 8px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+    }
+
+    .pagination a.active {
+      background: #eee;
+      font-weight: bold;
+    }
+    .page {
+        display: none;
+    }
+
+    .page.active {
+        display: block;
+    }
+    .container {
+    max-width: 1300px;
+    margin: 40px auto;
+    padding: 0 20px;
+  }
+
+  /* ===== CARD (TOP) ===== */
+  .pay-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    margin-bottom: 24px;
+  }
+
+  .pay-card-header {
+    display: flex;
+    justify-content: space-between;
+    padding: 14px 16px;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .badge {
+    background: #eef2ff;
+    color: #4338ca;
+    font-size: 12px;
+    padding: 2px 8px;
+    border-radius: 6px;
+  }
+
+  .btn-outline {
+    border: 1px solid #d1d5db;
+    background: #fff;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+  }
+
+  .pay-card-body {
+    padding: 16px;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
+  }
+
+  label {
+    font-size: 12px;
+    color: #6b7280;
+  }
+
+  /* ===== LAYOUT BELOW ===== */
+  .layout {
+    display: flex;
+    gap: 24px;
+  }
+
+  /* ===== SIDEBAR ===== */
+  .sidebar {
+    width: 260px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 10px 0;
+    height: fit-content;
+  }
+
+  .sidebar h4 {
+    font-size: 12px;
+    color: #6b7280;
+    padding: 10px 16px;
+    margin: 0;
+    text-transform: uppercase;
+  }
+
+  .menu-item {
+    padding: 10px 16px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-left: 3px solid transparent;
+  }
+
+  .menu-item:hover {
+    background: #f9fafb;
+  }
+
+  .menu-item.active {
+    background: #f3f4f6;
+    border-left: 3px solid #7c3aed;
+    font-weight: 600;
+  }
+
+  /* ===== CONTENT AREA ===== */
+  .content {
+    flex: 1;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 20px;
+  }
+
+  .content-section {
+    display: none;
+  }
+
+  .content-section.active {
+    display: block;
+  }
+
+  .content h3 {
+    margin-top: 0;
+    font-size: 18px;
+  }
+
+  /* ===== DOCUMENT TABLE ===== */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 16px;
+  }
+
+  th, td {
+    padding: 12px;
+    border-bottom: 1px solid #e5e7eb;
+    font-size: 14px;
+    text-align: left;
+  }
+
+  th {
+    color: #6b7280;
+    font-size: 12px;
+    text-transform: uppercase;
+  }
+
+  .status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+  }
+
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+
+  .pending { background: #facc15; }
+  .signed { background: #22c55e; }
+  .sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0 0 15px 0;
+    font-size: 16px;
+    font-weight: bold;
+  }
+  .sidebar > span{
+    padding: 10px 16px;
+    cursor: default;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #525252;
+    border-left: 3px solid transparent;
+  }
+
+  .add-btn-vendor {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    font-size: 18px;
+    font-weight: bold;
+    color: #000;
+    background-color: #fff;
+    border: 1px solid #d1d5db !important;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .add-btn-vendor:hover {
+    background-color: #0056b3;
+    color: white;
+  }
+  /* Slide-out panel */
+  #vendorPanel {
+    position: fixed;
+    top: 0;
+    right: -350px; /* Hidden by default */
+    width: 350px;
+    height: 100%;
+    background: #fff;
+    box-shadow: -2px 0 5px rgba(0,0,0,0.2);
+    padding: 20px;
+    box-sizing: border-box;
+    transition: right 0.3s ease;
+    z-index: 1000;
+    overflow-y: auto;
+  }
+
+  #vendorPanel.active {
+    right: 0; /* Slide in */
+  }
+
+  #vendorPanel h4 {
+    margin-top: 0;
+  }
+
+  #vendorSearch {
+    width: 100%;
+    padding: 5px;
+    margin-bottom: 10px;
+    box-sizing: border-box;
+  }
+
+  .vendor-item {
+    margin-bottom: 5px;
+  }
+
+  .vendor-panel-actions {
+    margin-top: 15px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+
+  .vendor-panel-actions button {
+    padding: 6px 12px;
+    cursor: pointer;
+  }
+  .hide{
+    display: none !important;
+  }
+  .show{
+    display: block;
+  }
+  .empty{
+    color: lightgray;
+  }
+  .editable.empty {
+        color: #9ca3af;
+        font-style: italic;
+    }
+    .save-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: #16a34a; 
+        font-size: 0.85rem;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .save-status.show {
+     opacity: 1;
+    }
+
+    .save-status .tick {
+        font-weight: bold;
+    }
+    .note {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      background: #f0f9ff;
+      border-left: 4px solid #0ea5e9;
+      padding: 14px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      color: #0f172a;
+      margin: 20px 0;
+    }
+
+    .note strong {
+      color: #0369a1;
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+<div class="skeleton-container">
+
+    <!-- NAV -->
+    <div class="skeleton-nav skeleton"></div>
+
+    <!-- DASHBOARD -->
+    <div class="skeleton-dashboard">
+      <div class="skeleton-dash-title skeleton"></div>
+
+      <div class="dash-metrics">
+        <div class="metric skeleton"></div>
+        <div class="metric skeleton"></div>
+        <div class="metric skeleton"></div>
+        <div class="metric skeleton"></div>
+        <div class="metric skeleton"></div>
+      </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="skeleton-content">
+
+      <!-- SIDEBAR -->
+      <div class="skeleton-sidebar">
+        <div class="skeleton-sidebar-title skeleton"></div>
+
+        <div class="skeleton-sidebar-item skeleton"></div>
+        <div class="skeleton-sidebar-item skeleton"></div>
+        <div class="skeleton-sidebar-item skeleton"></div>
+        <div class="skeleton-sidebar-item skeleton"></div>
+        <div class="skeleton-sidebar-item skeleton"></div>
+        <div class="skeleton-sidebar-item skeleton"></div>
+        <div class="skeleton-sidebar-item skeleton"></div>
+      </div>
+
+      <!-- MAIN PANEL -->
+      <div class="skeleton-main">
+        <div class="skeleton-main-title skeleton"></div>
+
+        <div class="skeleton-main-line skeleton"></div>
+        <div class="skeleton-main-line skeleton"></div>
+        <div class="skeleton-main-line skeleton"></div>
+        <div class="skeleton-main-line skeleton short"></div>
+      </div>
+
+    </div>
+  </div>
+  <div class="container hide" id="mainPage">
+
+    <!-- Header -->
+    <div class="header">
+      RFP Tool - <span>ADMIN</span>
+    </div>
+    
+    <div id="requirements_summary">
+      <div class="container">
+        <nav class="breadcrumb">
+          <a href="../dashboard">Home</a>
+          <span>/</span>
+          <span class="active">New Requirement Details <span id="save-status" class="save-status">
+              <span class="text">Saved</span>
+              <span class="tick">✓</span>
+              </span>
+          </span>
+        </nav>
+      </div>
+      <div class="note hide">
+        <strong style="color:red">Note:</strong>
+        <span>
+          This requirement has been signed-off. No further changes can be made.
+        </span>
+      </div>
+  <!-- PAY CARD -->
+  <div class="pay-card">
+    <div class="pay-card-header">
+      <div class="title">
+        <span contenteditable="true" id="client_company" class="editable empty" style="font-weight: bold;">Company Name *</span> (<span contenteditable="true" id="title" style="font-weight: bold;" class="editable empty">Title *</span>)
+        <span class="badge" id="client_country">
+            <select id="country" name="country" style="width:100%">
+                <option value="">Select a country</option>
+
+                <option>Afghanistan</option>
+                <option>Albania</option>
+                <option>Algeria</option>
+                <option>Andorra</option>
+                <option>Angola</option>
+                <option>Antigua and Barbuda</option>
+                <option>Argentina</option>
+                <option>Armenia</option>
+                <option>Australia</option>
+                <option>Austria</option>
+                <option>Azerbaijan</option>
+                <option>Bahamas</option>
+                <option>Bahrain</option>
+                <option>Bangladesh</option>
+                <option>Barbados</option>
+                <option>Belarus</option>
+                <option>Belgium</option>
+                <option>Belize</option>
+                <option>Benin</option>
+                <option>Bhutan</option>
+                <option>Bolivia</option>
+                <option>Bosnia and Herzegovina</option>
+                <option>Botswana</option>
+                <option>Brazil</option>
+                <option>Brunei</option>
+                <option>Bulgaria</option>
+                <option>Burkina Faso</option>
+                <option>Burundi</option>
+                <option>Cambodia</option>
+                <option>Cameroon</option>
+                <option>Canada</option>
+                <option>Cape Verde</option>
+                <option>Central African Republic</option>
+                <option>Chad</option>
+                <option>Chile</option>
+                <option>China</option>
+                <option>Colombia</option>
+                <option>Comoros</option>
+                <option>Congo</option>
+                <option>Costa Rica</option>
+                <option>Croatia</option>
+                <option>Cuba</option>
+                <option>Cyprus</option>
+                <option>Czech Republic</option>
+                <option>Denmark</option>
+                <option>Djibouti</option>
+                <option>Dominica</option>
+                <option>Dominican Republic</option>
+                <option>Ecuador</option>
+                <option>Egypt</option>
+                <option>El Salvador</option>
+                <option>Equatorial Guinea</option>
+                <option>Eritrea</option>
+                <option>Estonia</option>
+                <option>Eswatini</option>
+                <option>Ethiopia</option>
+                <option>Fiji</option>
+                <option>Finland</option>
+                <option>France</option>
+                <option>Gabon</option>
+                <option>Gambia</option>
+                <option>Georgia</option>
+                <option>Germany</option>
+                <option>Ghana</option>
+                <option>Greece</option>
+                <option>Grenada</option>
+                <option>Guatemala</option>
+                <option>Guinea</option>
+                <option>Guinea-Bissau</option>
+                <option>Guyana</option>
+                <option>Haiti</option>
+                <option>Honduras</option>
+                <option>Hungary</option>
+                <option>Iceland</option>
+                <option>India</option>
+                <option>Indonesia</option>
+                <option>Iran</option>
+                <option>Iraq</option>
+                <option>Ireland</option>
+                <option>Israel</option>
+                <option>Italy</option>
+                <option>Jamaica</option>
+                <option>Japan</option>
+                <option>Jordan</option>
+                <option>Kazakhstan</option>
+                <option>Kenya</option>
+                <option>Kiribati</option>
+                <option>Kuwait</option>
+                <option>Kyrgyzstan</option>
+                <option>Laos</option>
+                <option>Latvia</option>
+                <option>Lebanon</option>
+                <option>Lesotho</option>
+                <option>Liberia</option>
+                <option>Libya</option>
+                <option>Liechtenstein</option>
+                <option>Lithuania</option>
+                <option>Luxembourg</option>
+                <option>Madagascar</option>
+                <option>Malawi</option>
+                <option>Malaysia</option>
+                <option>Maldives</option>
+                <option>Mali</option>
+                <option>Malta</option>
+                <option>Marshall Islands</option>
+                <option>Mauritania</option>
+                <option>Mauritius</option>
+                <option>Mexico</option>
+                <option>Micronesia</option>
+                <option>Moldova</option>
+                <option>Monaco</option>
+                <option>Mongolia</option>
+                <option>Montenegro</option>
+                <option>Morocco</option>
+                <option>Mozambique</option>
+                <option>Myanmar</option>
+                <option>Namibia</option>
+                <option>Nauru</option>
+                <option>Nepal</option>
+                <option>Netherlands</option>
+                <option>New Zealand</option>
+                <option>Nicaragua</option>
+                <option>Niger</option>
+                <option>Nigeria</option>
+                <option>North Korea</option>
+                <option>North Macedonia</option>
+                <option>Norway</option>
+                <option>Oman</option>
+                <option>Pakistan</option>
+                <option>Palau</option>
+                <option>Panama</option>
+                <option>Papua New Guinea</option>
+                <option>Paraguay</option>
+                <option>Peru</option>
+                <option>Philippines</option>
+                <option>Poland</option>
+                <option>Portugal</option>
+                <option>Qatar</option>
+                <option>Romania</option>
+                <option>Russia</option>
+                <option>Rwanda</option>
+                <option>Saudi Arabia</option>
+                <option>Senegal</option>
+                <option>Serbia</option>
+                <option>Seychelles</option>
+                <option>Sierra Leone</option>
+                <option>Singapore</option>
+                <option>Slovakia</option>
+                <option>Slovenia</option>
+                <option>Solomon Islands</option>
+                <option>Somalia</option>
+                <option>South Africa</option>
+                <option>South Korea</option>
+                <option>South Sudan</option>
+                <option>Spain</option>
+                <option>Sri Lanka</option>
+                <option>Sudan</option>
+                <option>Suriname</option>
+                <option>Sweden</option>
+                <option>Switzerland</option>
+                <option>Syria</option>
+                <option>Taiwan</option>
+                <option>Tajikistan</option>
+                <option>Tanzania</option>
+                <option>Thailand</option>
+                <option>Timor-Leste</option>
+                <option>Togo</option>
+                <option>Tonga</option>
+                <option>Trinidad and Tobago</option>
+                <option>Tunisia</option>
+                <option>Turkey</option>
+                <option>Turkmenistan</option>
+                <option>Tuvalu</option>
+                <option>Uganda</option>
+                <option>Ukraine</option>
+                <option>United Arab Emirates</option>
+                <option>United Kingdom</option>
+                <option>United States</option>
+                <option>Uruguay</option>
+                <option>Uzbekistan</option>
+                <option>Vanuatu</option>
+                <option>Vatican City</option>
+                <option>Venezuela</option>
+                <option>Vietnam</option>
+                <option>Palestine</option>
+                <option>Yemen</option>
+                <option>Zambia</option>
+                <option>Zimbabwe</option>
+            </select>
+        </span>
+      </div>
+      <div>
+        <button class="btn-outline" id="sendToClientBtn">✉ Send to Client</button>
+        <button class="btn-outline" id="markAsDoneBtn" title="ready to send to vendor">✓ Send to Vendors</button>
+        <!-- <button class="btn-outline">View history</button> -->
+      </div>
+    </div>
+
+    <div class="pay-card-body">
+      <div><label>Contact Name *</label><div data-placeholder="__" id="client_name" class="editable empty" contenteditable="true">__</div></div>
+      <div><label>Contact Email *</label><div id="client_email" contenteditable="true" class="editable empty">__</div></div>
+      <div><label>Contact Phone</label><div id="client_phone" contenteditable="true" class="editable empty">__</div></div>
+      <div><label>Head Count</label><div id="head_count" contenteditable="true" class="editable empty">__</div></div>
+      <div><label><strong>Timeline</strong></label><div id="client_timeline" style="font-weight: bold;" contenteditable="true" class="editable empty">__</div></div>
+    </div>
+  </div>
+
+  <!-- BELOW CARD -->
+  <div class="layout">
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <h4 class="sidebar-header">
+        INSTRUCTIONS
+      </h4>
+      <span>Insert the cursor at the indicated spots to edit the text.</span>
+      <span>All changes made will automatically be saved.</span>
+      <span>You can access all your drafs under Requirements > Drafts.</span>
+    </div>
+
+    <!-- Slide-out vendor panel -->
+    <div id="vendorPanel">
+      <h4>Select Vendors <i class="fa fa-circle-info" title="The vendors listed below are those with a designated contact person."></i></h4>
+      <input type="text" id="vendorSearch" placeholder="Search vendors..." />
+      <div id="vendorList"></div>
+      <div style="text-align: center;margin-bottom: 40px;" id="xloader"></div>
+      <div class="vendor-panel-actions">
+        <button id="inviteVendorsBtn" class="btn-outline">Invite</button>
+        <button id="closeVendorPanel" class="btn-outline">Cancel</button>
+      </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content">
+
+      <!-- DOCUMENTS -->
+      <div id="requirements" class="content-section active">
+        <h3>Requirements *</h3>
+        <span></span>
+        <table id="requirementsTable">
+          <thead>
+            <tr>
+              <th>Category</th>
+              <th>Description</th>
+              <th>Priority</th>
+              <th>System Part</th>
+              <th>Recommendation</th>
+              <th>Comment</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+          </tbody>
+        </table>
+        <div style="margin-top: 10px;">
+            <button type="button" class="btn-outline" id="addRowBtn">Add New Row</button>
+        </div>
+      </div>
+
+      <!-- <div id="personal" class="content-section">
+        <h3>Personal Information</h3>
+        <p>Employee personal details will appear here.</p>
+      </div>
+
+      <div id="jobs" class="content-section">
+        <h3>Jobs</h3>
+        <p>Job roles, titles and history.</p>
+      </div>
+
+      <div id="expenses" class="content-section">
+        <h3>Expenses</h3>
+        <p>Expense claims and reimbursements.</p>
+      </div>
+
+      <div id="devices" class="content-section">
+        <h3>Devices</h3>
+        <p>Assigned company devices.</p>
+      </div> -->
+
+    </div>
+  </div>
+      </div>
+      <script>
+        function showSection(id) {
+          document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+          document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+
+          document.getElementById(id).classList.add('active');
+          event.target.classList.add('active');
+        }
+      </script>
+        
+      </div>
+    </div>
+</body>
+</html>

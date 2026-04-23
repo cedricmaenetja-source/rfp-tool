@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Client Requirements</title>
+
+  <!-- jQuery CDN -->
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+   <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --text: #111827;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      flex-direction: column;
+    }
+
+    .card {
+      background: var(--card);
+      width: 100%;
+      max-width: 820px;
+      padding: 24px;
+      border-radius: 14px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+      margin-bottom: 20px;
+    }
+
+    h2 {
+      margin: 0 0 6px;
+      color: var(--text);
+    }
+
+    p {
+      margin: 0 0 20px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .section-title {
+      margin: 20px 0 8px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .input-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    input, textarea, select {
+      flex: 1;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      font-size: 14px;
+    }
+
+    .required {
+      color: #dc2626;
+      font-weight: 600;
+      margin-left: 4px;
+      font-size: 12px;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+      width: 100%;
+    }
+
+    input:focus, textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    button {
+      padding: 12px 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .add-btn {
+      background: var(--primary);
+      color: white;
+      margin-top: 10px;
+    }
+
+    .add-btn:hover {
+      background: var(--primary-hover);
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 20px;
+    }
+
+    li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 8px;
+      background: #fafafa;
+      font-size: 14px;
+    }
+
+    .remove {
+      background: none;
+      color: #ef4444;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .submit-btn {
+      width: 100%;
+      background: var(--primary);
+      color: white;
+      font-weight: 600;
+    }
+
+    .submit-btn:hover {
+      background: var(--primary-hover);
+    }
+    .hide{
+      display: none !important;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- NOTE -->
+  <div class="note hide">
+    <strong style="color:red">Note:</strong>
+    <span>
+      You may return to this link at any time, and all changes will be saved automatically. Once you click "Approve Requirements", <br/>no further changes can be made.
+    </span>
+  </div>
+
+  <style>
+    .note {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      background: #f0f9ff;
+      border-left: 4px solid #0ea5e9;
+      padding: 14px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      color: #0f172a;
+      margin: 20px 0;
+    }
+
+    .note strong {
+      color: #0369a1;
+      white-space: nowrap;
+    }
+  </style>
+  <div class="card" style="margin-top: 20px;">
+    <h2>System Requirements</h2>
+    <p>Please provide your details and list your requirements.</p>
+
+    <!-- Client Information -->
+    <div class="section-title">Client Information <span class="required">* required fields</span></div>
+
+    <div class="input-row">
+      <input id="clientName" type="text" placeholder="Full name *" />
+    </div>
+
+    <div class="input-row">
+      <input id="email" type="email" placeholder="Email address *" />
+      <input id="phone" type="tel" placeholder="Phone number" />
+    </div>
+
+    <div class="input-row" style="margin-top: 50px;">
+      <input id="companyName" type="text" placeholder="Company name *" />
+      <input id="headcount" type="number" placeholder="No. of employees" />
+    </div>
+
+    <div class="input-row" style="margin-bottom: 20px;">
+      <select id="country" name="country" style="width:100%">
+        <option value="">Select a country</option>
+
+        <option>Afghanistan</option>
+        <option>Albania</option>
+        <option>Algeria</option>
+        <option>Andorra</option>
+        <option>Angola</option>
+        <option>Antigua and Barbuda</option>
+        <option>Argentina</option>
+        <option>Armenia</option>
+        <option>Australia</option>
+        <option>Austria</option>
+        <option>Azerbaijan</option>
+        <option>Bahamas</option>
+        <option>Bahrain</option>
+        <option>Bangladesh</option>
+        <option>Barbados</option>
+        <option>Belarus</option>
+        <option>Belgium</option>
+        <option>Belize</option>
+        <option>Benin</option>
+        <option>Bhutan</option>
+        <option>Bolivia</option>
+        <option>Bosnia and Herzegovina</option>
+        <option>Botswana</option>
+        <option>Brazil</option>
+        <option>Brunei</option>
+        <option>Bulgaria</option>
+        <option>Burkina Faso</option>
+        <option>Burundi</option>
+        <option>Cambodia</option>
+        <option>Cameroon</option>
+        <option>Canada</option>
+        <option>Cape Verde</option>
+        <option>Central African Republic</option>
+        <option>Chad</option>
+        <option>Chile</option>
+        <option>China</option>
+        <option>Colombia</option>
+        <option>Comoros</option>
+        <option>Congo</option>
+        <option>Costa Rica</option>
+        <option>Croatia</option>
+        <option>Cuba</option>
+        <option>Cyprus</option>
+        <option>Czech Republic</option>
+        <option>Denmark</option>
+        <option>Djibouti</option>
+        <option>Dominica</option>
+        <option>Dominican Republic</option>
+        <option>Ecuador</option>
+        <option>Egypt</option>
+        <option>El Salvador</option>
+        <option>Equatorial Guinea</option>
+        <option>Eritrea</option>
+        <option>Estonia</option>
+        <option>Eswatini</option>
+        <option>Ethiopia</option>
+        <option>Fiji</option>
+        <option>Finland</option>
+        <option>France</option>
+        <option>Gabon</option>
+        <option>Gambia</option>
+        <option>Georgia</option>
+        <option>Germany</option>
+        <option>Ghana</option>
+        <option>Greece</option>
+        <option>Grenada</option>
+        <option>Guatemala</option>
+        <option>Guinea</option>
+        <option>Guinea-Bissau</option>
+        <option>Guyana</option>
+        <option>Haiti</option>
+        <option>Honduras</option>
+        <option>Hungary</option>
+        <option>Iceland</option>
+        <option>India</option>
+        <option>Indonesia</option>
+        <option>Iran</option>
+        <option>Iraq</option>
+        <option>Ireland</option>
+        <option>Israel</option>
+        <option>Italy</option>
+        <option>Jamaica</option>
+        <option>Japan</option>
+        <option>Jordan</option>
+        <option>Kazakhstan</option>
+        <option>Kenya</option>
+        <option>Kiribati</option>
+        <option>Kuwait</option>
+        <option>Kyrgyzstan</option>
+        <option>Laos</option>
+        <option>Latvia</option>
+        <option>Lebanon</option>
+        <option>Lesotho</option>
+        <option>Liberia</option>
+        <option>Libya</option>
+        <option>Liechtenstein</option>
+        <option>Lithuania</option>
+        <option>Luxembourg</option>
+        <option>Madagascar</option>
+        <option>Malawi</option>
+        <option>Malaysia</option>
+        <option>Maldives</option>
+        <option>Mali</option>
+        <option>Malta</option>
+        <option>Marshall Islands</option>
+        <option>Mauritania</option>
+        <option>Mauritius</option>
+        <option>Mexico</option>
+        <option>Micronesia</option>
+        <option>Moldova</option>
+        <option>Monaco</option>
+        <option>Mongolia</option>
+        <option>Montenegro</option>
+        <option>Morocco</option>
+        <option>Mozambique</option>
+        <option>Myanmar</option>
+        <option>Namibia</option>
+        <option>Nauru</option>
+        <option>Nepal</option>
+        <option>Netherlands</option>
+        <option>New Zealand</option>
+        <option>Nicaragua</option>
+        <option>Niger</option>
+        <option>Nigeria</option>
+        <option>North Korea</option>
+        <option>North Macedonia</option>
+        <option>Norway</option>
+        <option>Oman</option>
+        <option>Pakistan</option>
+        <option>Palau</option>
+        <option>Panama</option>
+        <option>Papua New Guinea</option>
+        <option>Paraguay</option>
+        <option>Peru</option>
+        <option>Philippines</option>
+        <option>Poland</option>
+        <option>Portugal</option>
+        <option>Qatar</option>
+        <option>Romania</option>
+        <option>Russia</option>
+        <option>Rwanda</option>
+        <option>Saudi Arabia</option>
+        <option>Senegal</option>
+        <option>Serbia</option>
+        <option>Seychelles</option>
+        <option>Sierra Leone</option>
+        <option>Singapore</option>
+        <option>Slovakia</option>
+        <option>Slovenia</option>
+        <option>Solomon Islands</option>
+        <option>Somalia</option>
+        <option>South Africa</option>
+        <option>South Korea</option>
+        <option>South Sudan</option>
+        <option>Spain</option>
+        <option>Sri Lanka</option>
+        <option>Sudan</option>
+        <option>Suriname</option>
+        <option>Sweden</option>
+        <option>Switzerland</option>
+        <option>Syria</option>
+        <option>Taiwan</option>
+        <option>Tajikistan</option>
+        <option>Tanzania</option>
+        <option>Thailand</option>
+        <option>Timor-Leste</option>
+        <option>Togo</option>
+        <option>Tonga</option>
+        <option>Trinidad and Tobago</option>
+        <option>Tunisia</option>
+        <option>Turkey</option>
+        <option>Turkmenistan</option>
+        <option>Tuvalu</option>
+        <option>Uganda</option>
+        <option>Ukraine</option>
+        <option>United Arab Emirates</option>
+        <option>United Kingdom</option>
+        <option>United States</option>
+        <option>Uruguay</option>
+        <option>Uzbekistan</option>
+        <option>Vanuatu</option>
+        <option>Vatican City</option>
+        <option>Venezuela</option>
+        <option>Vietnam</option>
+        <option>Palestine</option>
+        <option>Yemen</option>
+        <option>Zambia</option>
+        <option>Zimbabwe</option>
+      </select>
+      <input id="timeline" type="text" placeholder="Timeline" />
+    </div>
+
+  </div>
+  <div class="card">
+    <div class="">
+      <label class="section-title">Title:
+      <input id="title" type="input" placeholder="e.g Payroll System *" style="width: 100%;"/>
+      </label>
+    </div>
+
+    <!-- Requirements -->
+    <div class="section-title">Requirements</div>
+
+    <div class="">
+      <select id="areaInput" style="width:20%">
+        <option value="">Category</option>
+      </select>
+      <select id="priorityInput" style="width:20%">
+        <option value="">Priority</option>
+        <option>Must-Have</option>
+        <option>Could-Have</option>
+        <option>Should-Have</option>
+      </select>
+      <select id="systemPartInput" style="width:20%">
+        <option value="">System Part</option>
+      </select>
+      <input id="requirementInput" type="text" placeholder="Requirement description" style="width:100%;margin-top:10px"/>
+      <button class="add-btn" id="addRequirement">Add</button>
+    </div>
+
+    <table id="requirementsTable" width="100%" style="border-collapse: collapse; margin-bottom: 20px;margin-top:20px">
+      <thead>
+        <tr style="text-align:left; font-size:13px; color:#6b7280;">
+          <th style="padding:8px; border-bottom:1px solid #e5e7eb;">Category</th>
+          <th style="padding:8px; border-bottom:1px solid #e5e7eb;">Requirement</th>
+          <th style="padding:8px; border-bottom:1px solid #e5e7eb;">Priority</th>
+          <th style="padding:8px; border-bottom:1px solid #e5e7eb;"></th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <button class="submit-btn" id="submitRequirements">
+      Submit Requirements
+    </button>
+  </div>
+  <script type="module" src="js/client_requirements.js"></script>
+</body>
+</html>
