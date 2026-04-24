@@ -86,10 +86,10 @@ $(function(){
 
     $('#categoryFilter').on('change', function(){
         const selected = $(this).val().toLowerCase();
-
+ 
         $('#requirementsTable tbody tr').each(function(){
-            const category = $(this).find('td:first').text().toLowerCase();
-
+            const category = $(this).find('td:nth-child(2)').text().toLowerCase();
+ 
             if(selected === '' || category === selected){
                 $(this).show();
             } else {

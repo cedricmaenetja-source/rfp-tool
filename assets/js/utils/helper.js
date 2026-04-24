@@ -166,7 +166,7 @@ export function getMatchScores(allSystemParts, vendors, vendorFormFields, requir
                 let score = 0;
                 const solutionScoring = getSolutionMultipliers(vendor.feedback, vendorFormFields, solutionMultiplier);
                 $.each(requirements, function(index, value) {
-                    if (part == 'All-in-one'){
+                    if (part == 'All areas'){
                         score += priorityWeighting[value.priority] * solutionScoring[index];
                     }else{
                         if (part == value.system_part){

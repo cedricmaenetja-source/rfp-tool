@@ -6,6 +6,6 @@ export function error(error){
     Swal.fire({
         icon: "error",
         title: "Oops...",
-        text: error,
+        html: error,
     });
 }

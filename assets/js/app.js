@@ -48,7 +48,7 @@ export const priorityWeighting = {
     'Should-Have': 1.25
 };
 
-export const ALL_IN_ONE = 'All-in-one';
+export const ALL_IN_ONE = 'All areas';
 
 export const zapierVendorInvitationsWebhook = 'https://hooks.zapier.com/hooks/catch/25735666/uq8x4ke/'
 export const COMPLETED = 'completed';

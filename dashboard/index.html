@@ -3,318 +3,832 @@
 <head>
   <meta charset="UTF-8" />
   <title>RFP Tool - Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" type="text/css" href="../assets/css/site.css" />
   <link rel="stylesheet" type="text/css" href="../assets/css/main.css" />
   <link rel="stylesheet" type="text/css" href="../assets/css/skeleton.css" />
   <link rel="stylesheet" type="text/css" href="../assets/css/form-fields-skeleton.css" />
-    <!-- <link rel="stylesheet" type="text/css" href="css/dataTables.responsive.css" /> -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
-    <!-- <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script> -->
-    <!-- <script type="text/javascript" src="js/site.js"></script>	
-    <script type="text/javascript" src="js/dataTables.responsive.min.js"></script> -->
-    <link href="https://cdn.datatables.net/responsive/2.2.3/css/responsive.dataTables.min.css" rel="stylesheet" />
-        <link href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css" rel="stylesheet" />
-        <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
-        <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
-        <script src="https://cdn.datatables.net/responsive/2.2.3/js/dataTables.responsive.min.js"></script>
-    <script src="../assets/js/core/main.js"></script>	
-    <style>
-      /*  */
-      /* ===== CARD (TOP) ===== */
-  .pay-card {
-    background: #fff;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
-    margin-bottom: 24px;
-  }
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <link href="https://cdn.datatables.net/responsive/2.2.3/css/responsive.dataTables.min.css" rel="stylesheet" />
+  <link href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css" rel="stylesheet" />
+  <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+  <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/responsive/2.2.3/js/dataTables.responsive.min.js"></script>
+  <script src="../assets/js/core/main.js"></script>
+  <style>
 
-  .pay-card-header {
-    display: flex;
-    justify-content: space-between;
-    padding: 14px 16px;
-    border-bottom: 1px solid var(--border-color);
-  }
+    /* ── THEME TOKENS ── */
+    :root {
+      --bg:            #f2f1ee;
+      --card:          #ffffff;
+      --surface:       #f8f7f5;
+      --text:          #111827;
+      --muted:         #8a8880;
+      --border-color:  #e2e0db;
+      --border-strong: #c8c5be;
+      --heading-color: #111827;
+      --font:          'Geist', system-ui, -apple-system, sans-serif;
+    }
 
-  .title {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
+    *, *::before, *::after { box-sizing: border-box; }
 
-  .badge {
-    background: #eef2ff;
-    color: #4338ca;
-    font-size: 12px;
-    padding: 2px 8px;
-    border-radius: 6px;
-  }
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+    }
 
-  .btn-outline {
-    border: 1px solid #d1d5db;
-    background: #fff;
-    padding: 6px 10px;
-    border-radius: 6px;
-    font-size: 13px;
-    cursor: pointer;
-  }
+    /* ── CARD (TOP) ── */
+    .pay-card {
+      background: var(--card);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
 
-  .pay-card-body {
-    padding: 16px;
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 16px;
-  }
+    .pay-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border-color);
+    }
 
-  /* label {
-    font-size: 12px;
-    color: #6b7280;
-  } */
+    .title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
 
-  /* ===== LAYOUT BELOW ===== */
-  .layout {
-    display: flex;
-    gap: 24px;
-  }
+    .badge {
+      background: var(--surface);
+      color: var(--muted);
+      font-size: 11.5px;
+      font-weight: 500;
+      padding: 2px 9px;
+      border-radius: 20px;
+      border: 1px solid var(--border-color);
+    }
 
-  /* ===== SIDEBAR ===== */
-  .sidebar {
-    width: 260px;
-    background: #fff;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    padding: 10px 0;
-    height: fit-content;
-  }
+    .btn-outline {
+      border: 1px solid var(--border-strong);
+      background: var(--card);
+      color: var(--text);
+      padding: 7px 13px;
+      border-radius: 7px;
+      font-size: 13px;
+      font-family: var(--font);
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.14s ease, border-color 0.14s ease;
+    }
 
-  .sidebar h4 {
-    font-size: 12px;
-    padding: 10px 16px;
-    margin: 0;
-    text-transform: uppercase;
-  }
+    .btn-outline:hover {
+      background: var(--surface);
+      border-color: var(--border-strong);
+    }
 
-  .menu-item {
-    padding: 10px 16px;
-    cursor: pointer;
-    font-size: 14px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    border-left: 3px solid transparent;
-  }
+    .pay-card-body {
+      padding: 16px 18px;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 16px;
+    }
 
-  .menu-item:hover {
-    background: #f9fafb;
-  }
+    /* ── LAYOUT ── */
+    .layout {
+      display: flex;
+      gap: 20px;
+    }
 
-  .menu-item.active {
-    background: #f3f4f6;
-    border-left: 3px solid #7c3aed;
-    font-weight: 600;
-  }
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: 240px;
+      background: var(--card);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 8px 0;
+      height: fit-content;
+    }
 
-  /* ===== CONTENT AREA ===== */
-  .content {
-    flex: 1;
-    background: #fff;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    padding: 20px;
-  }
+    .sidebar h4 {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 10px 16px 5px;
+      margin: 0;
+    }
 
-  .content-section {
-    display: none;
-  }
+    .menu-item {
+      padding: 9px 16px;
+      cursor: pointer;
+      font-size: 13.5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-left: 2px solid transparent;
+      color: var(--muted);
+      transition: background 0.12s ease, color 0.12s ease;
+    }
 
-  .content-section.active {
-    display: block;
-  }
+    .menu-item:hover {
+      background: var(--surface);
+      color: var(--text);
+    }
 
-  .content h3 {
-    margin-top: 0;
-    font-size: 18px;
-  }
+    .menu-item.active {
+      background: var(--surface);
+      border-left-color: var(--text);
+      color: var(--text);
+      font-weight: 600;
+    }
 
-  .status {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 13px;
-  }
+    /* ── CONTENT AREA ── */
+    .content {
+      flex: 1;
+      background: var(--card);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 20px;
+    }
 
-  .dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-  }
+    .content-section { display: none; }
+    .content-section.active { display: block; }
+    .content h3 { margin-top: 0; font-size: 16px; font-weight: 600; }
 
-  .pending { background: #facc15; }
-  .signed { background: #22c55e; }
-  .sidebar-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin: 0 0 15px 0;
-    font-size: 16px;
-    font-weight: bold;
-  }
+    /* ── STATUS DOTS ── */
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+    }
 
-  .add-btn-vendor {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 28px;
-    height: 28px;
-    font-size: 18px;
-    font-weight: bold;
-    color: #000;
-    background-color: #fff;
-    border: 1px solid #d1d5db !important;
-    border: none;
-    border-radius: 50%;
-    cursor: pointer;
-    transition: background 0.2s;
-  }
+    .dot { width: 7px; height: 7px; border-radius: 50%; }
+    .pending { background: #f59e0b; }
+    .signed  { background: #22c55e; }
 
-  .add-btn-vendor:hover {
-    background-color: #0056b3;
-    color: white;
-  }
-  .hide{
-    display: none !important;
-  }
-  .show{
-    display: inline-block;
-  }
-  /* Slide-out panel */
-  #vendorPanel {
-    position: fixed;
-    top: 0;
-    right: -350px; /* Hidden by default */
-    width: 350px;
-    height: 100%;
-    background: #fff;
-    box-shadow: -2px 0 5px rgba(0,0,0,0.2);
-    padding: 20px;
-    box-sizing: border-box;
-    transition: right 0.3s ease;
-    z-index: 1000;
-    overflow-y: auto;
-  }
+    /* ── SIDEBAR HEADER ── */
+    .sidebar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 0 0 15px;
+      font-size: 14px;
+      font-weight: 600;
+    }
 
-  #vendorPanel.active {
-    right: 0; /* Slide in */
-  }
+    /* ── ADD VENDOR BTN ── */
+    .add-btn-vendor {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 26px;
+      height: 26px;
+      font-size: 16px;
+      font-weight: bold;
+      color: var(--muted);
+      background-color: var(--card);
+      border: 1px solid var(--border-color) !important;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: background 0.14s, color 0.14s;
+    }
 
-  #vendorPanel h4 {
-    margin-top: 0;
-  }
+    .add-btn-vendor:hover {
+      background-color: var(--text);
+      color: white;
+    }
 
-  #vendorSearch {
-    width: 100%;
-    padding: 5px;
-    margin-bottom: 10px;
-    box-sizing: border-box;
-  }
+    .hide { display: none !important; }
+    .show { display: inline-block; }
 
-  .vendor-item {
-    margin-bottom: 5px;
-  }
+    /* ── VENDOR SLIDE-OUT PANEL ── */
+    #vendorPanel {
+      position: fixed;
+      top: 0;
+      right: -380px;
+      width: 360px;
+      height: 100%;
+      background: var(--card);
+      border-left: 1px solid var(--border-color);
+      padding: 24px 22px;
+      box-sizing: border-box;
+      transition: right 0.28s cubic-bezier(0.22,0.61,0.36,1);
+      z-index: 1000;
+      overflow-y: auto;
+    }
 
-  .vendor-panel-actions {
-    margin-top: 15px;
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-  }
+    #vendorPanel.active { right: 0; }
 
-  .vendor-panel-actions button {
-    padding: 6px 12px;
-    cursor: pointer;
-  }
-  #vendorList > input, 
-  #vendorList > textarea{
-    width: -webkit-fill-available;
-    margin-bottom: 10px;
-  }
-  button:disabled{
-    background: #ddd;
-  }
-  .form-section {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    width: 100%;
-}
+    #vendorPanel h4 {
+      margin-top: 0;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: -0.01em;
+    }
 
-.form-group {
-    display: flex;
-    flex-direction: column;
-}
+    #vendorSearch {
+      width: 100%;
+      padding: 8px 11px;
+      margin-bottom: 12px;
+      box-sizing: border-box;
+      border: 1px solid var(--border-color);
+      border-radius: 7px;
+      font-family: var(--font);
+      font-size: 13px;
+      background: var(--surface);
+      color: var(--text);
+      outline: none;
+    }
 
-.form-group label {
-    font-size: 14px;
-    margin-bottom: 6px;
-    font-weight: 600;
-}
+    #vendorSearch:focus { border-color: var(--border-strong); background: white; }
 
-.form-group input {
-    padding: 10px 12px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    font-size: 14px;
-    width: 45%;
-    outline: none;
-}
+    .vendor-item { margin-bottom: 5px; }
 
-.form-group input:focus {
-    border-color: #007bff;
-}
-    </style>
+    .vendor-panel-actions {
+      margin-top: 18px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    .vendor-panel-actions button { padding: 8px 14px; cursor: pointer; }
+
+    #vendorList > input,
+    #vendorList > textarea {
+      width: 100%;
+      margin-bottom: 10px;
+      padding: 9px 11px;
+      border: 1px solid var(--border-color);
+      border-radius: 7px;
+      font-family: var(--font);
+      font-size: 13px;
+      background: var(--surface);
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.12s, background 0.12s;
+    }
+
+    #vendorList > input:focus,
+    #vendorList > textarea:focus {
+      border-color: var(--border-strong);
+      background: white;
+    }
+
+    #vendorList > textarea { resize: vertical; }
+
+    button:disabled { background: #e5e3df; color: var(--muted); cursor: not-allowed; }
+
+    /* ── FORM SECTION (vendor panel) ── */
+    .form-section { display: flex; flex-direction: column; gap: 12px; width: 100%; }
+    .form-group   { display: flex; flex-direction: column; }
+
+    .form-group label {
+      font-size: 11.5px;
+      font-weight: 500;
+      color: var(--muted);
+      margin-bottom: 5px;
+      letter-spacing: 0.03em;
+    }
+
+    .form-group input {
+      padding: 9px 11px;
+      border: 1px solid var(--border-color);
+      border-radius: 7px;
+      font-family: var(--font);
+      font-size: 13.5px;
+      width: 100%;
+      background: var(--surface);
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.12s, background 0.12s;
+    }
+
+    .form-group input:focus {
+      border-color: var(--border-strong);
+      background: white;
+    }
+
+    /* ── CARD (GENERAL) ── */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    /* ── HEADER TABS ── */
+    .header-tab {
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      padding: 6px 12px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: color 0.12s, background 0.12s;
+    }
+
+    .header-tab:hover { color: var(--text); }
+
+    .header-tab.active {
+      color: var(--text);
+      background: var(--surface);
+      font-weight: 600;
+    }
+
+    /* ── PREMIUM TABLE STYLES ── */
+    .tab-content .card,
+    #vendors .card {
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+      overflow: hidden;
+      background: var(--card);
+    }
+
+    .dataTables_wrapper { padding: 0; }
+
+    .dataTables_wrapper .dataTables_filter input,
+    .dataTables_wrapper .dataTables_length select {
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 5px 10px;
+      font-size: 13px;
+      font-family: var(--font);
+      outline: none;
+      background: var(--surface);
+      color: var(--text);
+    }
+
+    .dataTables_wrapper .dataTables_filter,
+    .dataTables_wrapper .dataTables_length {
+      padding: 12px 16px 0;
+      font-size: 13px;
+      color: var(--muted);
+      font-family: var(--font);
+    }
+
+    .dataTables_wrapper .dataTables_info,
+    .dataTables_wrapper .dataTables_paginate {
+      padding: 10px 16px;
+      font-size: 12.5px;
+      color: var(--muted);
+      font-family: var(--font);
+    }
+
+    .dataTables_wrapper .dataTables_paginate .paginate_button {
+      border-radius: 5px !important;
+      padding: 3px 9px !important;
+      font-size: 12.5px !important;
+      border: none !important;
+      color: var(--muted) !important;
+    }
+
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current,
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+      background: var(--surface) !important;
+      border: 1px solid var(--border-color) !important;
+      color: var(--text) !important;
+      font-weight: 600;
+    }
+
+    .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+      background: var(--surface) !important;
+      color: var(--text) !important;
+    }
+
+    table#mytable,
+    table#vendors-table,
+    .tab-content .card table {
+      width: 100% !important;
+      border-collapse: collapse !important;
+      font-size: 13.5px;
+      font-family: var(--font);
+    }
+
+    table#mytable thead tr,
+    table#vendors-table thead tr,
+    .tab-content .card table thead tr {
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    table#mytable thead th,
+    table#vendors-table thead th,
+    .tab-content .card table thead th {
+      background: var(--surface);
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 11px 16px;
+      border-bottom: 1px solid var(--border-color);
+      border-top: none;
+      white-space: nowrap;
+      font-family: var(--font);
+    }
+
+    table#mytable thead th.sorting,
+    table#mytable thead th.sorting_asc,
+    table#mytable thead th.sorting_desc,
+    table#vendors-table thead th.sorting,
+    table#vendors-table thead th.sorting_asc,
+    table#vendors-table thead th.sorting_desc {
+      background-image: none !important;
+      padding-right: 24px;
+      position: relative;
+    }
+
+    table#mytable thead th.sorting::after,
+    table#vendors-table thead th.sorting::after { content: '↕'; position: absolute; right: 8px; color: var(--border-strong); font-size: 10px; }
+
+    table#mytable thead th.sorting_asc::after,
+    table#vendors-table thead th.sorting_asc::after { content: '↑'; position: absolute; right: 8px; color: var(--muted); font-size: 10px; }
+
+    table#mytable thead th.sorting_desc::after,
+    table#vendors-table thead th.sorting_desc::after { content: '↓'; position: absolute; right: 8px; color: var(--muted); font-size: 10px; }
+
+    table#mytable tbody tr,
+    table#vendors-table tbody tr,
+    .tab-content .card table tbody tr {
+      border-bottom: 1px solid #f0ede8;
+      transition: background 0.12s ease;
+      cursor: pointer;
+    }
+
+    table#mytable tbody tr:last-child,
+    table#vendors-table tbody tr:last-child,
+    .tab-content .card table tbody tr:last-child { border-bottom: none; }
+
+    table#mytable tbody tr:hover,
+    table#vendors-table tbody tr:hover,
+    .tab-content .card table tbody tr:hover { background: var(--surface); }
+
+    table#mytable.dataTable tbody tr.odd,
+    table#vendors-table.dataTable tbody tr.odd,
+    table#mytable.dataTable tbody tr.even,
+    table#vendors-table.dataTable tbody tr.even { background: var(--card); }
+
+    table#mytable.dataTable tbody tr.odd:hover,
+    table#vendors-table.dataTable tbody tr.odd:hover,
+    table#mytable.dataTable tbody tr.even:hover,
+    table#vendors-table.dataTable tbody tr.even:hover { background: var(--surface); }
+
+    table#mytable tbody td,
+    table#vendors-table tbody td,
+    .tab-content .card table tbody td {
+      padding: 13px 16px;
+      color: var(--muted);
+      vertical-align: middle;
+      white-space: nowrap;
+      font-family: var(--font);
+    }
+
+    table#mytable tbody td:nth-child(2),
+    .tab-content #tab-drafts table tbody td:first-child,
+    .tab-content #tab-completed table tbody td:nth-child(2),
+    table#vendors-table tbody td:nth-child(2) {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    table#mytable tbody tr td.dataTables_empty,
+    table#vendors-table tbody tr td.dataTables_empty {
+      color: var(--border-strong);
+      font-size: 13px;
+      text-align: center;
+      padding: 32px 16px;
+      font-style: italic;
+    }
+
+    /* ── TILE GRID (resources) ── */
+    .tile-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 14px;
+      padding: 18px;
+    }
+
+    .tile {
+      background: var(--surface);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 18px;
+    }
+
+    .tile h3 { font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+    .tile p  { font-size: 13px; color: var(--muted); margin-bottom: 14px; line-height: 1.5; }
+
+    /* ── CONFIGURATIONS GRID ── */
+    .grid-configurations {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-top: 16px;
+    }
+
+    .card-configurations {
+      background: var(--card);
+      border: 1px solid var(--border-color);
+      border-radius: 9px;
+      padding: 18px;
+    }
+
+    .card-configurations h3 {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      margin: 0 0 14px;
+      letter-spacing: -0.01em;
+    }
+
+    .input-row-configurations {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .input-row-configurations input {
+      flex: 1;
+      padding: 8px 11px;
+      border: 1px solid var(--border-color);
+      border-radius: 7px;
+      font-family: var(--font);
+      font-size: 13px;
+      background: var(--surface);
+      color: var(--text);
+      outline: none;
+    }
+
+    .input-row-configurations input:focus {
+      border-color: var(--border-strong);
+      background: white;
+    }
+
+    .add-configurations-btn {
+      padding: 7px 13px;
+      font-size: 13px;
+      font-family: var(--font);
+      border: 1px solid var(--border-strong);
+      border-radius: 7px;
+      background: var(--card);
+      color: var(--text);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.12s;
+    }
+
+    .add-configurations-btn:hover { background: var(--surface); }
+
+    .list-configurations { display: flex; flex-direction: column; gap: 6px; }
+
+    /* ── MODAL (edit vendor) ── */
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.25);
+      z-index: 500;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal.active { display: flex; }
+
+    .modal-content {
+      background: var(--card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 28px 30px;
+      width: 480px;
+      max-width: 95vw;
+      position: relative;
+    }
+
+    .modal-content h2 {
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      margin-bottom: 18px;
+    }
+
+    .modal-content .close {
+      position: absolute;
+      top: 16px;
+      right: 18px;
+      font-size: 18px;
+      color: var(--muted);
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    .modal-content .close:hover { color: var(--text); }
+
+    /* ── FOOTER ── */
+    .app-footer {
+      /* border-top: 1px solid var(--border-color);
+      background: var(--card); */
+      padding: 12px 24px;
+    }
+
+    .footer-content {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11.5px;
+      color: var(--muted);
+    }
+
+    .footer-separator { color: var(--border-strong); }
+
+    /* ── SWEETALERT2 THEME ── */
+    .swal2-popup {
+      --swal2-width: 400px;
+      --swal2-padding: 28px 32px;
+      --swal2-border: 1px solid #e2e0db;
+      --swal2-border-radius: 12px;
+      --swal2-background: #ffffff;
+      --swal2-color: #111827;
+      font-family: 'Geist', system-ui, sans-serif !important;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.07) !important;
+    }
+
+    .swal2-title {
+      font-size: 17px !important; font-weight: 600 !important;
+      color: #111827 !important; letter-spacing: -0.02em !important;
+      padding: 0 0 6px !important;
+    }
+
+    .swal2-html-container, .swal2-content {
+      font-size: 13.5px !important; color: #8a8880 !important;
+      line-height: 1.6 !important; margin: 0 !important; padding: 0 !important;
+    }
+
+    .swal2-icon { border-width: 2px !important; width: 48px !important; height: 48px !important; margin: 0 auto 18px !important; }
+    .swal2-icon .swal2-icon-content { font-size: 24px !important; }
+
+    .swal2-actions { margin: 22px 0 0 !important; gap: 8px !important; }
+
+    .swal2-confirm {
+      padding: 9px 18px !important; font-size: 13px !important;
+      font-weight: 600 !important; font-family: 'Geist', sans-serif !important;
+      border-radius: 7px !important; background: #111827 !important;
+      color: #ffffff !important; border: none !important;
+      box-shadow: none !important; margin-left: 0 !important;
+    }
+
+    .swal2-confirm:hover { background: #333 !important; }
+
+    .swal2-cancel {
+      padding: 9px 18px !important; font-size: 13px !important;
+      font-weight: 600 !important; font-family: 'Geist', sans-serif !important;
+      border-radius: 7px !important; background: #ffffff !important;
+      color: #111827 !important; border: 1px solid #c8c5be !important;
+      box-shadow: none !important;
+    }
+
+    .swal2-cancel:hover { background: #f8f7f5 !important; }
+
+    .swal2-input, .swal2-textarea, .swal2-select {
+      font-family: 'Geist', sans-serif !important; font-size: 13.5px !important;
+      border: 1px solid #e2e0db !important; border-radius: 7px !important;
+      background: #f8f7f5 !important; color: #111827 !important;
+      box-shadow: none !important; padding: 10px 13px !important;
+      margin: 12px 0 0 !important;
+    }
+
+    .swal2-input:focus, .swal2-textarea:focus {
+      border-color: #c8c5be !important; background: #ffffff !important;
+      outline: none !important; box-shadow: none !important;
+    }
+
+    .swal2-input-label {
+      font-size: 12px !important; font-weight: 500 !important;
+      color: #8a8880 !important; margin: 14px 0 0 !important;
+    }
+
+    .swal2-validation-message {
+      font-size: 12.5px !important; border-radius: 6px !important;
+      background: #fef2f2 !important; color: #b91c1c !important; border: none !important;
+    }
+
+    .swal2-toast {
+      font-family: 'Geist', sans-serif !important; font-size: 13px !important;
+      border-radius: 8px !important; border: 1px solid #e2e0db !important;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06) !important;
+      background: #ffffff !important; color: #111827 !important;
+      padding: 10px 16px !important;
+    }
+
+    .swal2-toast .swal2-title { font-size: 13px !important; font-weight: 500 !important; }
+
+    /* ── TABS (configurations) ── */
+    .tabs { display: flex; gap: 4px; margin-bottom: 4px; }
+
+    .tab {
+      font-size: 12.5px;
+      font-weight: 500;
+      font-family: var(--font);
+      color: var(--muted);
+      padding: 7px 13px;
+      border-radius: 6px;
+      border: 1px solid transparent;
+      background: none;
+      cursor: pointer;
+      transition: all 0.12s;
+    }
+
+    .tab:hover { color: var(--text); background: var(--surface); }
+
+    .tab.active {
+      color: var(--text);
+      background: var(--surface);
+      border-color: var(--border-color);
+      font-weight: 600;
+    }
+
+    /* ── SECTION HEADER ── */
+    .section-header p {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.6;
+      margin: 10px 0 0;
+    }
+
+    /* ── MULTI-SELECT ── */
+    .multi-select {
+      margin-bottom: 10px;
+    }
+
+    .multi-select__control {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 9px 11px;
+      border: 1px solid var(--border-color);
+      border-radius: 7px;
+      background: var(--surface);
+      cursor: pointer;
+      font-size: 13px;
+      color: var(--muted);
+      transition: border-color 0.12s;
+    }
+
+    .multi-select__control:hover { border-color: var(--border-strong); }
+    .multi-select__placeholder { flex: 1; }
+    .multi-select__arrow { color: var(--border-strong); font-size: 11px; }
+
+    .multi-select__dropdown {
+      border: 1px solid var(--border-color);
+      border-radius: 7px;
+      background: var(--card);
+      margin-top: 4px;
+      overflow: hidden;
+    }
+
+  </style>
 </head>
 <body>
+
+  <!-- ── WIZARD MODAL ── -->
   <div class="modal-wizard" id="wizardModal">
     <div class="modal-wizard-content">
-        <button class="close-modal-wizard" id="closeWizard">&times;</button>
-
-        <div class="wizard-wrapper">
-
-            <div class="steps">
-                <div class="step active">1</div>
-                <div class="step">2</div>
-                <div class="step">3</div>
-            </div>
-
-            <div class="wizard-content">
-                <div class="step-label">Step 1</div>
-                <h2></h2>
-                <p class="description"></p>
-
-                <div class="card-group">
-                    <div class="card-modal-wizard active"></div>
-                    <div class="card-modal-wizard"></div>
-                    <div class="card-modal-wizard"></div>
-                </div>
-
-                <div class="wizard-buttons">
-                    <button class="back-btn" id="backBtn">Restart</button>
-                    <button class="next-btn" id="nextBtn" disabled>Next</button>
-                </div>
-            </div>
-
+      <button class="close-modal-wizard" id="closeWizard">&times;</button>
+      <div class="wizard-wrapper">
+        <div class="steps">
+          <div class="step active">1</div>
+          <div class="step">2</div>
+          <div class="step">3</div>
         </div>
+        <div class="wizard-content">
+          <div class="step-label">Step 1</div>
+          <h2></h2>
+          <p class="description"></p>
+          <div class="card-group">
+            <div class="card-modal-wizard active"></div>
+            <div class="card-modal-wizard"></div>
+            <div class="card-modal-wizard"></div>
+          </div>
+          <div class="wizard-buttons">
+            <button class="back-btn" id="backBtn">Restart</button>
+            <button class="next-btn" id="nextBtn" disabled>Next</button>
+          </div>
+        </div>
+      </div>
     </div>
-</div>
+  </div>
+
+  <!-- ── SKELETON ── -->
   <div class="skeleton-container">
-
-    <!-- NAV -->
     <div class="skeleton-nav skeleton"></div>
-
-    <!-- DASHBOARD -->
     <div class="skeleton-dashboard">
       <div class="skeleton-dash-title skeleton"></div>
-
       <div class="dash-metrics">
         <div class="metric skeleton"></div>
         <div class="metric skeleton"></div>
@@ -323,14 +837,9 @@
         <div class="metric skeleton"></div>
       </div>
     </div>
-
-    <!-- MAIN CONTENT -->
     <div class="skeleton-content">
-
-      <!-- SIDEBAR -->
       <div class="skeleton-sidebar">
         <div class="skeleton-sidebar-title skeleton"></div>
-
         <div class="skeleton-sidebar-item skeleton"></div>
         <div class="skeleton-sidebar-item skeleton"></div>
         <div class="skeleton-sidebar-item skeleton"></div>
@@ -339,355 +848,317 @@
         <div class="skeleton-sidebar-item skeleton"></div>
         <div class="skeleton-sidebar-item skeleton"></div>
       </div>
-
-      <!-- MAIN PANEL -->
       <div class="skeleton-main">
         <div class="skeleton-main-title skeleton"></div>
-
         <div class="skeleton-main-line skeleton"></div>
         <div class="skeleton-main-line skeleton"></div>
         <div class="skeleton-main-line skeleton"></div>
         <div class="skeleton-main-line skeleton short"></div>
       </div>
-
     </div>
   </div>
+
+  <!-- ── MAIN PAGE ── -->
   <div class="container hide" id="mainPage">
 
-    <!-- Header -->
-    <div class="header">
-      RFP Tool - <span>ADMIN</span>
-    </div>
+    <div class="header">RFP Tool - <span>ADMIN</span></div>
+    <div class="nav"></div>
 
-    <!-- Navigation -->
-    <div class="nav">
-    </div>
     <div class="card loader-container">
-      <div class="loader">
-      </div>
+      <div class="loader"></div>
     </div>
 
     <div class="main">
+
+      <!-- REQUIREMENTS PAGE -->
       <div id="requirements" class="page">
-            <div class="container">
-                <div class="pay-card">
-                    <div class="pay-card-header">
-                        <div class="title">
-                            <span class="header-tab active" data-tab="drafts">CLIENT REVIEW</span>
-                            <span class="header-tab" data-tab="requirements">VENDOR REVIEW</span>
-                            <!-- <span class="header-tab" data-tab="completed">VENDOR REVIEW</span> -->
-                            <span class="header-tab" data-tab="resources">RESOURCES</span>
-                            <span class="badge"></span>
-                        </div>
-                    <div></div>
-                </div>
-
-                <div class="pay-card-body">
-                    <div><label><a href="javascript:void(0)" id="createNewRequirement">+create new</a></label><div></div></div>
-                    <div><label>-</label><div id=""></div></div>
-                    <div><label>-</label><div id="client_phone"></div></div>
-                    <div><label>-</label><div id="created_at"></div></div>
-                    <div><label><strong>-</strong></label><div id="client_timeline" style="font-weight: bold;"></div></div>
-                    </div>
-                </div>
-
-                <div class="tab-content" id="tab-requirements">
-                    <!-- Card -->
-                    <div class="card">
-                        <!-- Table -->
-                        <table id="mytable" class="display nowrap" style="width:100%;border-collapse: collapse;">
-                            <thead>
-                            <tr>
-                                <th></th>
-                                <th>Submitted On</th>
-                                <th>Company Name</th>
-                                <th>Title</th>
-                                <th>Contact Person</th>
-                                <th>Email Address</th>
-                                <th>Phone Number</th>
-                                <th>Country</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div class="tab-content active" id="tab-drafts">
-                    <div class="card">
-                        <table class="display nowrap" style="width:100%;border-collapse: collapse;">
-                            <thead>
-                            <tr>
-                                <th>Company Name</th>
-                                <th>Title</th>
-                                <th>Contact Person</th>
-                                <th>Email Address</th>
-                                <th>Phone Number</th>
-                                <th>Country</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div class="tab-content" id="tab-completed">
-                    <div class="card">
-                        <table class="display nowrap" style="width:100%;border-collapse: collapse;">
-                            <thead>
-                            <tr>
-                                <th>Submitted On</th>
-                                <th>Company Name</th>
-                                <th>Title</th>
-                                <th>Contact Person</th>
-                                <th>Email Address</th>
-                                <th>Phone Number</th>
-                                <th>Country</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                <div class="tab-content" id="tab-resources">
-                    <div class="pay-card">
-                        <div class="pay-card-header">
-                            <div class="title">
-                                <span id="" style="font-weight: bold;">Resources</span>
-                                <span class="badge" id="">Find all requirement resources here.</span>
-                            </div>
-                        </div>
-                        <div class="tile-grid">
-                            <div class="tile">
-                                <h3>Template</h3>
-                                <p>File template for uploading new requirements.</p>
-                                <a href="../resources/template.xlsx" download class="btn-outline" style="color:black">Download</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="vendors" class="page">
-            <div class="container">
-                <!-- Card -->
-                <div class="card">
-                    <h2>VENDORS</h2>
-
-                    <div class="actions">
-                    <button class="btn-outline" id="add-btn-vendor">Add Vendor</button>
-                    </div>
-
-                    <!-- Table -->
-                    <table id="vendors-table" width="100%">
-                        <thead>
-                            <tr>
-                                <th></th>
-                                <th>Company Name</th>
-                                <th>Description</th>
-                                <th>Hq Location</th>
-                                <th>Contact Person</th>
-                                <th>Email Address</th>
-                                <th>Phone Number</th>
-                                <th>Verified by Udder</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        </tbody>
-                    </table>
-                </div>
-                <!-- Slide-out vendor panel -->
-                    <div id="vendorPanel">
-                    <h4>Vendor Information</h4>
-                    <div id="vendorList" class="form-fields">
-                        <h4 style="margin-top:20px">Company Information</h4>
-                        <input type="text" id="company_name" placeholder="Enter company name *" />
-                        <textarea id="description" rows="3" placeholder="Brief company description"></textarea>
-                        <input type="text" id="hq_location" placeholder="City, Country" />
-                        <div class="multi-select">
-                            <div class="multi-select__control">
-                                <span class="multi-select__placeholder">Select system parts *</span>
-                                <span class="multi-select__arrow">▾</span>
-                            </div>
-                            <div class="multi-select__dropdown">
-                            </div>
-                        </div>
-
-                        <h4 style="margin-top:20px">Contact Person</h4>
-                        <input type="text" id="contact_person" placeholder="Contact person (full name)*" />
-                        <input type="email" id="email_address" placeholder="Contact person (email)*" />
-                        <input type="tel" id="phone_number" placeholder="Contact person (phone)" />
-                    </div>
-                    <div class="vendor-panel-actions">
-                        <button id="addVendorBtn" class="btn-outline">Add <i class="fa-solid fa-spin fa-spinner hide" id="addVendorSpinner"></i></button>
-                        <button id="closeVendorPanel" class="btn-outline">Cancel</button>
-                    </div>
-                    </div>
-                </div>
-        </div>
-
-        <div id="popupModal" class="modal">
-            <div class="modal-content">
-                <span class="close">&times;</span>
-                <h2>Edit Vendor</h2>
-                <form id="editForm">
-                </form>
-            </div>
-        </div>
-      <div id="home" class="page active">
-            <div id="requirements_summary">
         <div class="container">
+          <div class="pay-card">
+            <div class="pay-card-header">
+              <div class="title">
+                <span class="header-tab active" data-tab="drafts">CLIENT REVIEW</span>
+                <span class="header-tab" data-tab="requirements">VENDOR REVIEW</span>
+                <span class="header-tab" data-tab="resources">RESOURCES</span>
+                <!-- <span class="badge"></span> -->
+              </div>
+              <div></div>
+            </div>
+            <div class="pay-card-body">
+              <div><label><a href="javascript:void(0)" id="createNewRequirement">+create new</a></label><div></div></div>
+              <div><label>-</label><div id=""></div></div>
+              <div><label>-</label><div id="client_phone"></div></div>
+              <div><label>-</label><div id="created_at"></div></div>
+              <div><label><strong>-</strong></label><div id="client_timeline" style="font-weight: bold;"></div></div>
+            </div>
+          </div>
 
-            <!-- PAY CARD -->
+          <div class="tab-content" id="tab-requirements">
+            <div class="card">
+              <table id="mytable" class="display nowrap" style="width:100%;border-collapse:collapse;">
+                <thead>
+                  <tr>
+                    <th></th>
+                    <th>Submitted On</th>
+                    <th>Company Name</th>
+                    <th>Title</th>
+                    <th>Contact Person</th>
+                    <th>Email Address</th>
+                    <th>Phone Number</th>
+                    <th>Country</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="tab-content active" id="tab-drafts">
+            <div class="card">
+              <table class="display nowrap" style="width:100%;border-collapse:collapse;">
+                <thead>
+                  <tr>
+                    <th>Company Name</th>
+                    <th>Title</th>
+                    <th>Contact Person</th>
+                    <th>Email Address</th>
+                    <th>Phone Number</th>
+                    <th>Country</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="tab-content" id="tab-completed">
+            <div class="card">
+              <table class="display nowrap" style="width:100%;border-collapse:collapse;">
+                <thead>
+                  <tr>
+                    <th>Submitted On</th>
+                    <th>Company Name</th>
+                    <th>Title</th>
+                    <th>Contact Person</th>
+                    <th>Email Address</th>
+                    <th>Phone Number</th>
+                    <th>Country</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="tab-content" id="tab-resources">
             <div class="pay-card">
-                <div class="pay-card-header">
+              <div class="pay-card-header">
                 <div class="title">
-                    <span id="" style="font-weight: bold;">OVERVIEW</span>
-                    <span class="badge" id="client_country"></span>
+                  <span style="font-weight: bold;">Resources</span>
+                  <span class="badge">Find all requirement resources here.</span>
                 </div>
-                <div>
-                    <!-- <button class="btn-outline">✓ Mark As Done</button>
-                    <button class="btn-outline">View history</button> -->
+              </div>
+              <div class="tile-grid">
+                <div class="tile">
+                  <h3>Template</h3>
+                  <p>File template for uploading new requirements.</p>
+                  <a href="../resources/template.xlsx" download class="btn-outline" style="color:var(--text)">Download</a>
                 </div>
-                </div>
-
-                <div class="pay-card-body" style="text-align: center;">
-                  <div style="color: var(--heading-color);border-right: 1px solid var(--border-color);"><label id="tot_active_req" style="font-size:28px;">0</label><div>active requirements</div></div>
-                  <div style="color: var(--heading-color);border-right: 1px solid var(--border-color);"><label id="tot_draft_req" style="font-size:28px;">0</label><div>draft requirements</div></div>
-                  <div style="color: var(--heading-color);border-right: 1px solid var(--border-color);"><label id="tot_completed_req" style="font-size:28px;">0</label><div>completed requirements</div></div>
-                  <div style="color: var(--heading-color);border-right: 1px solid var(--border-color);"><label id="tot_vendors" style="font-size:28px;">0</label><div>total vendors</div></div>
-                  <div><label><strong>-</strong></label><div id="" style="font-weight: bold;"></div></div>
-                </div>
+              </div>
             </div>
+          </div>
+        </div>
+      </div>
 
-            <!-- BELOW CARD -->
+      <!-- VENDORS PAGE -->
+      <div id="vendors-list" class="page">
+        <div class="container">
+          <div class="card">
+            <h2 style="padding:18px 18px 0;font-size:15px;font-weight:600;letter-spacing:-0.01em;">VENDORS</h2>
+            <div class="actions" style="padding:12px 18px;">
+              <button class="btn-outline" id="add-btn-vendor">Add Vendor</button>
+            </div>
+            <table id="vendors-table" width="100%">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>Company Name</th>
+                  <th>Description</th>
+                  <th>Hq Location</th>
+                  <th>Contact Person</th>
+                  <th>Email Address</th>
+                  <th>Phone Number</th>
+                  <th>Verified by Udder</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+
+          <div id="vendorPanel">
+            <h4>Vendor Information</h4>
+            <div id="vendorList" class="form-fields">
+              <h4 style="margin-top:18px;font-size:12px;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;color:var(--muted);">Company Information</h4>
+              <input type="text" id="company_name" placeholder="Enter company name *" />
+              <textarea id="description" rows="3" placeholder="Brief company description"></textarea>
+              <input type="text" id="hq_location" placeholder="City, Country" />
+              <div class="multi-select">
+                <div class="multi-select__control">
+                  <span class="multi-select__placeholder">Select system parts *</span>
+                  <span class="multi-select__arrow">▾</span>
+                </div>
+                <div class="multi-select__dropdown"></div>
+              </div>
+              <h4 style="margin-top:18px;font-size:12px;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;color:var(--muted);">Contact Person</h4>
+              <input type="text" id="contact_person" placeholder="Contact person (full name)*" />
+              <input type="email" id="email_address" placeholder="Contact person (email)*" />
+              <input type="tel" id="phone_number" placeholder="Contact person (phone)" />
+            </div>
+            <div class="vendor-panel-actions">
+              <button id="addVendorBtn" class="btn-outline">Add <i class="fa-solid fa-spin fa-spinner hide" id="addVendorSpinner"></i></button>
+              <button id="closeVendorPanel" class="btn-outline">Cancel</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- EDIT VENDOR MODAL -->
+      <div id="popupModal" class="modal">
+        <div class="modal-content">
+          <span class="close">&times;</span>
+          <h2>Edit Vendor</h2>
+          <form id="editForm"></form>
+        </div>
+      </div>
+
+      <!-- HOME PAGE -->
+      <div id="home" class="page active">
+        <div id="requirements_summary">
+          <div class="container">
+            <div class="pay-card">
+              <div class="pay-card-header">
+                <div class="title">
+                  <span style="font-weight: bold;">OVERVIEW</span>
+                  <!-- <span class="badge" id="client_country"></span> -->
+                </div>
+              </div>
+              <div class="pay-card-body" style="text-align: center;">
+                <div style="color: var(--heading-color); border-right: 1px solid var(--border-color);">
+                  <label id="tot_active_req" style="font-size:28px;">0</label>
+                  <div>active requirements</div>
+                </div>
+                <div style="color: var(--heading-color); border-right: 1px solid var(--border-color);">
+                  <label id="tot_draft_req" style="font-size:28px;">0</label>
+                  <div>draft requirements</div>
+                </div>
+                <div style="color: var(--heading-color); border-right: 1px solid var(--border-color);">
+                  <label id="tot_completed_req" style="font-size:28px;">0</label>
+                  <div>completed requirements</div>
+                </div>
+                <div style="color: var(--heading-color); border-right: 1px solid var(--border-color);">
+                  <label id="tot_vendors" style="font-size:28px;">0</label>
+                  <div>total vendors</div>
+                </div>
+                <div><label><strong>-</strong></label><div style="font-weight: bold;"></div></div>
+              </div>
+            </div>
             <div class="layout">
+              <div class="sidebar"></div>
+              <div class="content"></div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-                <!-- SIDEBAR -->
-                <div class="sidebar">
-                  
+      <!-- CONFIGURATIONS PAGE -->
+      <div id="configurations" class="page">
+        <div class="container">
+          <div class="pay-card">
+            <div class="pay-card-header">
+              <div class="title">
+                <span style="font-weight: bold;">Configurations</span>
+                <!-- <span class="badge"></span> -->
+              </div>
+            </div>
+            <div style="padding: 14px 18px;">
+              <div class="tabs">
+                <button class="tab active" data-tab="all-areas-fields">Form Fields</button>
+              </div>
+              <div class="tab-content active" data-tab="all-areas-fields">
+                <div class="section-header">
+                  <p>Use this section to define custom form fields. These fields will be used across vendor and requirement submission workflows.</p>
                 </div>
 
-                <!-- CONTENT -->
-                <div class="content">
-                </div>
-            </div>
-            </div>
-            </div>
-            </div>
-
-            <div id="configurations" class="page">
-            <div id="">
-              <div class="container">
-
-                  <!-- PAY CARD -->
-                  <div class="pay-card">
-                      <div class="pay-card-header">
-                        <div class="title">
-                            <span id="" style="font-weight: bold;">Configurations</span>
-                            <span class="badge" id=""></span>
-                        </div>
-                        <div>
-                            <!-- <button class="btn-outline">✓ Mark As Done</button>
-                            <button class="btn-outline">View history</button> -->
-                        </div>
-                      </div>
-
-                      <div class="" style="padding: 10px;">
-                        <div class="tabs">
-                          <button class="tab active" data-tab="all-areas-fields">Form Fields</button>
-                        </div>
-                        <div class="tab-content active" data-tab="all-areas-fields">
-                            <div class="section-header">
-                              <!-- <h2>Form Field Configuration</h2> -->
-                              <p>
-                                Use this section to define custom form fields. 
-                                These fields will be used across vendor and requirement submission workflows..
-                              </p>
-                            </div>
-                            <div class="grid-configurations skeleton-grid-form-fields">
-                              <!-- Skeleton Card -->
-                              <div class="card-configurations skeleton-form-fields">
-                                <div class="skeleton-title-form-fields"></div>
-
-                                <div class="skeleton-input-form-fields"></div>
-                                <div class="skeleton-textarea-form-fields"></div>
-                                <div class="skeleton-button-form-fields"></div>
-
-                                <div class="skeleton-list-form-fields">
-                                  <div class="skeleton-item-form-fields"></div>
-                                  <div class="skeleton-item-form-fields"></div>
-                                  <div class="skeleton-item-form-fields"></div>
-                                </div>
-                              </div>
-
-                              <div class="card-configurations skeleton-form-fields">
-                                <div class="skeleton-title-form-fields"></div>
-                                <div class="skeleton-input-form-fields"></div>
-                                <div class="skeleton-textarea-form-fields"></div>
-                                <div class="skeleton-button-form-fields"></div>
-                                <div class="skeleton-list-form-fields">
-                                  <div class="skeleton-item-form-fields"></div>
-                                  <div class="skeleton-item-form-fields"></div>
-                                  <div class="skeleton-item-form-fields"></div>
-                                </div>
-                              </div>
-
-                              <div class="card-configurations skeleton-form-fields">
-                                <div class="skeleton-title-form-fields"></div>
-                                <div class="skeleton-input-form-fields"></div>
-                                <div class="skeleton-textarea-form-fields"></div>
-                                <div class="skeleton-button-form-fields"></div>
-                                <div class="skeleton-list-form-fields">
-                                  <div class="skeleton-item-form-fields"></div>
-                                  <div class="skeleton-item-form-fields"></div>
-                                  <div class="skeleton-item-form-fields"></div>
-                                </div>
-                              </div>
-                            </div>
-
-                            <div class="grid-configurations hide" id="formFieldsPage">
-                              <div class="card-configurations">
-                                <h3>Area/Category Values</h3>
-                                <div class="input-row-configurations">
-                                  <input type="text" id="formFieldArea" placeholder="Add area..." />
-                                  <button class="btn-outline add-configurations-btn">Add</button>
-                                </div>
-                                <div class="list-configurations" id="areaFormFieldList"></div>
-                              </div>
-
-                              <div class="card-configurations">
-                                <h3>System Part Values</h3>
-                                <div class="input-row-configurations">
-                                  <input type="text" id="formFieldSystemPart" placeholder="Add system part..." />
-                                  <button class="btn-outline add-configurations-btn">Add</button>
-                                </div>
-                                <div class="list-configurations" id="systemPartFormFieldList"></div>
-                              </div>
-
-                              <div class="card-configurations">
-                                <h3>Vendor Feedback Values</h3>
-                                <div class="input-row-configurations">
-                                  <input type="text" id="formFieldVendorFeedback" placeholder="Add vendor feedback..." disabled />
-                                  <button class="btn-outline add-configurations-btn" disabled>Add</button>
-                                </div>
-                                <div class="list-configurations" id="vendorFeedbackFormFieldList"></div>
-                              </div>
-
-                            </div>
-                        </div>
-                      </div>
+                <div class="grid-configurations skeleton-grid-form-fields">
+                  <div class="card-configurations skeleton-form-fields">
+                    <div class="skeleton-title-form-fields"></div>
+                    <div class="skeleton-input-form-fields"></div>
+                    <div class="skeleton-textarea-form-fields"></div>
+                    <div class="skeleton-button-form-fields"></div>
+                    <div class="skeleton-list-form-fields">
+                      <div class="skeleton-item-form-fields"></div>
+                      <div class="skeleton-item-form-fields"></div>
+                      <div class="skeleton-item-form-fields"></div>
+                    </div>
+                  </div>
+                  <div class="card-configurations skeleton-form-fields">
+                    <div class="skeleton-title-form-fields"></div>
+                    <div class="skeleton-input-form-fields"></div>
+                    <div class="skeleton-textarea-form-fields"></div>
+                    <div class="skeleton-button-form-fields"></div>
+                    <div class="skeleton-list-form-fields">
+                      <div class="skeleton-item-form-fields"></div>
+                      <div class="skeleton-item-form-fields"></div>
+                      <div class="skeleton-item-form-fields"></div>
+                    </div>
+                  </div>
+                  <div class="card-configurations skeleton-form-fields">
+                    <div class="skeleton-title-form-fields"></div>
+                    <div class="skeleton-input-form-fields"></div>
+                    <div class="skeleton-textarea-form-fields"></div>
+                    <div class="skeleton-button-form-fields"></div>
+                    <div class="skeleton-list-form-fields">
+                      <div class="skeleton-item-form-fields"></div>
+                      <div class="skeleton-item-form-fields"></div>
+                      <div class="skeleton-item-form-fields"></div>
+                    </div>
                   </div>
                 </div>
+
+                <div class="grid-configurations hide" id="formFieldsPage">
+                  <div class="card-configurations">
+                    <h3>Area/Category Values</h3>
+                    <div class="input-row-configurations">
+                      <input type="text" id="formFieldArea" placeholder="Add area..." />
+                      <button class="btn-outline add-configurations-btn">Add</button>
+                    </div>
+                    <div class="list-configurations" id="areaFormFieldList"></div>
+                  </div>
+                  <div class="card-configurations">
+                    <h3>System Part Values</h3>
+                    <div class="input-row-configurations">
+                      <input type="text" id="formFieldSystemPart" placeholder="Add system part..." />
+                      <button class="btn-outline add-configurations-btn">Add</button>
+                    </div>
+                    <div class="list-configurations" id="systemPartFormFieldList"></div>
+                  </div>
+                  <div class="card-configurations">
+                    <h3>Vendor Feedback Values</h3>
+                    <div class="input-row-configurations">
+                      <input type="text" id="formFieldVendorFeedback" placeholder="Add vendor feedback..." disabled />
+                      <button class="btn-outline add-configurations-btn" disabled>Add</button>
+                    </div>
+                    <div class="list-configurations" id="vendorFeedbackFormFieldList"></div>
+                  </div>
+                </div>
+              </div>
             </div>
-            </div>
+          </div>
         </div>
+      </div>
+
     </div>
   </div>
+
   <footer class="app-footer">
     <div class="footer-content">
       <span>© <span id="footerYear"></span> Udder</span>
@@ -695,6 +1166,7 @@
       <span>All rights reserved</span>
     </div>
   </footer>
+
   <script src="../assets/js/vendor/xlsx.full.min.js"></script>
   <script type="module" src="../assets/js/core/dashboard.js"></script>
   <script type="module" src="../assets/js/core/requirements.js"></script>
@@ -706,11 +1178,10 @@
   </script>
   <script>
     function exportExcel(tableId, name){
-        console.info('tableId', tableId);
-        //const tableId = $(this).data(íd);
-        const table = document.getElementById(tableId);
-        const wb = XLSX.utils.table_to_book(table, { sheet: "Sheet1" });
-        XLSX.writeFile(wb, `${name}.xlsx`);
+      console.info('tableId', tableId);
+      const table = document.getElementById(tableId);
+      const wb = XLSX.utils.table_to_book(table, { sheet: "Sheet1" });
+      XLSX.writeFile(wb, `${name}.xlsx`);
     }
   </script>
 </body>

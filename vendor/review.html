@@ -3,157 +3,665 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>RFP Tool - Vendor Requirements Review</title>
-
-  <!-- jQuery -->
+  <title>Request For Proposal - Vendor Requirements Review</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <script type="module" src="../assets/js/requirements/vendor_review.js"></script>
-
   <style>
     :root {
-      --bg: #f5f7fb;
+      --bg: #f2f1ee;
       --card: #ffffff;
-      --primary: #4f46e5;
+      --primary: #111;
+      --primary-hover: #333;
       --text: #111827;
-      --muted: #6b7280;
-      --border: #e5e7eb;
+      --muted: #8a8880;
+      --border: #e2e0db;
+      --border-strong: #c8c5be;
+      --surface: #f8f7f5;
     }
 
-    * {
-      box-sizing: border-box;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 14px; }
 
     body {
-      margin: 0;
+      font-family: 'Geist', system-ui, -apple-system, sans-serif;
       background: var(--bg);
-      padding: 40px;
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 40px 16px 60px;
     }
 
+    .warning {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 7px;
+    }
+
+    .warning select,
+    .warning button {
+      background: transparent !important;
+      /* border: none; */
+    }
+
+    /* ── PAGE EYEBROW ── */
+    .page-eyebrow {
+      width: 90%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+
+    .page-eyebrow-left { display: flex; align-items: center; gap: 10px; }
+
+    .logo-chip {
+      width: 28px; height: 28px;
+      background: var(--text);
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .logo-chip svg { width: 13px; height: 13px; fill: white; }
+
+    .page-brand { font-size: 13px; font-weight: 500; color: var(--text); letter-spacing: -0.01em; }
+    .page-brand span { color: var(--muted); font-weight: 400; margin-left: 6px; }
+
+    .status-chip {
+      font-size: 11px; font-weight: 500; letter-spacing: 0.05em;
+      text-transform: uppercase; padding: 3px 10px; border-radius: 20px;
+      background: var(--surface); color: var(--muted); border: 1px solid var(--border);
+    }
+
+    /* ── MAIN CARD ── */
     .card {
       background: var(--card);
-      max-width: 100%;
-      margin: auto;
-      padding: 24px;
-      border-radius: 14px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+      width: 90%;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      margin-bottom: 16px;
+      overflow: hidden;
     }
 
-    h2 {
-      margin: 0 0 6px;
+    .card-header-block {
+      padding: 22px 28px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .card-header-block h2 {
+      font-size: 17px; font-weight: 600;
+      letter-spacing: -0.02em; margin-bottom: 3px;
+    }
+
+    .card-header-block p {
+      font-size: 13px; color: var(--muted); line-height: 1.5; margin: 0;
+    }
+
+    .card-header-block p + p { margin-top: 2px; }
+
+    .card-body { padding: 0 28px 28px; }
+
+    /* ── FILTER BAR ── */
+    .filter-bar {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 14px;
+      padding: 14px 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+
+    .filter-bar label {
+      font-size: 12px; font-weight: 500;
+      color: var(--muted); white-space: nowrap;
+    }
+
+    .filter-bar select,
+    .filter-bar input[type="text"] {
+      padding: 7px 11px;
+      font-size: 12.5px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--card);
       color: var(--text);
+      font-family: 'Geist', sans-serif;
+      flex: unset;
+      min-width: 130px;
+      outline: none;
+      appearance: none;
     }
 
-    p {
-      margin: 0 0 20px;
-      color: var(--muted);
-      font-size: 14px;
+    .filter-bar select:focus,
+    .filter-bar input[type="text"]:focus {
+      border-color: var(--border-strong);
     }
 
+    .filter-bar input[type="checkbox"] {
+      width: 15px; height: 15px;
+      accent-color: var(--text);
+      cursor: pointer; flex: unset;
+    }
+
+    .filter-divider {
+      width: 1px; height: 20px;
+      background: var(--border); flex-shrink: 0;
+    }
+
+    /* ── TABLE ── */
     table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 14px;
+      font-size: 13.5px;
     }
 
-    thead {
-      background: #f9fafb;
-    }
+    thead tr { border-bottom: 1px solid var(--border); }
 
-    th, td {
-      padding: 12px;
-      border-bottom: 1px solid var(--border);
+    thead th {
+      padding: 10px 12px;
       text-align: left;
-    }
-
-    th {
-      color: var(--muted);
+      font-size: 11px;
       font-weight: 600;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
-      font-size: 12px;
+      color: var(--muted);
+      background: var(--surface);
+      white-space: nowrap;
+      border-bottom: 1px solid var(--border);
     }
 
-    select, input, textarea {
-      padding: 8px 10px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      font-size: 13px;
-      background: white;
+    tbody tr {
+      border-bottom: 1px solid #f0ede8;
+      transition: background 0.12s ease;
+    }
+
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: var(--surface); }
+
+    tbody td {
+      padding: 12px 12px;
+      color: #4b4a47;
+      vertical-align: middle;
+    }
+
+    tbody td:first-child {
+      color: var(--muted);
+      width: 36px;
+    }
+
+    /* inline form controls in table */
+    tbody td select,
+    tbody td textarea,
+    tbody td input[type="text"] {
       width: 100%;
+      padding: 7px 10px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      font-family: 'Geist', sans-serif;
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.12s, background 0.12s;
+      appearance: none;
     }
 
-    .actions {
-      margin-top: 20px;
-      display: flex;
-      justify-content: flex-end;
+    tbody td select:focus,
+    tbody td textarea:focus,
+    tbody td input[type="text"]:focus {
+      border-color: var(--border-strong);
+      background: var(--card);
     }
 
-    button {
-      padding: 12px 18px;
-      border-radius: 8px;
-      border: none;
-      background: var(--primary);
-      color: white;
-      font-weight: 600;
+    tbody td textarea {
+      resize: vertical;
+      min-height: 60px;
+    }
+
+    .row-checkbox {
+      width: 15px; height: 15px;
+      accent-color: var(--text);
       cursor: pointer;
+      transform: scale(1.4);
+      margin-left: 4px;
     }
 
-    button:hover {
-      opacity: 0.95;
+    /* ── BULK ACTION BAR (shown when rows checked) ── */
+    .bulk-bar {
+      display: none;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 16px;
+      background: var(--text);
+      color: white;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      font-size: 13px;
     }
+
+    .bulk-bar.visible { display: flex; }
+
+    .bulk-bar span { flex: 1; font-weight: 500; }
+
+    .bulk-bar select {
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.1);
+      color: white;
+      font-family: 'Geist', sans-serif;
+      font-size: 12.5px;
+      outline: none;
+      cursor: pointer;
+      min-width: 140px;
+    }
+
+    .bulk-bar select option { background: #1a1a1a; color: white; }
+
+    .bulk-clear {
+      background: none;
+      border: 1px solid rgba(255,255,255,0.25);
+      color: white;
+      font-size: 12px;
+      padding: 5px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: 'Geist', sans-serif;
+    }
+
+    .bulk-clear:hover { background: rgba(255,255,255,0.1); }
+
+    /* ── LOADER ── */
     .loader {
-      width: 48px;
-      height: 48px;
-      border: 5px solid #FFF;
-      border-bottom-color: #FF3D00;
+      width: 36px; height: 36px;
+      border: 3px solid #e5e3df;
+      border-bottom-color: var(--text);
       border-radius: 50%;
       display: inline-block;
-      box-sizing: border-box;
-      animation: rotation 1s linear infinite;
+      animation: rotation 0.8s linear infinite;
     }
 
     @keyframes rotation {
-      0% {
-          transform: rotate(0deg);
-      }
-      100% {
-          transform: rotate(360deg);
-      }
-    } 
-    .hide{
-      display: none !important;
+      0%   { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
+
+    .loader-wrap {
+      display: flex;
+      justify-content: center;
+      padding: 48px 0;
+    }
+
+    /* ── ACTIONS ── */
+    .actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+
+    button {
+      padding: 10px 18px;
+      border-radius: 7px;
+      border: none;
+      background: var(--primary);
+      color: white;
+      font-family: 'Geist', sans-serif;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      transition: background 0.14s ease;
+    }
+
+    button:hover { background: var(--primary-hover); }
+
+    /* ── FOOTER ── */
+    footer { margin-top: 12px; text-align: center; }
+    .footer-text { font-size: 11px; color: #c4c1bb; letter-spacing: 0.04em; }
+
+    .hide { display: none !important; }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 24px;
+      color: var(--muted);
+      gap: 8px;
+      font-size: 13px;
+    }
+
+    .empty-state i { font-size: 22px; opacity: 0.35; }
+    /* ── SWEETALERT2 THEME OVERRIDE ── */
+.swal2-popup {
+  --swal2-width: 400px;
+  --swal2-padding: 28px 32px;
+  --swal2-border: 1px solid #e2e0db;
+  --swal2-border-radius: 12px;
+  --swal2-background: #ffffff;
+  --swal2-color: #111827;
+  font-family: 'Geist', system-ui, -apple-system, sans-serif !important;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.07) !important;
+}
+
+.swal2-title {
+  font-size: 17px !important;
+  font-weight: 600 !important;
+  color: #111827 !important;
+  letter-spacing: -0.02em !important;
+  padding: 0 0 6px !important;
+}
+
+.swal2-html-container,
+.swal2-content {
+  font-size: 13.5px !important;
+  color: #8a8880 !important;
+  line-height: 1.6 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.swal2-icon {
+  border-width: 2px !important;
+  width: 48px !important;
+  height: 48px !important;
+  margin: 0 auto 18px !important;
+}
+
+.swal2-icon .swal2-icon-content {
+  font-size: 24px !important;
+}
+
+.swal2-actions {
+  margin: 22px 0 0 !important;
+  gap: 8px !important;
+}
+
+.swal2-confirm {
+  padding: 9px 18px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  font-family: 'Geist', sans-serif !important;
+  border-radius: 7px !important;
+  background: #111827 !important;
+  color: #ffffff !important;
+  border: none !important;
+  box-shadow: none !important;
+  margin-left: 0 !important;
+}
+
+.swal2-confirm:hover {
+  background: #333 !important;
+}
+
+.swal2-cancel {
+  padding: 9px 18px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  font-family: 'Geist', sans-serif !important;
+  border-radius: 7px !important;
+  background: #ffffff !important;
+  color: #111827 !important;
+  border: 1px solid #c8c5be !important;
+  box-shadow: none !important;
+}
+
+.swal2-cancel:hover {
+  background: #f8f7f5 !important;
+}
+
+.swal2-input,
+.swal2-textarea,
+.swal2-select {
+  font-family: 'Geist', sans-serif !important;
+  font-size: 13.5px !important;
+  border: 1px solid #e2e0db !important;
+  border-radius: 7px !important;
+  background: #f8f7f5 !important;
+  color: #111827 !important;
+  box-shadow: none !important;
+  padding: 10px 13px !important;
+  margin: 12px 0 0 !important;
+}
+
+.swal2-input:focus,
+.swal2-textarea:focus {
+  border-color: #c8c5be !important;
+  background: #ffffff !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.swal2-input-label {
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  color: #8a8880 !important;
+  letter-spacing: 0.03em !important;
+  margin: 14px 0 0 !important;
+}
+
+.swal2-validation-message {
+  font-size: 12.5px !important;
+  border-radius: 6px !important;
+  background: #fef2f2 !important;
+  color: #b91c1c !important;
+  border: none !important;
+}
+
+/* Toast variant */
+.swal2-toast {
+  font-family: 'Geist', sans-serif !important;
+  font-size: 13px !important;
+  border-radius: 8px !important;
+  border: 1px solid #e2e0db !important;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06) !important;
+  background: #ffffff !important;
+  color: #111827 !important;
+  padding: 10px 16px !important;
+}
+
+.swal2-toast .swal2-title {
+  font-size: 13px !important;
+  font-weight: 500 !important;
+}
   </style>
 </head>
 
 <body>
-  <div class="card">
-    <h2 id="title"></h2>
-    <p id="company_info"></p>
-    <p>Review each requirement and indicate how it will be handled.</p>
-    <div style="text-align: center;">
-        <div class="loader" id="loader"></div>
-    </div>
-    <table width="100%" class="hide">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th width="10%">Area</th>
-          <th width="30%">Decision</th>
-          <th width="15%">Priority</th>
-          <th width="20%">Feedback</th>
-          <th width="20%">Comments</th>
-        </tr>
-      </thead>
-      <tbody id="requirementsTable"></tbody>
-    </table>
 
-    <div class="actions">
-      <button id="saveDecisions">Submit</button>
+  <!-- Page eyebrow -->
+  <div class="page-eyebrow">
+    <div class="page-eyebrow-left">
+      <div class="logo-chip">
+        <svg viewBox="0 0 14 14"><path d="M7 1L1 5v8h4V9h4v4h4V5L7 1z"/></svg>
+      </div>
+      <span class="page-brand">Udder <span> &gt; Request For Proposal</span></span>
+    </div>
+    <span class="status-chip">Vendor Review</span>
+  </div>
+
+  <div class="card">
+
+    <!-- Header -->
+    <div class="card-header-block">
+      <h2 id="title">Requirements Review</h2>
+      <p id="company_info"></p>
+      <p style="margin-top:10px;">Review each requirement and indicate how it will be handled.</p>
+    </div>
+
+    <div class="card-body">
+
+      <!-- Loader -->
+      <div class="loader-wrap" id="loaderWrap">
+        <div class="loader" id="loader"></div>
+      </div>
+
+      <!-- Filter bar — hidden until table loads -->
+      <div class="filter-bar hide" id="filterBar">
+
+        <label for="areaFilter">Filter by Area</label>
+        <select id="areaFilter">
+          <option value="">All Areas</option>
+        </select>
+
+        <div class="filter-divider"></div>
+
+        <label for="feedbackFilter">Filter by Feedback</label>
+        <select id="feedbackFilter">
+          <option value="">All</option>
+        </select>
+
+        <div class="filter-divider"></div>
+
+        <label for="searchInput">Search</label>
+        <input type="text" id="searchInput" placeholder="Keyword…" style="min-width:160px;" />
+
+      </div>
+
+      <!-- Bulk action bar — shown when rows selected -->
+      <div class="bulk-bar" id="bulkBar">
+        <span id="bulkCount">0 rows selected</span>
+        <select id="bulkFeedback">
+          <option value="">Set Feedback…</option>
+        </select>
+        <button class="bulk-clear" id="bulkClear">Clear selection</button>
+      </div>
+
+      <!-- Table -->
+      <table width="100%" class="hide" id="mainTable">
+        <thead>
+          <tr>
+            <th>
+              <input type="checkbox" id="selectAll" class="row-checkbox" title="Select all">
+            </th>
+            <th width="10%">Area</th>
+            <th width="30%">Decision</th>
+            <th width="15%">Priority</th>
+            <th width="20%">Feedback</th>
+            <th width="20%">Comments</th>
+          </tr>
+        </thead>
+        <tbody id="requirementsTable"></tbody>
+      </table>
+
+      <!-- Empty state (shown if no rows after filter) -->
+      <div class="empty-state hide" id="emptyState">
+        <i class="fa-regular fa-folder-open"></i>
+        <p>No requirements match your filters.</p>
+      </div>
+
+      <div class="actions">
+        <button id="saveDecisions">Submit</button>
+      </div>
+
     </div>
   </div>
-  <footer style="margin-bottom: 12px;">
-    <span style="color: lightslategray;font-size: 10px;">Powered by Udder.</span>
+
+  <footer>
+    <span class="footer-text">Powered by Udder.</span>
   </footer>
+
+  <script>
+    $(function () {
+
+      /* ── FILTER + SEARCH ── */
+      function applyFilters() {
+        const area     = $('#areaFilter').val().toLowerCase();
+        const feedback = $('#feedbackFilter').val().toLowerCase();
+        const keyword  = $('#searchInput').val().toLowerCase();
+
+        let visible = 0;
+
+        $('#requirementsTable tr').each(function () {
+          const rowArea     = $(this).find('td.col-area').text().toLowerCase();
+          const rowFeedback = $(this).find('td.col-feedback select').val()?.toLowerCase() ?? '';
+          const rowDecision = $(this).find('td.col-decision').text().toLowerCase();
+          const rowComments = $(this).find('td.col-comments textarea').val()?.toLowerCase() ?? '';
+
+          const matchArea     = !area     || rowArea === area;
+          const matchFeedback = !feedback || rowFeedback === feedback;
+          const matchKeyword  = !keyword  || rowDecision.includes(keyword) || rowArea.includes(keyword) || rowComments.includes(keyword);
+
+          const show = matchArea && matchFeedback && matchKeyword;
+          $(this).toggle(show);
+          if (show) visible++;
+        });
+
+        $('#emptyState').toggleClass('hide', visible > 0);
+      }
+
+      $('#areaFilter, #feedbackFilter').on('change', applyFilters);
+      $('#searchInput').on('input', applyFilters);
+
+      /* ── SELECT ALL ── */
+      $('#selectAll').on('change', function () {
+        const checked = $(this).is(':checked');
+        $('#requirementsTable tr:visible .row-checkbox').prop('checked', checked);
+        updateBulkBar();
+      });
+
+      $(document).on('change', '.row-checkbox', function () {
+        const total   = $('#requirementsTable tr:visible .row-checkbox').length;
+        const checked = $('#requirementsTable tr:visible .row-checkbox:checked').length;
+        $('#selectAll').prop('indeterminate', checked > 0 && checked < total);
+        $('#selectAll').prop('checked', checked === total && total > 0);
+        updateBulkBar();
+      });
+
+      function updateBulkBar() {
+        const count = $('#requirementsTable .row-checkbox:checked').length;
+        if (count > 0) {
+          $('#bulkCount').text(count + ' row' + (count > 1 ? 's' : '') + ' selected');
+          $('#bulkBar').addClass('visible');
+        } else {
+          $('#bulkBar').removeClass('visible');
+        }
+      }
+
+      /* ── BULK FEEDBACK ── */
+      $('#bulkFeedback').on('change', function () {
+        const val = $(this).val();
+        if (!val) return;
+        $('#requirementsTable .row-checkbox:checked').each(function () {
+          $(this).closest('tr').find('td.col-feedback select').val(val);
+        });
+        $(this).val('');
+        applyFilters();
+      });
+
+      /* ── CLEAR SELECTION ── */
+      $('#bulkClear').on('click', function () {
+        $('#requirementsTable .row-checkbox, #selectAll').prop('checked', false);
+        $('#selectAll').prop('indeterminate', false);
+        updateBulkBar();
+      });
+
+      /* ── HELPER: populate filter dropdowns (called by vendor_review.js after table loads) ── */
+      window.initVendorFilters = function (areas, feedbackOptions) {
+        areas.forEach(function (a) {
+          $('#areaFilter').append(`<option value="${a.toLowerCase()}">${a}</option>`);
+        });
+        feedbackOptions.forEach(function (f) {
+          $('#feedbackFilter').append(`<option value="${f.toLowerCase()}">${f}</option>`);
+          $('#bulkFeedback').append(`<option value="${f}">${f}</option>`);
+        });
+        $('#filterBar').removeClass('hide');
+        $('#mainTable').removeClass('hide');
+        $('#loaderWrap').addClass('hide');
+      };
+
+    });
+  </script>
+
 </body>
 </html>

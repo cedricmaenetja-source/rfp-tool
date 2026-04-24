@@ -4,7 +4,7 @@ $(function(){
     $('.nav').html(`
         <a href="#" data-page="home">Home</a>
         <a href="#" data-page="requirements">Requirements</a>
-        <a href="#" data-page="vendors">Vendors</a>
+        <a href="#" data-page="vendors-list">Vendors</a>
         <a href="#" data-page="configurations">Configurations</a>
     `);
 

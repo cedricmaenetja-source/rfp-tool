@@ -40,7 +40,7 @@ $(function(){
 
         if(currentStep === 1){
             $('.step-label').text('Step 1');
-            $('h2').text('File Upload Requirements');
+            $('.wizard-content h2').text('File Upload Requirements');
             $('.description').html(`
                 Please use the sample structure below before uploading your file.<br>
                 <small style="color:#888;">Note: Only Excel files (.xlsx, .xls) are accepted.</small>
@@ -506,7 +506,7 @@ $(function(){
                 const company = requirement.client.company;
                 const name = requirement.client.name;
                 const email = requirement.client.email;
-                const phone = requirement.client.phone;
+                const phone = (requirement.client.phone === 'undefined') ? '': requirement.client.phone;
                 const country = requirement.client.country;
                 const title = requirement.title;
                 const createdAt = requirement.created_at;
@@ -527,7 +527,7 @@ $(function(){
                         <td><a href="../requirements/details.html?req=${reqId}" target="_blank">${title}</a></td>
                         <td>${name}</td>
                         <td>${email}</td>
-                        <td>${phone}</td>
+                        <td>${phone}%</td>
                         <td>${country}</td>
                     </tr>   
                 `);
@@ -874,14 +874,63 @@ async function home(){
         <h4 class="sidebar-header">
             ACTIVE REQUIREMENTS
         </h4>
-        <div class="menu-item active" data-target="main-summary">Main</div>`
+        <div class="menu-item active" data-target="main-summary">What's Happening</div>`
     );
     
     $('.content').append(`
         <div data-target="main-summary" class="content-section active">
-            <h3>MAIN</h3>
-            <span></span>
+    <h3>What's Happening</h3>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+
+        <!-- Vendor response completion -->
+        <div style="background:#f8f7f5;border:1px solid #e2e0db;border-radius:10px;padding:16px 18px;">
+        <p style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#8a8880;margin:0 0 10px;">Vendor response completion</p>
+
+        <div id="vendor-completion-list">
+            <!-- JS populates rows here -->
         </div>
+        </div>
+
+        <!-- Needs attention -->
+        <div style="background:#f8f7f5;border:1px solid #e2e0db;border-radius:10px;padding:16px 18px;">
+        <p style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#8a8880;margin:0 0 10px;">Needs attention</p>
+
+        <div id="attention-list">
+            <!-- JS populates rows here -->
+        </div>
+        </div>
+
+    </div>
+
+    <!-- Pipeline status -->
+    <div style="background:#f8f7f5;border:1px solid #e2e0db;border-radius:10px;padding:16px 18px;">
+        <p style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#8a8880;margin:0 0 12px;">Pipeline status</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <div style="background:#fff;border:1px solid #e2e0db;border-radius:8px;padding:12px 16px;flex:1;min-width:90px;text-align:center;">
+            <div id="stat-active" style="font-size:22px;font-weight:600;color:#111827;">0</div>
+            <div style="font-size:11.5px;color:#8a8880;margin-top:3px;">active</div>
+        </div>
+        <div style="background:#fff;border:1px solid #e2e0db;border-radius:8px;padding:12px 16px;flex:1;min-width:90px;text-align:center;">
+            <div id="stat-awaiting" style="font-size:22px;font-weight:600;color:#111827;">0</div>
+            <div style="font-size:11.5px;color:#8a8880;margin-top:3px;">awaiting client</div>
+        </div>
+        <div style="background:#fff;border:1px solid #e2e0db;border-radius:8px;padding:12px 16px;flex:1;min-width:90px;text-align:center;">
+            <div id="stat-scoring" style="font-size:22px;font-weight:600;color:#111827;">0</div>
+            <div style="font-size:11.5px;color:#8a8880;margin-top:3px;">ready to score</div>
+        </div>
+        <div style="background:#fff;border:1px solid #e2e0db;border-radius:8px;padding:12px 16px;flex:1;min-width:90px;text-align:center;">
+            <div id="stat-completed" style="font-size:22px;font-weight:600;color:#111827;">0</div>
+            <div style="font-size:11.5px;color:#8a8880;margin-top:3px;">completed</div>
+        </div>
+        <div style="background:#FAEEDA;border:1px solid #FAC775;border-radius:8px;padding:12px 16px;flex:1;min-width:90px;text-align:center;">
+            <div id="stat-attention" style="font-size:22px;font-weight:600;color:#633806;">0</div>
+            <div style="font-size:11.5px;color:#854F0B;margin-top:3px;">needs attention</div>
+        </div>
+        </div>
+    </div>
+
+    </div>
     `);
 
     result.data.forEach(function(key, value){
@@ -971,6 +1020,8 @@ async function home(){
         generateTabs(key.id, key.assigned_vendors, mustHaveResponses, couldHaveResponses, shouldHaveResponses, key.requirements);
     });
 
+    renderMainSummary(result.data);
+
     $('.skeleton-container').addClass('hide');
     App.showElement('mainPage');
     $('#mainPage').css('display', 'block');
@@ -1043,6 +1094,80 @@ async function generateTabs(reqId, vendors, mustHaveResponses, couldHaveResponse
         summaryTabContent(reqId, id, part);
         i++;
     }
+}
+
+function renderMainSummary(requirements) {
+  const $completion = $('#vendor-completion-list').empty();
+  const $attention  = $('#attention-list').empty();
+
+  let statActive = 0, statAwaiting = 0, statScoring = 0, statCompleted = 0, statAttention = 0;
+
+  requirements.forEach(req => {
+    const vendors     = req.assigned_vendors ?? [];
+    const total       = vendors.length;
+    const responded   = vendors.filter(v => v.feedback && v.feedback.length).length;
+    const allIn       = total > 0 && responded === total;
+    const noneIn      = total > 0 && responded === 0;
+    const isApproved  = req.approved === 'Y';
+    const pct         = total > 0 ? Math.round((responded / total) * 100) : 0;
+
+    // Pipeline counts
+    if (isApproved)        statCompleted++;
+    else if (allIn)        statScoring++;
+    else if (req.status === 'awaiting_client') statAwaiting++;
+    else                   statActive++;
+
+    // Completion row
+    $completion.append(`
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f0ede8;">
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:13px;font-weight:500;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${req.title}</div>
+          <div style="font-size:11.5px;color:#8a8880;margin-top:2px;">${vendors.map(v => v.name).join(', ') || '—'}</div>
+        </div>
+        <div style="width:80px;flex-shrink:0;">
+          <div style="height:4px;border-radius:2px;background:#e2e0db;">
+            <div style="height:100%;width:${pct}%;border-radius:2px;background:#111827;"></div>
+          </div>
+        </div>
+        <div style="font-size:12px;color:#8a8880;min-width:36px;text-align:right;">${responded} / ${total}</div>
+      </div>
+    `);
+
+    // Attention items
+    if (noneIn && !isApproved) {
+      statAttention++;
+      $attention.append(attentionRow('red', `${req.title} — no vendors have responded`, `${total} vendor${total > 1 ? 's' : ''} assigned`));
+    } else if (allIn && !isApproved) {
+      $attention.append(attentionRow('blue', `${req.title} — ready to score`, 'All responses in'));
+    } else if (!allIn && !noneIn && !isApproved) {
+      statAttention++;
+      $attention.append(attentionRow('amber', `${req.title} — ${total - responded} vendor${(total - responded) > 1 ? 's' : ''} pending`, `${responded} of ${total} responded`));
+    }
+  });
+
+  if ($attention.children().length === 0) {
+    $attention.append(`<div style="font-size:13px;color:#8a8880;padding:12px 0;">All requirements are on track.</div>`);
+  }
+
+  $('#stat-active').text(statActive);
+  $('#stat-awaiting').text(statAwaiting);
+  $('#stat-scoring').text(statScoring);
+  $('#stat-completed').text(statCompleted);
+  $('#stat-attention').text(statAttention);
+}
+
+function attentionRow(color, text, meta) {
+  const dots  = { red: '#E24B4A', amber: '#BA7517', blue: '#378ADD' };
+  const dot   = dots[color] ?? '#888';
+  return `
+    <div style="display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid #f0ede8;">
+      <div style="width:6px;height:6px;border-radius:50%;background:${dot};margin-top:5px;flex-shrink:0;"></div>
+      <div>
+        <div style="font-size:13px;color:#111827;line-height:1.45;">${text}</div>
+        <div style="font-size:11.5px;color:#8a8880;margin-top:2px;">${meta}</div>
+      </div>
+    </div>
+  `;
 }
 
 function generateMatchScoreTable(reqId, vendors, data, requirements){

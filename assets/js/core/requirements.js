@@ -22,7 +22,7 @@ $(function () {
                 d.toTimeString().split(' ')[0];
             
             const reqId = encodeURIComponent(btoa(JSON.stringify(key.id)));
-
+            const phone = (key.client.phone === undefined) ? '' : key.client.phone;
             tbody.append(`
                 <tr>
                     <td><button class="add-btn-white" title="edit vendor">+</button></td>
@@ -31,7 +31,7 @@ $(function () {
                     <td><a href="../requirements/details.html?req=${reqId}" target="_blank">${key.title}</a></td>
                     <td>${key.client.name}</td>
                     <td>${key.client.email}</td>
-                    <td>${key.client.phone}</td>
+                    <td>${phone}</td>
                     <td>${key.client.country}</td>
                 </tr>
             `);

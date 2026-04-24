@@ -132,6 +132,104 @@ $(function(){
     });
 });
 
+function showSection(id) {
+      document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      event.target.classList.add('active');
+    }
+
+function renderPipeline(vendors, requirements) {
+    vendors = vendors ?? [];
+    const total     = vendors.length;
+    const responded = vendors.filter(v => v.feedback && v.feedback.length).length;
+    const pending   = total - responded;
+
+    // Tiles
+    $('#pipe-total').text(total);
+    $('#pipe-responded').text(responded);
+    $('#pipe-pending').text(pending);
+
+    // Top match score (if scores are available on the vendor object)
+    const scores = vendors
+    .filter(v => v.match_score !== undefined)
+    .map(v => parseInt(v.match_score));
+
+    if (scores.length) {
+    $('#pipe-top-score').text(Math.max(...scores) + '%');
+    } else {
+    $('#pipe-score-tile').hide();
+    }
+
+    // Vendor rows
+    const $list = $('#pipeline-vendor-list').empty();
+    const $attn = $('#pipeline-attention').empty();
+
+    if (total === 0) {
+    $list.html('<p style="font-size:13px;color:#8a8880;padding:4px 0;">No vendors assigned yet.</p>');
+    $attn.html('<p style="font-size:13px;color:#8a8880;padding:4px 0;">No vendors assigned yet.</p>');
+    return;
+    }
+
+    vendors.forEach(function(vendor) {
+        const hasResponded = vendor.feedback && vendor.feedback.length > 0;
+        const initials     = vendor.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+        const pct          = hasResponded ? 100 : 0;
+        const pill         = hasResponded
+            ? '<span class="status-pill pill-done">Responded</span>'
+            : '<span class="status-pill pill-pending">Pending</span>';
+
+        $list.append(`
+            <div class="vendor-row">
+            <div class="vendor-avatar">${initials}</div>
+            <div class="vendor-info">
+                <div class="vendor-name">${vendor.name}</div>
+                <div class="vendor-meta">${vendor.contact_person.email ?? ''}</div>
+            </div>
+            <div class="vendor-prog-wrap">
+                <div class="vendor-prog-bg">
+                <div class="vendor-prog-fill" style="width:${pct}%"></div>
+                </div>
+            </div>
+            ${pill}
+            </div>
+        `);
+
+        if (!hasResponded) {
+            $attn.append(attentionItem('#E24B4A', `${vendor.name} has not responded yet`, `Invite sent to ${vendor.contact_person.email ?? 'unknown'}`));
+        }
+        });
+
+        if (responded === total && total > 0) {
+        $attn.append(attentionItem('#378ADD', 'All vendors have responded', 'Ready to review and score'));
+        }
+
+        if ($attn.children().length === 0) {
+            $attn.html('<p style="font-size:13px;color:#8a8880;padding:4px 0;">Nothing needs attention right now.</p>');
+        }
+
+        const $vendorMenu = $('#vendor-menu-items').empty();
+        vendors.forEach(function(vendor) {
+        $vendorMenu.append(`
+            <div class="menu-item" onclick="showSection('vendor_${vendor.id}')">
+            ${vendor.name}
+            </div>
+        `);
+    });
+}
+
+function attentionItem(dotColor, text, meta) {
+    return `
+    <div style="display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid #f0ede8;">
+        <div style="width:6px;height:6px;border-radius:50%;background:${dotColor};margin-top:5px;flex-shrink:0;"></div>
+        <div>
+        <div style="font-size:13px;color:#111827;line-height:1.45;">${text}</div>
+        <div style="font-size:11.5px;color:#8a8880;margin-top:2px;">${meta}</div>
+        </div>
+    </div>
+    `;
+}
+
 async function getFormFields(){
     const response = await fetch(`/api/supabase?action=getFormFields`);
     const result = await response.json();
@@ -416,6 +514,7 @@ async function loadAssignedVendors(requirementId){
         $('.resendInvitation').prop('disabled', true);
     }
 
+    renderPipeline(data.assigned_vendors, data.requirements);
     $('.skeleton-container').addClass('hide');
     App.showElement('mainPage');
     $('#mainPage').css('display', 'block');
