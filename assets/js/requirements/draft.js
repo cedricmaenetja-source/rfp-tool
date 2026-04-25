@@ -6,8 +6,9 @@ let requirementId;
 let isApproved = false;
 
 $(function(){
-    if (!App.loggedIn){
+    if (!App.loggedIn()){
         location.href = App.pages.login;
+        return;
     }
 
     App.hasInternet(location.href);

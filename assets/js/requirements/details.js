@@ -6,8 +6,9 @@ let requirementData = null;
 let formFields = {};
 
 $(function(){
-    if (!App.loggedIn){
+    if (!App.loggedIn()){
         location.href = App.pages.login;
+        return;
     }
 
     App.hasInternet(location.href);
@@ -129,6 +130,14 @@ $(function(){
             const name = $(this).text().toLowerCase();
             $(this).toggle(name.includes(search));
         });
+    });
+
+    $('#generateReportBtn').on('click', function(){
+        const reqId = getParam('req');
+        if (reqId === null) return;
+        
+        const reportUrl = `report.html?req=${reqId}`;
+        window.open(reportUrl, '_blank');
     });
 });
 

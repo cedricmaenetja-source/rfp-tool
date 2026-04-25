@@ -4,72 +4,116 @@
   <meta charset="UTF-8" />
   <title>Admin Login</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" type="text/css" href="css/main.css" />
-    <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
-    <script type="module" src="js/login.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" type="text/css" href="../assets/css/main.css" />
+  <link rel="stylesheet" href="../../assets/css/common.css">
+  <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+  <script type="module" src="../assets/js/core/login.js"></script>
   <style>
-    * {
-      box-sizing: border-box;
-    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      margin: 0;
-      height: 100vh;
+      font-family: var(--font);
+      background: var(--bg);
+      min-height: 100vh;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
+      padding: 24px;
     }
 
+    /* ── LOGO ── */
+    .login-logo {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin-bottom: 24px;
+    }
+
+    .logo-chip {
+      width: 28px; height: 28px;
+      background: var(--text);
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .logo-chip svg { width: 13px; height: 13px; fill: white; }
+
+    .logo-word {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text);
+      letter-spacing: -0.01em;
+    }
+
+    /* ── CARD ── */
     .login-card {
       width: 100%;
-      max-width: 380px;
-      background: #ffffff;
+      max-width: 360px;
+      background: var(--card);
+      border: 1px solid var(--border);
       border-radius: 12px;
-      padding: 30px;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+      overflow: hidden;
     }
 
-    .login-card h2 {
-      margin: 0 0 8px;
-      text-align: center;
-      color: #171717;
+    .login-card-header {
+      padding: 24px 28px 20px;
+      border-bottom: 1px solid var(--border);
     }
 
-    .login-card p {
-      margin-bottom: 25px;
-      text-align: center;
-      color: #64748b;
-      font-size: 14px;
+    .login-card-header h2 {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: -0.02em;
+      margin-bottom: 3px;
     }
 
-    .form-group {
-      margin-bottom: 16px;
+    .login-card-header p {
+      font-size: 13px;
+      color: var(--muted);
     }
+
+    .login-card-body {
+      padding: 24px 28px 28px;
+    }
+
+    /* ── FORM ── */
+    .form-group { margin-bottom: 16px; }
 
     label {
       display: block;
+      font-size: 11.5px;
+      font-weight: 500;
+      color: var(--muted);
       margin-bottom: 6px;
-      font-size: 13px;
-      color: #334155;
-      font-weight: 600;
+      letter-spacing: 0.03em;
     }
 
     input {
       width: 100%;
-      padding: 12px 14px;
-      border-radius: 8px;
-      border: 1px solid #d1d5db;
-      font-size: 14px;
+      padding: 10px 13px;
+      border-radius: 7px;
+      border: 1px solid var(--border);
+      font-size: 13.5px;
+      font-family: var(--font);
+      background: var(--surface);
+      color: var(--text);
+      transition: border-color 0.14s, background 0.14s;
     }
+
+    input::placeholder { color: #bbb9b3; }
 
     input:focus {
       outline: none;
-      border-color: #2563eb;
+      border-color: var(--border-strong);
+      background: var(--card);
     }
 
-    .password-wrapper {
-      position: relative;
-    }
+    .password-wrapper { position: relative; }
 
     .toggle-password {
       position: absolute;
@@ -77,62 +121,98 @@
       top: 50%;
       transform: translateY(-50%);
       cursor: pointer;
-      font-size: 12px;
-      color: #2563eb;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      transition: color 0.12s;
+      user-select: none;
     }
 
+    .toggle-password:hover { color: var(--text); }
+
+    /* ── BUTTON ── */
+    #login-btn {
+      width: 100%;
+      padding: 10px 16px;
+      border-radius: 7px;
+      border: none;
+      background: var(--text);
+      color: white;
+      font-family: var(--font);
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.14s;
+      margin-top: 4px;
+    }
+
+    #login-btn:hover { background: #2d2c29; }
+    #login-btn:disabled { background: #e5e3df; color: var(--muted); cursor: not-allowed; }
+
+    /* ── FOOTER ── */
     .footer {
       margin-top: 20px;
       text-align: center;
-      font-size: 12px;
-      color: #94a3b8;
+      font-size: 11.5px;
+      color: var(--muted);
     }
-    .btn-outline {
-        border: 1px solid #d1d5db;
-        background: #fff;
-        padding: 6px 10px;
-        border-radius: 6px;
-        width: 100%;
-        font-size: 18px;
-        cursor: pointer;
-        color: #525252;
+
+    .footer-page {
+      margin-top: 28px;
+      font-size: 11px;
+      color: #c4c1bb;
+      letter-spacing: 0.04em;
+      text-align: center;
     }
   </style>
 </head>
 <body>
 
+  <div class="login-logo">
+    <span class="logo-word">RFP Tool</span>
+  </div>
+
   <div class="login-card">
-    <h2>Admin Login</h2>
-    <p>Sign in to access the admin panel</p>
-
-    <div class="form-group">
-      <label for="username">Username</label>
-      <input type="text" id="username" placeholder="Enter username" />
+    <div class="login-card-header">
+      <h2>Admin Login</h2>
+      <p>Sign in to access the admin panel</p>
     </div>
 
-    <div class="form-group password-wrapper">
-      <label for="password">Password</label>
-      <input type="password" id="password" placeholder="Enter password" />
-      <span class="toggle-password" onclick="togglePassword()">SHOW</span>
-    </div>
+    <div class="login-card-body">
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" id="username" placeholder="Enter username" />
+      </div>
 
-    <button id="login-btn" class="btn-outline">Login</button>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <div class="password-wrapper">
+          <input type="password" id="password" placeholder="Enter password" />
+          <span class="toggle-password" onclick="togglePassword()">SHOW</span>
+        </div>
+      </div>
 
-    <div class="footer">
-      Restricted access • Admins only
+      <button id="login-btn">Login</button>
+
+      <div class="footer">
+        Restricted access · Admins only
+      </div>
     </div>
   </div>
+
+  <div class="footer-page">Powered by Udder</div>
+
   <script>
     function togglePassword() {
-      const input = document.getElementById("password");
-      const toggle = document.querySelector(".toggle-password");
-
-      if (input.type === "password") {
-        input.type = "text";
-        toggle.textContent = "HIDE";
+      const input  = document.getElementById('password');
+      const toggle = document.querySelector('.toggle-password');
+      if (input.type === 'password') {
+        input.type = 'text';
+        toggle.textContent = 'HIDE';
       } else {
-        input.type = "password";
-        toggle.textContent = "SHOW";
+        input.type = 'password';
+        toggle.textContent = 'SHOW';
       }
     }
   </script>

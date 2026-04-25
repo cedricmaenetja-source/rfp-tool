@@ -1,0 +1,80 @@
+/* ── SWEETALERT2 THEME ── */
+    .swal2-popup {
+      --swal2-width: 400px;
+      --swal2-padding: 28px 32px;
+      --swal2-border: 1px solid #e2e0db;
+      --swal2-border-radius: 12px;
+      --swal2-background: #ffffff;
+      --swal2-color: #111827;
+      font-family: 'Geist', system-ui, sans-serif !important;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.07) !important;
+    }
+
+    .swal2-title {
+      font-size: 17px !important; font-weight: 600 !important;
+      color: #111827 !important; letter-spacing: -0.02em !important;
+      padding: 0 0 6px !important;
+    }
+
+    .swal2-html-container, .swal2-content {
+      font-size: 13.5px !important; color: #8a8880 !important;
+      line-height: 1.6 !important; margin: 0 !important; padding: 0 !important;
+    }
+
+    .swal2-icon { border-width: 2px !important; width: 48px !important; height: 48px !important; margin: 0 auto 18px !important; }
+    .swal2-icon .swal2-icon-content { font-size: 24px !important; }
+
+    .swal2-actions { margin: 22px 0 0 !important; gap: 8px !important; }
+
+    .swal2-confirm {
+      padding: 9px 18px !important; font-size: 13px !important;
+      font-weight: 600 !important; font-family: 'Geist', sans-serif !important;
+      border-radius: 7px !important; background: #111827 !important;
+      color: #ffffff !important; border: none !important;
+      box-shadow: none !important; margin-left: 0 !important;
+    }
+
+    .swal2-confirm:hover { background: #333 !important; }
+
+    .swal2-cancel {
+      padding: 9px 18px !important; font-size: 13px !important;
+      font-weight: 600 !important; font-family: 'Geist', sans-serif !important;
+      border-radius: 7px !important; background: #ffffff !important;
+      color: #111827 !important; border: 1px solid #c8c5be !important;
+      box-shadow: none !important;
+    }
+
+    .swal2-cancel:hover { background: #f8f7f5 !important; }
+
+    .swal2-input, .swal2-textarea, .swal2-select {
+      font-family: 'Geist', sans-serif !important; font-size: 13.5px !important;
+      border: 1px solid #e2e0db !important; border-radius: 7px !important;
+      background: #f8f7f5 !important; color: #111827 !important;
+      box-shadow: none !important; padding: 10px 13px !important;
+      margin: 12px 0 0 !important;
+    }
+
+    .swal2-input:focus, .swal2-textarea:focus {
+      border-color: #c8c5be !important; background: #ffffff !important;
+      outline: none !important; box-shadow: none !important;
+    }
+
+    .swal2-input-label {
+      font-size: 12px !important; font-weight: 500 !important;
+      color: #8a8880 !important; margin: 14px 0 0 !important;
+    }
+
+    .swal2-validation-message {
+      font-size: 12.5px !important; border-radius: 6px !important;
+      background: #fef2f2 !important; color: #b91c1c !important; border: none !important;
+    }
+
+    .swal2-toast {
+      font-family: 'Geist', sans-serif !important; font-size: 13px !important;
+      border-radius: 8px !important; border: 1px solid #e2e0db !important;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06) !important;
+      background: #ffffff !important; color: #111827 !important;
+      padding: 10px 16px !important;
+    }
+
+    .swal2-toast .swal2-title { font-size: 13px !important; font-weight: 500 !important; }

@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RFP Report</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+  <script src="../assets/js/vendor/xlsx.full.min.js"></script>
+  <script src="../assets/js/core/main.js"></script>
+  <script type="module" src="../assets/js/requirements/report.js"></script>
+  <style>
+    :root {
+      --bg:      #f2f1ee;
+      --white:   #ffffff;
+      --text:    #111827;
+      --muted:   #8a8880;
+      --light:   #a8a59f;
+      --border:  #e2e0db;
+      --surface: #f8f7f5;
+      --green:        #15803d;
+      --green-bg:     #f0fdf4;
+      --green-border: #bbf7d0;
+      --amber:        #92400e;
+      --amber-bg:     #fffbeb;
+      --amber-border: #fde68a;
+      --red:          #b91c1c;
+      --red-bg:       #fef2f2;
+      --red-border:   #fecaca;
+      --blue:         #1e40af;
+      --blue-bg:      #eff3ff;
+      --blue-border:  #bfdbfe;
+      --font: 'Geist', system-ui, sans-serif;
+      --mono: 'Geist Mono', monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      font-size: 14px;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    .topbar {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      padding: 0 28px; height: 52px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+
+    .topbar-left { display: flex; align-items: center; gap: 10px; }
+
+    .logo-chip {
+      width: 26px; height: 26px; background: var(--text);
+      border-radius: 5px; display: flex; align-items: center; justify-content: center;
+    }
+    .logo-chip svg { width: 12px; height: 12px; fill: white; }
+
+    .topbar-title { font-size: 13px; font-weight: 500; }
+    .topbar-title span { color: var(--light); font-weight: 400; margin-left: 6px; }
+    .topbar-right { display: flex; align-items: center; gap: 8px; }
+
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-family: var(--font); font-size: 13px; font-weight: 500;
+      padding: 7px 14px; border-radius: 7px; cursor: pointer;
+      transition: all 0.14s; border: none;
+    }
+    .btn-primary { background: var(--text); color: white; }
+    .btn-primary:hover { background: #2d2c29; }
+    .btn-primary:disabled { background: #e5e3df; color: var(--muted); cursor: not-allowed; }
+    .btn-ghost { background: var(--surface); color: var(--muted); border: 1px solid var(--border); }
+    .btn-ghost:hover { color: var(--text); border-color: #c8c5be; }
+
+    .report-wrap { max-width: 1000px; margin: 0 auto; padding: 28px 24px 60px; }
+
+    .loading {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      min-height: 60vh; gap: 14px;
+    }
+    .spinner {
+      width: 30px; height: 30px;
+      border: 2.5px solid var(--border);
+      border-bottom-color: var(--text);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading p { font-size: 13px; color: var(--light); }
+
+    .page-header { margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
+    .page-eyebrow { font-size: 11px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; color: var(--light); margin-bottom: 6px; }
+    .page-title { font-size: 22px; font-weight: 600; letter-spacing: -0.03em; color: var(--text); margin-bottom: 2px; }
+    .page-subtitle { font-size: 14px; color: var(--muted); }
+    .meta-row { display: flex; gap: 24px; flex-wrap: wrap; margin-top: 16px; }
+    .meta-item label { font-size: 10px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; color: var(--light); display: block; margin-bottom: 2px; }
+    .meta-item span { font-size: 13px; color: var(--text); font-weight: 500; }
+
+    .section { margin-bottom: 28px; }
+    .section-label {
+      font-size: 11px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase;
+      color: var(--light); margin-bottom: 12px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    .card { background: var(--white); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+    .card-header {
+      padding: 12px 16px; border-bottom: 1px solid var(--border);
+      font-size: 12px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;
+      color: var(--muted); display: flex; align-items: center; justify-content: space-between;
+    }
+    .card-body { padding: 0; }
+
+    /* ── PIE CHARTS ── */
+    .pie-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-bottom: 14px; }
+    .pie-card { background: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+    .pie-card-vendor { font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--light); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .pie-card-score { font-size: 22px; font-weight: 600; line-height: 1; margin-bottom: 10px; }
+    .pie-canvas-wrap { position: relative; width: 100%; height: 140px; }
+    .pie-legend { margin-top: 10px; display: flex; flex-direction: column; gap: 4px; }
+    .pie-legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); }
+    .pie-legend-sq { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+
+    /* ── HEATMAP TABLE ── */
+    .heatmap-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .heatmap-table thead th { padding: 9px 14px; text-align: center; font-size: 10.5px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--light); background: var(--surface); border-bottom: 1px solid var(--border); white-space: nowrap; }
+    .heatmap-table thead th:first-child { text-align: left; }
+    .heatmap-table tbody td { padding: 9px 14px; border-bottom: 1px solid #f0ede8; font-size: 12px; text-align: center; color: var(--muted); }
+    .heatmap-table tbody td:first-child { text-align: left; color: var(--text); font-weight: 500; }
+    .heatmap-table tbody tr:last-child td { border-bottom: none; }
+    .heatmap-table tbody tr:hover { background: var(--surface); }
+    .heatmap-cell { display: inline-flex; align-items: center; justify-content: center; width: 54px; height: 26px; border-radius: 5px; font-size: 12px; font-weight: 600; font-family: var(--mono); }
+
+    /* ── SCORE CARDS ── */
+    .score-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+    .score-card { background: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 16px; text-align: center; }
+    .score-card-vendor { font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--light); margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .score-value { font-size: 30px; font-weight: 600; letter-spacing: -0.03em; line-height: 1; }
+    .score-value.high { color: var(--green); }
+    .score-value.mid  { color: #b45309; }
+    .score-value.low  { color: var(--red); }
+    .score-label { font-size: 11.5px; color: var(--light); margin-top: 4px; }
+
+    /* ── REPORT TABLE ── */
+    .report-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .report-table thead th { padding: 9px 14px; text-align: left; font-size: 10.5px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--light); background: var(--surface); border-bottom: 1px solid var(--border); white-space: nowrap; }
+    .report-table thead th:not(:first-child) { text-align: center; }
+    .report-table tbody tr { border-bottom: 1px solid #f0ede8; }
+    .report-table tbody tr:last-child { border-bottom: none; }
+    .report-table tbody tr:hover { background: var(--surface); }
+    .report-table tbody td { padding: 10px 14px; color: var(--muted); vertical-align: middle; }
+    .report-table tbody td:first-child { color: var(--text); font-weight: 500; }
+    .report-table tbody td:not(:first-child) { text-align: center; }
+
+    .pill { display: inline-block; font-size: 12px; font-weight: 600; padding: 2px 10px; border-radius: 20px; font-family: var(--mono); }
+    .pill.high { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+    .pill.mid  { background: var(--amber-bg); color: var(--amber); border: 1px solid var(--amber-border); }
+    .pill.low  { background: var(--red-bg);   color: var(--red);   border: 1px solid var(--red-border);   }
+
+    /* ── MUST-HAVE TILES ── */
+    .must-tile { background: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+    .must-tile-vendor { font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--light); margin-bottom: 8px; }
+    .must-tile-fraction { font-size: 22px; font-weight: 600; letter-spacing: -0.02em; color: var(--text); line-height: 1; }
+    .must-tile-fraction span { font-size: 14px; color: var(--light); font-weight: 400; }
+    .must-tile-pct { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+    /* ── GAP ITEMS ── */
+    .gap-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 16px; border-bottom: 1px solid #f0ede8; }
+    .gap-item:last-child { border-bottom: none; }
+    .gap-num { font-size: 11px; font-weight: 600; font-family: var(--mono); color: var(--light); min-width: 24px; padding-top: 1px; }
+    .gap-body { flex: 1; min-width: 0; }
+    .gap-req  { font-size: 13px; color: var(--text); font-weight: 500; line-height: 1.4; }
+    .gap-meta { font-size: 12px; color: var(--light); margin-top: 3px; }
+    .gap-tags { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+    .tag { font-size: 11.5px; font-weight: 500; padding: 2px 8px; border-radius: 5px; }
+    .tag-workaround { background: var(--amber-bg); color: var(--amber); border: 1px solid var(--amber-border); }
+    .tag-partial    { background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; }
+    .tag-fail       { background: var(--red-bg);   color: var(--red);   border: 1px solid var(--red-border);   }
+    .tag-minor      { background: var(--blue-bg);  color: var(--blue);  border: 1px solid var(--blue-border);  }
+    .tag-default    { background: var(--surface); color: var(--muted); border: 1px solid var(--border); }
+
+    /* ── BREAKDOWN ── */
+    .breakdown-wrap { padding: 12px 16px; }
+    .vendor-heading { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 12px 0 8px; padding-top: 12px; border-top: 1px solid var(--border); }
+    .vendor-heading:first-child { margin-top: 0; padding-top: 0; border-top: none; }
+    .area-heading { font-size: 11px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--light); margin: 10px 0 6px; }
+    .bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 5px; }
+    .bar-label { font-size: 12px; color: var(--text); min-width: 140px; flex-shrink: 0; }
+    .bar-track { flex: 1; height: 5px; border-radius: 3px; background: var(--border); overflow: hidden; }
+    .bar-fill  { height: 100%; border-radius: 3px; }
+    .bar-green  { background: #22c55e; }
+    .bar-blue   { background: #3b82f6; }
+    .bar-amber  { background: #f59e0b; }
+    .bar-orange { background: #f97316; }
+    .bar-red    { background: #ef4444; }
+    .bar-counts { display: flex; gap: 10px; min-width: 90px; justify-content: flex-end; flex-shrink: 0; }
+    .bar-count { font-size: 11.5px; font-family: var(--mono); color: var(--muted); min-width: 36px; text-align: right; }
+
+    /* ── VENDOR DIVIDER ── */
+    .vd { display: flex; align-items: center; gap: 10px; margin: 20px 0 14px; }
+    .vd-avatar { width: 26px; height: 26px; border-radius: 5px; background: var(--surface); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; color: var(--muted); text-transform: uppercase; flex-shrink: 0; }
+    .vd-name  { font-size: 13px; font-weight: 600; color: var(--text); }
+    .vd-line  { flex: 1; height: 1px; background: var(--border); }
+    .vd-count { font-size: 12px; color: var(--light); white-space: nowrap; }
+
+    .empty-note { font-size: 13px; color: var(--light); padding: 8px 0 14px; }
+    .hide { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="logo-chip"><svg viewBox="0 0 14 14"><path d="M7 1L1 5v8h4V9h4v4h4V5L7 1z"/></svg></div>
+      <span class="topbar-title">Udder <span>Vendor Evaluation Report</span></span>
+    </div>
+    <div class="topbar-right">
+      <button class="btn btn-ghost" id="backBtn">← Back</button>
+      <button class="btn btn-primary hide" id="exportBtn">
+        <i class="fa-solid fa-file-excel"></i> Export to Excel
+      </button>
+    </div>
+  </header>
+
+  <div class="report-wrap">
+
+    <div class="loading" id="loadingState">
+      <div class="spinner"></div>
+      <p>Building report…</p>
+    </div>
+
+    <div id="reportContent" class="hide">
+
+      <!-- PAGE HEADER -->
+      <div class="page-header">
+        <div class="page-eyebrow">Vendor Evaluation Report</div>
+        <div class="page-title" id="rTitle">—</div>
+        <div class="page-subtitle" id="rCompany">—</div>
+        <div class="meta-row">
+          <div class="meta-item"><label>Client</label><span id="rClient">—</span></div>
+          <div class="meta-item"><label>Country</label><span id="rCountry">—</span></div>
+          <div class="meta-item"><label>Timeline</label><span id="rTimeline">—</span></div>
+          <div class="meta-item"><label>Headcount</label><span id="rHeadcount">—</span></div>
+          <div class="meta-item"><label>Vendors</label><span id="rVendorCount">—</span></div>
+          <div class="meta-item"><label>Requirements</label><span id="rReqCount">—</span></div>
+        </div>
+      </div>
+
+      <!-- SECTION 0: OVERVIEW CHARTS -->
+      <div class="section">
+        <div class="section-label">Overview</div>
+
+        <div class="pie-row" id="chartPieRow"></div>
+
+        <div class="card">
+          <div class="card-header">Match score by area</div>
+          <div class="card-body">
+
+            <!-- Legend (populated by JS) -->
+            <div id="heatmapLegend" style="display:flex;flex-wrap:wrap;gap:14px;padding:12px 16px;border-bottom:1px solid #e2e0db;"></div>
+
+            <!-- Bar chart -->
+            <div style="padding:16px 16px 8px;">
+              <div id="heatmapBarWrap" style="position:relative;width:100%;height:280px;">
+                <canvas id="heatmapBarChart"
+                  role="img"
+                  aria-label="Grouped horizontal bar chart showing vendor match scores per area.">
+                </canvas>
+              </div>
+            </div>
+
+            <!-- Table -->
+            <table class="heatmap-table" style="border-top:1px solid #e2e0db;">
+              <thead id="heatmapHead"></thead>
+              <tbody id="heatmapBody"></tbody>
+            </table>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 1: MATCH SCORES -->
+      <div class="section">
+        <div class="section-label">1 — Match Scores</div>
+        <div class="score-grid" id="scoreCards"></div>
+        <div style="margin-top:14px;">
+          <div class="card">
+            <div class="card-header">Score by area</div>
+            <div class="card-body">
+              <table class="report-table">
+                <thead id="scoreTableHead"></thead>
+                <tbody id="scoreTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 2: MUST-HAVE SUMMARY -->
+      <div class="section">
+        <div class="section-label">2 — Must-Have Requirements</div>
+        <div class="score-grid" id="mustCards"></div>
+      </div>
+
+      <!-- SECTION 3: MUST-HAVE GAPS -->
+      <div class="section">
+        <div class="section-label">3 — Must-Have Gaps</div>
+        <div class="card">
+          <div class="card-body" id="gapList"></div>
+        </div>
+      </div>
+
+      <!-- SECTION 4: BREAKDOWN BY AREA -->
+      <div class="section">
+        <div class="section-label">4 — Breakdown by Area &amp; Priority</div>
+        <div class="card">
+          <div class="breakdown-wrap" id="breakdownWrap"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</body>
+</html>

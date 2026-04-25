@@ -5,8 +5,9 @@ import { getRequirementsById, getVendors, getVendorsByIdList, updateVendorList, 
 let requirementData = null;
 
 $(function(){
-    if (!App.loggedIn){
+    if (!App.loggedIn()){
         location.href = App.pages.login;
+        return;
     }
 
     App.hasInternet(location.href);

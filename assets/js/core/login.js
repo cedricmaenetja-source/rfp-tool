@@ -1,10 +1,11 @@
 import { auth, isUserLoggedIn } from "./auth.js";
-import { error } from "./sweetalert2.js";
+import { error } from "../utils/sweetalert2.js";
+import { PAGES } from '../utils/constants.js';
 
 $(function(){
     loggedIn();
     
-    $('#login-btn').onclick('click', async function() {
+    $('#login-btn').on('click', async function() {
         const username = document.getElementById("username").value.trim();
         const password = document.getElementById("password").value.trim();
 
@@ -15,7 +16,7 @@ $(function(){
 
         const authUser = await auth(username, password);
         if (authUser) {
-            location.href = 'index.html';
+            location.href = PAGES.root;
         }else{
             error('Incorrect username/password.');
         }
@@ -24,5 +25,5 @@ $(function(){
 
 function loggedIn(){
     const loggedIn = isUserLoggedIn();
-    if (loggedIn) location.href = 'index.html';
+    if (loggedIn) location.href = PAGES.root;
 }

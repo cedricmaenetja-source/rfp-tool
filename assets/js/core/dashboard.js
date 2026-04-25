@@ -7,8 +7,9 @@ let uploadedFileName = '';
 let error = false;
 
 $(function(){
-    if (!App.loggedIn){
+    if (!App.loggedIn()){
         location.href = App.pages.login;
+        return;
     }
 
     async function loadSumamaries() {

@@ -2,8 +2,9 @@ import { getFormFields, getRequirementsById } from "../services/supabase.js";
 import * as App from "../app.js";
 
 $(function(){
-    if (!App.loggedIn){
+    if (!App.loggedIn()){
         location.href = App.pages.login;
+        return;
     }
 
     App.hasInternet(location.href);

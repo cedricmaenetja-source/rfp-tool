@@ -1,0 +1,14 @@
+@use 'sweetalerts';
+
+/* ── THEME TOKENS ── */
+:root {
+    --bg:            #f2f1ee;
+    --card:          #ffffff;
+    --surface:       #f8f7f5;
+    --text:          #111827;
+    --muted:         #8a8880;
+    --border-color:  #e2e0db;
+    --border-strong: #c8c5be;
+    --heading-color: #111827;
+    --font:          'Geist', system-ui, -apple-system, sans-serif;
+}

@@ -6,7 +6,7 @@ const AUTH_USER = {
 export async function auth(user, pwd){
     const password = await sha256(pwd);
     if (user == AUTH_USER.user && password ==  AUTH_USER.password){
-        setCookie('loggedIn', true);
+        setCookie('loggedIn', true, 365);
         return true;
     }
 

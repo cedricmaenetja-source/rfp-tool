@@ -8,6 +8,7 @@ export const PAGES = {
     proposal_submitted: `${origin}/submitted.html`,
     thank_you: `${origin}/thank_you.html`,
     presentation: `${origin}/presentation`,
+    root: `${origin}/index.html`,
 };
 
 export const countryList = [
