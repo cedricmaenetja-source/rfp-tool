@@ -1,7 +1,6 @@
 import * as App from "../app.js";
 
 const PRIORITY_MULTIPLIER  = { 'Must-Have': 1.5, 'Should-Have': 1.25, 'Could-Have': 1 };
-const PRIORITY_ORDER       = ['Must-Have', 'Should-Have', 'Could-Have'];
 const SOLUTION_MULTIPLIERS = [1, 0.8, 0.6, 0.4, 0];
 const BAR_CLASSES          = ['bar-green', 'bar-blue', 'bar-amber', 'bar-orange', 'bar-red'];
 const PIE_COLORS           = ['#22c55e', '#3b82f6', '#f59e0b', '#f97316', '#ef4444'];
@@ -47,7 +46,7 @@ $(async function () {
 
     renderReport(data, formFields);
 
-    $('#backBtn').on('click', function(){
+    $('#backBtn').on('click', () => {
         location.href = `details.html?req=${requirement}`;
     });
 
@@ -69,12 +68,6 @@ $(async function () {
 // ─────────────────────────────────────────────────────────────────
 function getVendorFB(vendors, vendorId) {
     return vendors.find(v => v.id === vendorId)?.feedback ?? [];
-}
-
-function solutionMult(fbValue, fbLabels) {
-    const idx = fbLabels.indexOf(fbValue ?? '');
-    if (idx < 0) return 0;
-    return SOLUTION_MULTIPLIERS[idx] ?? 0;
 }
 
 function scoreClass(pct) {
@@ -114,30 +107,32 @@ function shortFB(fb) {
     return fb.slice(0, 30) + '…';
 }
 
+function isCoreFullyMet(fbValue, fbLabels) {
+    if (!fbValue) return false;
+    return fbValue === fbLabels[0] && !/workaround|3rd.party/i.test(fbValue);
+}
+
+function isMetWithGaps(fbValue) {
+    if (!fbValue) return false;
+    return /minor|workaround|3rd.party|partial/i.test(fbValue);
+}
+
 function buildScoreMap(vendors, reqs, allAreas, fbLabels) {
     const map = {};
     vendors.forEach(v => {
         map[v.name] = {};
-
-        const rawFeedback = getVendorFB(vendors, v.id);
-        const multipliers = rawFeedback.map(entry => {
+        const rawFB       = getVendorFB(vendors, v.id);
+        const multipliers = rawFB.map(entry => {
             const idx = fbLabels.indexOf(entry?.feedback ?? '');
             return idx >= 0 ? SOLUTION_MULTIPLIERS[idx] : 0;
         });
-
         allAreas.forEach(part => {
             let score = 0;
             reqs.forEach((req, i) => {
-                if (part === 'All areas' || req.system_part === part) {
+                if (part === 'All areas' || req.system_part === part)
                     score += (PRIORITY_MULTIPLIER[req.priority] ?? 1) * (multipliers[i] ?? 0);
-                }
             });
-
-            // Always divide by FULL requirements list length × 1.5
-            const pct = reqs.length > 0
-                ? parseInt((score / (reqs.length * 1.5)) * 100)
-                : 0;
-
+            const pct = reqs.length > 0 ? parseInt((score / (reqs.length * 1.5)) * 100) : 0;
             map[v.name][part] = Math.min(pct, 100);
         });
     });
@@ -145,12 +140,11 @@ function buildScoreMap(vendors, reqs, allAreas, fbLabels) {
 }
 
 // ─────────────────────────────────────────────────────────────────
-// SECTION 0: CHARTS
+// SECTION 0 — CHARTS
 // ─────────────────────────────────────────────────────────────────
 function renderCharts(vendors, reqs, fbLabels, sysParts, scoreMap) {
     const allAreas = ['All areas', ...sysParts];
 
-    // ── PIE CHARTS (one per vendor) ──
     vendors.forEach((v, vi) => {
         const fb    = getVendorFB(vendors, v.id);
         const dist  = fbLabels.map(label =>
@@ -163,11 +157,10 @@ function renderCharts(vendors, reqs, fbLabels, sysParts, scoreMap) {
         const legendHTML = fbLabels.map((lbl, i) => {
             if (!dist[i]) return '';
             const p = total > 0 ? Math.round((dist[i] / total) * 100) : 0;
-            return `
-                <div class="pie-legend-item">
-                    <div class="pie-legend-sq" style="background:${PIE_COLORS[i]}"></div>
-                    <span>${shortFB(lbl)} — ${dist[i]} (${p}%)</span>
-                </div>`;
+            return `<div class="pie-legend-item">
+                <div class="pie-legend-sq" style="background:${PIE_COLORS[i]}"></div>
+                <span>${shortFB(lbl)} — ${dist[i]} (${p}%)</span>
+            </div>`;
         }).join('');
 
         $('#chartPieRow').append(`
@@ -175,8 +168,7 @@ function renderCharts(vendors, reqs, fbLabels, sysParts, scoreMap) {
                 <div class="pie-card-vendor">${v.name}</div>
                 <div class="pie-card-score" style="color:${c.text}">${pct}%</div>
                 <div class="pie-canvas-wrap">
-                    <canvas id="pieChart${vi}"
-                        role="img"
+                    <canvas id="pieChart${vi}" role="img"
                         aria-label="Response distribution for ${v.name}. Overall match score ${pct}%.">
                     </canvas>
                 </div>
@@ -188,93 +180,55 @@ function renderCharts(vendors, reqs, fbLabels, sysParts, scoreMap) {
             type: 'doughnut',
             data: {
                 labels: fbLabels,
-                datasets: [{
-                    data: dist,
-                    backgroundColor: PIE_COLORS,
-                    borderWidth: 1.5,
-                    borderColor: '#ffffff',
-                    hoverOffset: 3,
-                }]
+                datasets: [{ data: dist, backgroundColor: PIE_COLORS, borderWidth: 1.5, borderColor: '#ffffff', hoverOffset: 3 }]
             },
             options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                cutout: '62%',
+                responsive: true, maintainAspectRatio: false, cutout: '62%',
                 plugins: {
                     legend: { display: false },
-                    tooltip: {
-                        callbacks: {
-                            label: ctx => ` ${shortFB(ctx.label)}: ${ctx.raw}`
-                        }
-                    }
+                    tooltip: { callbacks: { label: ctx => ` ${shortFB(ctx.label)}: ${ctx.raw}` } }
                 }
             }
         });
     });
 
-    // ── LEGEND ──
-    const legendHTML = vendors.map((v, i) => `
+    // Legend
+    $('#heatmapLegend').html(vendors.map((v, i) => `
         <span style="display:flex;align-items:center;gap:5px;">
             <span style="width:10px;height:10px;border-radius:2px;background:${VENDOR_COLORS[i % VENDOR_COLORS.length]}"></span>
             <span style="font-size:12px;color:#8a8880;">${v.name}</span>
         </span>
-    `).join('');
-    $('#heatmapLegend').html(legendHTML);
+    `).join(''));
 
-    // ── BAR CHART height scales with number of areas ──
+    // Bar chart
     const barHeight = Math.max(200, allAreas.length * vendors.length * 18 + 80);
     $('#heatmapBarWrap').css('height', barHeight + 'px');
 
-    const datasets = vendors.map((v, i) => ({
-        label: v.name,
-        data: allAreas.map(area => scoreMap[v.name][area]),
-        backgroundColor: VENDOR_COLORS[i % VENDOR_COLORS.length] + 'cc',
-        borderColor:     VENDOR_COLORS[i % VENDOR_COLORS.length],
-        borderWidth: 1,
-        borderRadius: 3,
-    }));
-
     new Chart(document.getElementById('heatmapBarChart'), {
         type: 'bar',
-        data: { labels: allAreas, datasets },
+        data: {
+            labels: allAreas,
+            datasets: vendors.map((v, i) => ({
+                label: v.name,
+                data: allAreas.map(area => scoreMap[v.name][area]),
+                backgroundColor: VENDOR_COLORS[i % VENDOR_COLORS.length] + 'cc',
+                borderColor:     VENDOR_COLORS[i % VENDOR_COLORS.length],
+                borderWidth: 1, borderRadius: 3,
+            }))
+        },
         options: {
-            indexAxis: 'y',
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    callbacks: {
-                        label: ctx => ` ${ctx.dataset.label}: ${ctx.raw}%`
-                    }
-                }
-            },
+            indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${ctx.dataset.label}: ${ctx.raw}%` } } },
             scales: {
-                x: {
-                    min: 0,
-                    max: 100,
-                    ticks: {
-                        callback: v => v + '%',
-                        font: { size: 11 },
-                        color: '#8a8880',
-                        stepSize: 20,
-                    },
-                    grid: { color: 'rgba(0,0,0,0.06)' },
-                    border: { display: false },
-                },
-                y: {
-                    ticks: { font: { size: 12 }, color: '#111827' },
-                    grid: { display: false },
-                    border: { display: false },
-                }
+                x: { min: 0, max: 100, ticks: { callback: v => v + '%', font: { size: 11 }, color: '#8a8880', stepSize: 20 }, grid: { color: 'rgba(0,0,0,0.06)' }, border: { display: false } },
+                y: { ticks: { font: { size: 12 }, color: '#111827' }, grid: { display: false }, border: { display: false } }
             }
         }
     });
 
-    // ── HEATMAP TABLE ──
+    // Heatmap table
     const vendorThs = vendors.map(v => `<th>${v.name}</th>`).join('');
     $('#heatmapHead').html(`<tr><th>Area</th>${vendorThs}</tr>`);
-
     allAreas.forEach(area => {
         const cells = vendors.map(v => {
             const pct = scoreMap[v.name][area];
@@ -286,7 +240,7 @@ function renderCharts(vendors, reqs, fbLabels, sysParts, scoreMap) {
 }
 
 // ─────────────────────────────────────────────────────────────────
-// RENDER DASHBOARD
+// RENDER REPORT
 // ─────────────────────────────────────────────────────────────────
 function renderReport(data, formFields) {
     const vendors  = data.assigned_vendors ?? [];
@@ -294,7 +248,9 @@ function renderReport(data, formFields) {
     const fbLabels = formFields.vendor_feedback ?? [];
     const sysParts = formFields.system_parts ?? [];
     const allAreas = ['All areas', ...sysParts];
+    const mustReqs = reqs.filter(r => r.priority === 'Must-Have');
 
+    // ── Page header ──
     $('#rTitle').text(data.title);
     $('#rCompany').text(data.client?.company ?? '');
     $('#rClient').text(data.client?.name ?? '—');
@@ -304,12 +260,31 @@ function renderReport(data, formFields) {
     $('#rVendorCount').text(vendors.length);
     $('#rReqCount').text(reqs.length);
 
+    // ── Sidebar ──
+    $('#sidebarTitle').text(data.title);
+    $('#sidebarCompany').text(data.client?.company ?? '');
+    $('#sidebarVendors').text(vendors.length);
+    $('#sidebarReqs').text(reqs.length);
+    $('#topbarMeta').text(
+        `${data.client?.company ?? ''} · ${vendors.length} vendor${vendors.length !== 1 ? 's' : ''}`
+    );
+
+    // Sidebar gap badge — total must-have gaps across all vendors
+    let totalGaps = 0;
+    vendors.forEach(v => {
+        const fb = getVendorFB(vendors, v.id);
+        totalGaps += mustReqs.filter(req =>
+            (fb[reqs.indexOf(req)]?.feedback ?? '') !== fbLabels[0]
+        ).length;
+    });
+    $('#navGapCount').text(totalGaps);
+
     const scoreMap = buildScoreMap(vendors, reqs, allAreas, fbLabels);
 
-    // Section 0 — charts
+    // ── Section 0 ── charts
     renderCharts(vendors, reqs, fbLabels, sysParts, scoreMap);
 
-    // Section 1 — score cards
+    // ── Section 1 ── Match Scores
     vendors.forEach(v => {
         const pct = scoreMap[v.name]['All areas'];
         $('#scoreCards').append(`
@@ -323,7 +298,6 @@ function renderReport(data, formFields) {
 
     const vendorThs = vendors.map(v => `<th>${v.name}</th>`).join('');
     $('#scoreTableHead').html(`<tr><th>Area</th>${vendorThs}</tr>`);
-
     allAreas.forEach(area => {
         const cells = vendors.map(v => {
             const pct = scoreMap[v.name][area];
@@ -332,14 +306,57 @@ function renderReport(data, formFields) {
         $('#scoreTableBody').append(`<tr><td>${area}</td>${cells}</tr>`);
     });
 
-    // Section 2 — must-have tiles
-    const mustReqs = reqs.filter(r => r.priority === 'Must-Have');
+    // ── Section 2 ── Core Platform
     vendors.forEach(v => {
-        const fb = getVendorFB(vendors, v.id);
-        const fullyMet = mustReqs.filter(req => {
-            const i = reqs.indexOf(req);
-            return (fb[i]?.feedback ?? '') === fbLabels[0];
-        }).length;
+        const fb       = getVendorFB(vendors, v.id);
+        const coreMet  = mustReqs.filter(req => isCoreFullyMet(fb[reqs.indexOf(req)]?.feedback ?? '', fbLabels)).length;
+        const withGaps = mustReqs.filter(req => isMetWithGaps(fb[reqs.indexOf(req)]?.feedback ?? '')).length;
+        const notMet   = mustReqs.length - coreMet - withGaps;
+        const corePct  = mustReqs.length > 0 ? Math.round((coreMet  / mustReqs.length) * 100) : 0;
+        const gapsPct  = mustReqs.length > 0 ? Math.round((withGaps / mustReqs.length) * 100) : 0;
+        const notPct   = mustReqs.length > 0 ? Math.round((notMet   / mustReqs.length) * 100) : 0;
+
+        $('#coreCards').append(`
+            <div class="core-tile">
+                <div class="core-tile-vendor">${v.name}</div>
+                <div class="core-stat-row">
+                    <div class="core-stat">
+                        <div class="core-stat-label"><span class="core-dot core-dot-green"></span>Core platform</div>
+                        <div class="core-stat-right">
+                            <div class="core-stat-value core-green">${coreMet}<span class="core-denom"> / ${mustReqs.length}</span></div>
+                            <div class="core-stat-pct">${corePct}%</div>
+                        </div>
+                    </div>
+                    <div class="core-stat">
+                        <div class="core-stat-label"><span class="core-dot core-dot-amber"></span>Met w/ gaps</div>
+                        <div class="core-stat-right">
+                            <div class="core-stat-value core-amber">${withGaps}<span class="core-denom"> / ${mustReqs.length}</span></div>
+                            <div class="core-stat-pct">${gapsPct}%</div>
+                        </div>
+                    </div>
+                    <div class="core-stat">
+                        <div class="core-stat-label"><span class="core-dot core-dot-red"></span>Not met</div>
+                        <div class="core-stat-right">
+                            <div class="core-stat-value core-red">${notMet}<span class="core-denom"> / ${mustReqs.length}</span></div>
+                            <div class="core-stat-pct">${notPct}%</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="core-bar-track" title="${corePct}% core · ${gapsPct}% gaps · ${notPct}% not met">
+                    <div class="core-bar-seg core-seg-green" style="width:${corePct}%"></div>
+                    <div class="core-bar-seg core-seg-amber" style="width:${gapsPct}%"></div>
+                    <div class="core-bar-seg core-seg-red"   style="width:${notPct}%"></div>
+                </div>
+            </div>
+        `);
+    });
+
+    // ── Section 3 ── Must-Have Summary
+    vendors.forEach(v => {
+        const fb       = getVendorFB(vendors, v.id);
+        const fullyMet = mustReqs.filter(req =>
+            (fb[reqs.indexOf(req)]?.feedback ?? '') === fbLabels[0]
+        ).length;
         const pct = mustReqs.length > 0 ? Math.round((fullyMet / mustReqs.length) * 100) : 0;
         $('#mustCards').append(`
             <div class="must-tile">
@@ -350,7 +367,7 @@ function renderReport(data, formFields) {
         `);
     });
 
-    // Section 3 — must-have gaps
+    // ── Section 4 ── Must-Have Gaps
     const $gapList = $('#gapList');
     vendors.forEach(v => {
         const fb   = getVendorFB(vendors, v.id);
@@ -387,8 +404,10 @@ function renderReport(data, formFields) {
         }
     });
 
-    // Section 4 — breakdown
-    const $bd = $('#breakdownWrap');
+    // ── Section 5 ── Breakdown by Area & Priority
+    const $bd    = $('#breakdownWrap');
+    const dotMap = ['dot-green','dot-blue','dot-amber','dot-orange','dot-red'];
+
     vendors.forEach(v => {
         const fb = getVendorFB(vendors, v.id);
         $bd.append(`<div class="vendor-heading">${v.name}</div>`);
@@ -402,26 +421,69 @@ function renderReport(data, formFields) {
         Object.entries(areaMap).forEach(([area, items]) => {
             $bd.append(`<div class="area-heading">${area}</div>`);
             const total = items.length;
+
+            // Bars with inline count + %
             fbLabels.forEach((label, li) => {
-                const count  = items.filter(x => x.fbVal === label).length;
+                const count = items.filter(x => x.fbVal === label).length;
+                if (count === 0) return;
                 const pct    = total > 0 ? Math.round((count / total) * 100) : 0;
                 const barCls = BAR_CLASSES[li] ?? 'bar-green';
                 $bd.append(`
                     <div class="bar-row">
                         <div class="bar-label">${shortFB(label)}</div>
-                        <div class="bar-track">
-                            <div class="bar-fill ${barCls}" style="width:${pct}%"></div>
-                        </div>
+                        <div class="bar-track"><div class="bar-fill ${barCls}" style="width:${pct}%"></div></div>
                         <div class="bar-counts">
-                            <div class="bar-count">${count} req${count !== 1 ? 's' : ''}</div>
-                            <div class="bar-count">${pct}%</div>
+                            <div class="bar-count bd-count">${count}</div>
+                            <div class="bar-count bd-pct">${pct}%</div>
                         </div>
                     </div>
                 `);
             });
+
+            // Summary table
+            const rows = fbLabels.map((label, li) => {
+                const count = items.filter(x => x.fbVal === label).length;
+                const pct   = total > 0 ? Math.round((count / total) * 100) : 0;
+                return `
+                    <tr class="bdt-row">
+                        <td class="bdt-status">
+                            <span class="bdt-dot ${dotMap[li] ?? 'dot-green'}"></span>${shortFB(label)}
+                        </td>
+                        <td class="bdt-n">${count}</td>
+                        <td class="bdt-pct">${pct}%</td>
+                        <td class="bdt-bar">
+                            <div class="bdt-track">
+                                <div class="bdt-fill ${BAR_CLASSES[li] ?? 'bar-green'}" style="width:${pct}%"></div>
+                            </div>
+                        </td>
+                    </tr>`;
+            }).join('');
+
+            $bd.append(`
+                <div class="bdt-wrap">
+                    <table class="bdt-table">
+                        <thead>
+                            <tr>
+                                <th class="bdt-th-status">Status</th>
+                                <th class="bdt-th-n">Count</th>
+                                <th class="bdt-th-pct">%</th>
+                                <th class="bdt-th-bar">Distribution</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${rows}
+                            <tr class="bdt-total">
+                                <td>Total</td><td>${total}</td><td>100%</td><td></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            `);
         });
     });
 
+    // ── Reveal sidebar + content ──
+    $('#sidebar').removeClass('hide');
     $('#loadingState').addClass('hide');
     $('#reportContent').removeClass('hide');
 }

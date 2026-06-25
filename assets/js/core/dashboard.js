@@ -387,7 +387,7 @@ $(function(){
         }
 
         if (page == 'requirements'){
-            $('.header-tab[data-tab="' + page + '"]').trigger('click');
+            $('.header-tab[data-tab="drafts"]').trigger('click');
         }
 
         if (page == 'configurations'){
@@ -910,7 +910,7 @@ async function home(){
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
         <div style="background:#fff;border:1px solid #e2e0db;border-radius:8px;padding:12px 16px;flex:1;min-width:90px;text-align:center;">
             <div id="stat-active" style="font-size:22px;font-weight:600;color:#111827;">0</div>
-            <div style="font-size:11.5px;color:#8a8880;margin-top:3px;">active</div>
+            <div style="font-size:11.5px;color:#8a8880;margin-top:3px;">client review</div>
         </div>
         <div style="background:#fff;border:1px solid #e2e0db;border-radius:8px;padding:12px 16px;flex:1;min-width:90px;text-align:center;">
             <div id="stat-awaiting" style="font-size:22px;font-weight:600;color:#111827;">0</div>

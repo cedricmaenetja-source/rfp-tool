@@ -1,0 +1,1736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Udder RFP Management Tool</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+<link href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css" rel="stylesheet" />
+<script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+<script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  /* ── PALETTE ── */
+  --o:#f04e23;--o2:#c93d18;--os:rgba(240,78,35,.08);--om:rgba(240,78,35,.15);
+  --k:#0f0f0f;--k2:#1c1c1c;--w:#ffffff;--off:#fafaf9;--off2:#f3f2ef;
+  --b1:rgba(15,15,15,.05);--b2:rgba(15,15,15,.09);--b3:rgba(15,15,15,.16);
+  --t1:#111110;--t2:#4a4a46;--t3:#8a8a85;--t4:#b8b8b2;
+  --sans:'Poppins','Helvetica Neue',Arial,sans-serif;
+  /* ── MAPPED TOKENS ── */
+  --blue:var(--o);--blue-h:var(--o2);
+  --light:var(--off2);--white:var(--w);
+  --border:var(--b2);--border-soft:var(--b1);
+  --text:var(--t1);--muted:var(--t2);--faint:var(--t4);
+  --sidebar-w:48px;--topbar-h:48px;
+  --amber-bg:var(--os);--amber-bd:var(--om);--amber-txt:var(--o2);--amber-lbl:var(--o);
+  --radius-card:5px;--radius-btn:4px;
+}
+body{font-family:var(--sans);background:var(--w);height:100vh;display:flex;color:var(--t1);font-size:13px}
+#app{display:flex;width:100%;height:100vh;overflow:hidden}
+#sidebar{width:var(--sidebar-w);background:var(--k);border-right:none;display:flex;flex-direction:column;transition:width .24s cubic-bezier(.4,0,.2,1);overflow:hidden;white-space:nowrap;z-index:20;flex-shrink:0}
+#sidebar:hover{width:220px}
+.sidebar-logo{padding:11px 13px;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(255,255,255,.07);min-height:var(--topbar-h);flex-shrink:0}
+.logo-mark{width:24px;height:24px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.logo-text{opacity:0;transition:opacity .15s .06s}
+.logo-text strong{display:block;font-size:12.5px;font-weight:600;color:#fff;letter-spacing:.01em}
+.logo-text span{font-size:9px;color:rgba(255,255,255,.38);letter-spacing:.05em;text-transform:uppercase}
+#sidebar:hover .logo-text{opacity:1}
+.nav-group{padding:8px 0;flex:1;display:flex;flex-direction:column;gap:1px;overflow-y:auto;overflow-x:hidden}
+.nav-group-label{padding:12px 14px 4px;font-size:8.5px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:rgba(255,255,255,.28);opacity:0;transition:opacity .15s .06s}
+#sidebar:hover .nav-group-label{opacity:1}
+.nav-item{display:flex;align-items:center;gap:10px;padding:7px 13px;cursor:pointer;color:rgba(255,255,255,.4);font-size:12.5px;transition:background .12s,color .12s,opacity .08s;position:relative}
+.nav-item:hover{background:rgba(255,255,255,.06);color:#fff}
+.nav-item.active{background:var(--os);color:#fff}
+.nav-item.active::before{content:'';position:absolute;left:0;top:4px;bottom:4px;width:2px;background:var(--o);border-radius:0 2px 2px 0}
+.nav-item:active{opacity:.7}
+.nav-item i{width:17px;text-align:center;flex-shrink:0;font-size:15px}
+.nav-label{font-size:12.5px;opacity:0;transition:opacity .15s .06s;color:#fff}
+#sidebar:hover .nav-label{opacity:1}
+.nav-badge{background:rgba(255,255,255,.1);color:rgba(255,255,255,.55);border:none;font-size:9px;font-weight:600;padding:1px 5px;border-radius:10px;margin-left:auto;opacity:0;transition:opacity .15s .06s;flex-shrink:0}
+#sidebar:hover .nav-badge{opacity:1}
+.sidebar-bottom{padding:8px 0;border-top:1px solid rgba(255,255,255,.07)}
+#main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+#topbar{background:var(--w);border-bottom:1px solid var(--b2);padding:0 14px;height:var(--topbar-h);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.topbar-left{display:flex;align-items:center;gap:10px}
+.breadcrumb{font-size:12.5px;color:var(--t2);display:flex;align-items:center;gap:6px;font-family:var(--sans)}
+.breadcrumb span{color:var(--t1);font-weight:500}
+.breadcrumb-sep{color:var(--t4)}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.topbar-btn{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--t2);cursor:pointer;padding:4px 10px;border-radius:var(--radius-btn);transition:background .1s,transform .08s,opacity .08s;background:none;border:1px solid var(--b2);font-family:var(--sans)}
+.topbar-btn:hover{background:var(--off2);color:var(--t1)}
+.topbar-btn:active{transform:scale(.95);opacity:.8}
+.avatar-circle{width:28px;height:28px;border-radius:50%;background:var(--k);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:white;cursor:pointer;flex-shrink:0}
+#content{flex:1;padding:10px 14px;overflow-y:auto;background:var(--w)}
+.page{display:none}
+.page.active{display:block}
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px}
+.page-title{font-family:var(--sans);font-size:17px;font-weight:600;color:var(--t1);letter-spacing:-.01em}
+.page-subtitle{font-size:11.5px;color:var(--t3);margin-top:2px}
+.header-actions{display:flex;gap:8px;align-items:center}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:var(--radius-btn);font-size:12.5px;font-family:var(--sans);cursor:pointer;font-weight:500;transition:all .12s,transform .08s,opacity .08s;border:none}
+.btn-primary{background:var(--o);color:#fff}
+.btn-primary:hover{background:var(--o2)}
+.btn-primary:active{transform:scale(.97);opacity:.88}
+.btn-secondary{background:var(--w);color:var(--t1);border:1px solid var(--b3)}
+.btn-secondary:hover{background:var(--off2)}
+.btn-secondary:active{transform:scale(.97);opacity:.88}
+.btn-sm{padding:4px 10px;font-size:11.5px;border-radius:var(--radius-btn)}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px}
+.stat-card{background:var(--w);border:1px solid var(--b2);border-radius:var(--radius-card);padding:12px 14px;position:relative;overflow:hidden}
+.stat-label{font-size:11px;font-weight:500;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
+.stat-value{font-size:26px;font-weight:600;color:var(--t1);line-height:1;letter-spacing:-.02em}
+.stat-sub{font-size:11px;color:var(--t4);margin-top:5px}
+.table-card{background:var(--w);border:1px solid var(--b1);border-radius:var(--radius-card);overflow:hidden;margin-bottom:10px}
+.table-toolbar{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;border-bottom:1px solid var(--b1)}
+.table-title{font-size:13px;font-weight:600;color:var(--t1);letter-spacing:-.01em}
+.table-actions{display:flex;gap:8px;align-items:center}
+.filter-input{display:flex;align-items:center;gap:7px;border:1px solid var(--b2);border-radius:var(--radius-btn);padding:5px 10px;font-size:12px;color:var(--t3);background:var(--off2);width:180px;font-family:var(--sans);outline:none;transition:border-color .12s}
+.filter-input:focus{border-color:var(--b3);background:var(--w);color:var(--t1)}
+.table-card .dataTables_wrapper{padding:0}
+.table-card .dataTables_filter,.table-card .dataTables_length{padding:10px 14px 0;font-size:12.5px;color:var(--t2);font-family:var(--sans)}
+.table-card .dataTables_filter input,.table-card .dataTables_length select{border:1px solid var(--b2);border-radius:var(--radius-btn);padding:4px 9px;font-size:12.5px;font-family:var(--sans);outline:none;background:var(--w);color:var(--t1)}
+.table-card .dataTables_info,.table-card .dataTables_paginate{padding:8px 14px;font-size:12px;color:var(--t2);font-family:var(--sans)}
+.table-card .dataTables_paginate .paginate_button{border-radius:var(--radius-btn) !important;padding:3px 8px !important;font-size:12px !important;border:none !important;color:var(--t2) !important}
+.table-card .dataTables_paginate .paginate_button.current,.table-card .dataTables_paginate .paginate_button.current:hover{background:var(--off2) !important;border:1px solid var(--b2) !important;color:var(--t1) !important;font-weight:600}
+.table-card .dataTables_paginate .paginate_button:hover{background:var(--off2) !important;color:var(--t1) !important}
+table.dataTable.display tbody tr.odd>.sorting_1, table.dataTable.order-column.stripe tbody tr.odd>.sorting_1 {
+    background-color: #fff;
+}
+table.dataTable.order-column.stripe tbody tr.odd>.sorting_1:hover {
+    background-color: #fff;
+}
+table.dataTable.order-column.stripe tbody tr.even>.sorting_1:hover {
+    background-color: #fff;
+}
+table.dataTable tbody tr:hover td.sorting_1{background:var(--w) !important}
+.rfp-table{width:100% !important;border-collapse:collapse !important;font-size:12.5px;font-family:var(--sans)}
+.rfp-table thead th{background:var(--w);color:var(--t3);font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;padding:8px 14px;border-bottom:1px solid var(--b1);white-space:nowrap}
+.rfp-table thead th.sorting,.rfp-table thead th.sorting_asc,.rfp-table thead th.sorting_desc{background-image:none !important;padding-right:22px;position:relative}
+.rfp-table thead th.sorting::after{content:'↕';position:absolute;right:7px;color:var(--t4);font-size:9px}
+.rfp-table thead th.sorting_asc::after{content:'↑';position:absolute;right:7px;color:var(--t3);font-size:9px}
+.rfp-table thead th.sorting_desc::after{content:'↓';position:absolute;right:7px;color:var(--t3);font-size:9px}
+.rfp-table tbody tr{border-bottom:1px solid var(--b1);transition:background .1s;cursor:pointer}
+.rfp-table tbody tr:last-child{border-bottom:none}
+.rfp-table tbody tr:hover{background:var(--off2)}
+.rfp-table.dataTable tbody tr.odd td,.rfp-table.dataTable tbody tr.even td{background:var(--w)}
+.rfp-table.dataTable tbody tr.odd:hover,.rfp-table.dataTable tbody tr.even:hover{background:var(--off2)}
+.rfp-table tbody td{padding:9px 14px;color:var(--t2);vertical-align:middle;white-space:nowrap}
+.rfp-table tbody td.cell-primary{color:var(--t1);font-weight:500}
+.rfp-table tbody tr td.dataTables_empty{color:var(--t4);font-size:12.5px;text-align:center;padding:28px 14px;font-style:italic}
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:3px;font-size:10.5px;font-weight:500}
+.b-green{background:var(--os);color:var(--o2)}
+.b-amber{background:var(--os);border:1px solid var(--om);color:var(--o2)}
+.b-gray{background:var(--off2);color:var(--t3);border:1px solid var(--b2)}
+.b-blue{background:var(--off2);color:var(--t2);border:1px solid var(--b2)}
+.act-btn{font-size:11px;padding:4px 10px;border:1px solid var(--b2);border-radius:var(--radius-btn);background:var(--w);color:var(--t2);cursor:pointer;font-family:var(--sans);transition:background .1s,transform .08s,opacity .08s}
+.act-btn:hover{background:var(--off2);color:var(--t1)}
+.act-btn:active{transform:scale(.96);opacity:.82}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.info-card{background:var(--w);border:1px solid var(--b2);border-radius:var(--radius-card);padding:12px 14px}
+.info-card-title{font-size:10.5px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.info-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--b1);font-size:12.5px}
+.info-row:last-child{border-bottom:none;padding-bottom:0}
+.info-key{color:var(--t2)}
+.info-val{color:var(--t1);font-weight:500;text-align:right}
+.alert{display:flex;align-items:flex-start;gap:10px;background:var(--os);border:1px solid var(--om);border-radius:var(--radius-card);padding:9px 14px;margin-bottom:10px;font-size:12.5px;color:var(--o2)}
+.settings-section{background:var(--w);border:1px solid var(--b2);border-radius:var(--radius-card);overflow:hidden;margin-bottom:10px}
+.settings-row{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--b1)}
+.settings-row:last-child{border-bottom:none}
+.s-label{font-size:13px;font-weight:500;color:var(--t1)}
+.s-desc{font-size:11px;color:var(--t2);margin-top:2px}
+.section-lbl{font-size:11px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.header-tabs{display:flex;gap:4px;margin-bottom:12px}
+.htab{font-size:12px;font-weight:500;color:var(--t2);padding:5px 10px;border-radius:var(--radius-btn);border:1px solid transparent;background:none;cursor:pointer;font-family:var(--sans);transition:all .12s,transform .08s,opacity .08s}
+.htab:hover{color:var(--t1);background:var(--off2)}
+.htab:active{transform:scale(.96);opacity:.82}
+.htab.active{color:var(--t1);background:var(--off2);border-color:var(--b2);font-weight:600}
+.tab-pane{display:none}
+.tab-pane.active{display:block}
+#vendorPanel{position:fixed;top:0;right:-380px;width:340px;height:100%;background:var(--w);border-left:1px solid var(--b2);padding:14px 16px;transition:right .28s cubic-bezier(.22,.61,.36,1);z-index:1000;overflow-y:auto}
+#vendorPanel.open{right:0}
+#vendorPanel h4{margin:0 0 12px;font-size:14px;font-weight:600;color:var(--t1)}
+#vendorPanel .form-group{display:flex;flex-direction:column;margin-bottom:10px}
+#vendorPanel .form-group label{font-size:10.5px;font-weight:600;letter-spacing:.04em;color:var(--t3);margin-bottom:4px;text-transform:uppercase}
+#vendorPanel .form-group input,#vendorPanel .form-group textarea{padding:8px 10px;border:1px solid var(--b2);border-radius:var(--radius-btn);font-family:var(--sans);font-size:12.5px;background:var(--off2);color:var(--t1);outline:none;transition:border-color .12s,background .12s}
+#vendorPanel .form-group input:focus,#vendorPanel .form-group textarea:focus{border-color:var(--b3);background:var(--w)}
+.panel-actions{margin-top:14px;display:flex;justify-content:flex-end;gap:8px}
+.pipeline-grid{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.pipe-tile{background:var(--w);border:1px solid var(--b2);border-radius:var(--radius-card);padding:10px 12px;flex:1;min-width:80px;text-align:center}
+.pipe-tile.warn{background:var(--os);border-color:var(--om)}
+.pipe-value{font-size:22px;font-weight:600;color:var(--t1);line-height:1;letter-spacing:-.02em}
+.pipe-tile.warn .pipe-value{color:var(--o)}
+.pipe-label{font-size:11px;color:var(--t2);margin-top:3px}
+.pipe-tile.warn .pipe-label{color:var(--o2)}
+.completion-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--b1)}
+.completion-row:last-child{border-bottom:none}
+.completion-name{flex:1;min-width:0;font-size:12.5px;font-weight:500;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.completion-meta{font-size:11px;color:var(--t2);margin-top:2px}
+.completion-bar{width:72px;flex-shrink:0;height:3px;border-radius:2px;background:var(--b2)}
+.completion-fill{height:100%;border-radius:2px;background:var(--o)}
+.completion-count{font-size:11.5px;color:var(--t3);min-width:32px;text-align:right}
+.attention-row{display:flex;align-items:flex-start;gap:10px;padding:7px 0;border-bottom:1px solid var(--b1)}
+.attention-row:last-child{border-bottom:none}
+.attention-dot{width:6px;height:6px;border-radius:50%;margin-top:5px;flex-shrink:0}
+.dot-red{background:#E24B4A}
+.dot-amber{background:var(--o)}
+.dot-blue{background:#378ADD}
+.attention-text{font-size:12.5px;color:var(--t1);line-height:1.45}
+.attention-meta{font-size:11px;color:var(--t3);margin-top:2px}
+.configs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.config-card{background:var(--w);border:1px solid var(--b2);border-radius:var(--radius-card);padding:12px 14px}
+.config-card h3{font-size:12.5px;font-weight:600;color:var(--t1);margin:0 0 12px;letter-spacing:-.01em}
+.config-input-row{display:flex;gap:8px;margin-bottom:10px}
+.config-input-row input{flex:1;padding:7px 10px;border:1px solid var(--b2);border-radius:var(--radius-btn);font-family:var(--sans);font-size:12.5px;background:var(--off2);color:var(--t1);outline:none;transition:border-color .12s}
+.config-input-row input:focus{border-color:var(--b3);background:var(--w)}
+.config-add-btn{padding:6px 12px;font-size:12.5px;font-family:var(--sans);border:1px solid var(--b2);border-radius:var(--radius-btn);background:var(--w);color:var(--t1);cursor:pointer;white-space:nowrap;transition:background .12s,transform .08s,opacity .08s}
+.config-add-btn:hover{background:var(--off2)}
+.config-add-btn:active{transform:scale(.96);opacity:.82}
+.config-list{display:flex;flex-direction:column;gap:5px}
+.config-item{display:flex;align-items:center;justify-content:space-between;padding:5px 10px;background:var(--off2);border:1px solid var(--b1);border-radius:var(--radius-btn);font-size:12.5px;color:var(--t1)}
+.config-item button{background:none;border:none;cursor:pointer;color:var(--t4);font-size:14px;padding:0 2px;transition:color .12s,transform .08s}
+.config-item button:hover{color:#E24B4A}
+.config-item button:active{transform:scale(.9)}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.22);z-index:500;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal-box{background:var(--w);border:1px solid var(--b2);border-radius:var(--radius-card);padding:20px 22px;width:480px;max-width:95vw;position:relative}
+.modal-box h2{font-size:15px;font-weight:600;margin-bottom:16px;letter-spacing:-.01em}
+.modal-box .close-modal{position:absolute;top:14px;right:16px;font-size:18px;color:var(--t3);cursor:pointer;background:none;border:none;line-height:1}
+.modal-box .close-modal:hover{color:var(--t1)}
+.wizard-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.22);z-index:600;align-items:center;justify-content:center}
+.wizard-overlay.open{display:flex}
+.wizard-box{background:var(--w);border:1px solid var(--b2);border-radius:var(--radius-card);padding:22px 26px;width:540px;max-width:95vw;position:relative}
+.wizard-steps{display:flex;gap:8px;margin-bottom:20px}
+.wizard-step{width:24px;height:24px;border-radius:50%;background:var(--off2);border:1px solid var(--b2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--t3);transition:all .2s}
+.wizard-step.active{background:var(--o);color:#fff;border-color:var(--o)}
+.wizard-step-label{font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--t3);margin-bottom:5px}
+.wizard-box h2{font-size:16px;font-weight:600;margin-bottom:5px;letter-spacing:-.01em}
+.wizard-desc{font-size:12.5px;color:var(--t2);margin-bottom:16px;line-height:1.6}
+.wizard-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:20px}
+.file-upload-box{border:1px dashed var(--b3);border-radius:var(--radius-card);padding:20px;text-align:center;background:var(--off2);margin-bottom:14px}
+.upload-label{display:inline-block;padding:6px 12px;border:1px solid var(--b2);border-radius:var(--radius-btn);font-size:12.5px;cursor:pointer;background:var(--w);color:var(--t1);transition:background .12s;margin-top:8px}
+.upload-label:hover{background:var(--off2)}
+.checklist-item{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:var(--off2);border:1px solid var(--b1);border-radius:var(--radius-btn);font-size:12.5px;margin-bottom:6px}
+.wizard-form .form-group{display:flex;flex-direction:column;margin-bottom:10px}
+.wizard-form .form-group label{font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--t3);margin-bottom:4px}
+.wizard-form .form-group input,.wizard-form .form-group select{padding:8px 10px;border:1px solid var(--b2);border-radius:var(--radius-btn);font-family:var(--sans);font-size:12.5px;background:var(--off2);color:var(--t1);outline:none;width:100%;transition:border-color .12s}
+.wizard-form .form-group input:focus,.wizard-form .form-group select:focus{border-color:var(--b3);background:var(--w)}
+.two-form-cols{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* ── ACTIVE REQUIREMENTS SUMMARY ── */
+.req-sidebar-item{padding:7px 14px;cursor:pointer;font-size:12.5px;color:var(--t2);border-left:2px solid transparent;transition:background .12s,color .12s,opacity .08s}
+.req-sidebar-item:hover{background:var(--off2);color:var(--t1)}
+.req-sidebar-item:active{opacity:.7}
+.req-sidebar-item.active{background:transparent;border-left-color:var(--o);color:var(--t1);font-weight:600}
+.req-tab{font-size:12px;font-weight:500;color:var(--t2);padding:5px 10px;border:1px solid transparent;background:none;cursor:pointer;font-family:var(--sans);transition:all .12s,transform .08s,opacity .08s;white-space:nowrap}
+.req-tab:hover{color:var(--t1);background:transparent;border-top:1px solid transparent;border-left:1px solid transparent;border-right:1px solid transparent;border-bottom:1px solid var(--b3)}
+.req-tab.active{color:var(--o);background:transparent;border-top:1px solid transparent;border-left:1px solid transparent;border-right:1px solid transparent;border-bottom:2px solid var(--o);font-weight:600}
+.req-table{width:100%;border-collapse:collapse;font-size:12.5px;font-family:var(--sans)}
+.req-table th{background:var(--off2);color:var(--t3);font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;padding:9px 13px;border:1px solid var(--b2);white-space:nowrap;text-align:left}
+.req-table td{padding:9px 13px;border:1px solid var(--b1);color:var(--t2);vertical-align:middle}
+.req-table td:first-child{color:var(--t1)}
+.req-table tbody tr:hover{background:var(--off2)}
+.req-table .grand-total td{background:var(--off2);font-weight:600;color:var(--t1)}
+.req-table .max-points td{background:#fff9e6;font-weight:600;color:var(--t1)}
+.req-table .grand-total td:last-child,.req-table td:last-child{background:var(--w)}
+.req-table .max-points td:last-child{background:#fff9e6}
+.req-table td.center{text-align:center}
+.req-table td.cell-blue{color:var(--o)}
+
+/* ── UPLOAD RESPONSES ── */
+#ur-dropzone{border:1.5px dashed var(--b3);border-radius:var(--radius-card);padding:36px 24px;text-align:center;background:var(--w);cursor:pointer;transition:border-color .15s,background .15s;display:flex;flex-direction:column;align-items:center;margin-bottom:10px}
+#ur-dropzone:hover,#ur-dropzone.drag-over{border-color:var(--o);background:var(--os)}
+.ur-file-item{display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--w);border:1px solid var(--b2);border-radius:var(--radius-card);margin-bottom:6px;transition:background .1s}
+.ur-file-item:hover{background:var(--off2)}
+.ur-file-icon{width:30px;height:30px;border-radius:var(--radius-btn);background:var(--os);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;color:var(--o)}
+.ur-file-name{flex:1;font-size:12.5px;font-weight:500;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ur-file-size{font-size:11px;color:var(--t3);flex-shrink:0}
+.ur-file-status{font-size:11px;flex-shrink:0;min-width:70px;text-align:right}
+.ur-file-remove{background:none;border:none;cursor:pointer;color:var(--t4);font-size:15px;padding:0 4px;line-height:1;transition:color .1s,transform .08s}
+.ur-file-remove:hover{color:#b91c1c}
+.ur-file-remove:active{transform:scale(.9)}
+
+/* ── PAGE TRANSITION ── */
+@keyframes spin{to{transform:rotate(360deg)}}
+.req-table td:first-child{border-left:none}
+.req-table td:last-child{border-right:none}
+.req-table th:first-child{border-left:none}
+.req-table th:last-child{border-right:none}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="page-transition" style="display:none;position:fixed;inset:0;z-index:9999;background:#fff;align-items:center;justify-content:center;opacity:0;transition:opacity .18s ease;">
+    <div style="width:22px;height:22px;border-radius:50%;border:2.5px solid rgba(15,15,15,.09);border-top-color:#f04e23;animation:spin .7s linear infinite;"></div>
+  </div>
+  <div id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">
+        <img src="../assets/images/udder.png" alt="Udder logo" width="24" height="24" style="object-fit:contain;display:block">
+      </div>
+      <div class="logo-text">
+        <strong>Udder RFP</strong>
+        <span>Management Tool</span>
+      </div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-label">Overview</div>
+      <div class="nav-item active" data-page="home">
+        <i class="fa-solid fa-house" aria-hidden="true"></i>
+        <span class="nav-label">Dashboard</span>
+      </div>
+      <div class="nav-group-label">Requirements</div>
+      <div class="nav-item" data-page="requirements">
+        <i class="fa-solid fa-file-lines" aria-hidden="true"></i>
+        <span class="nav-label">Client Review</span>
+        <span class="nav-badge" id="nav-draft-count">0</span>
+      </div>
+      <div class="nav-item" data-page="vendor-review">
+        <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+        <span class="nav-label">Vendor Review</span>
+        <span class="nav-badge" id="nav-active-count">0</span>
+      </div>
+      <div class="nav-item" data-page="completed">
+        <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+        <span class="nav-label">Completed</span>
+      </div>
+      <div class="nav-item" data-page="active-summary">
+        <i class="fa-solid fa-table-list" aria-hidden="true"></i>
+        <span class="nav-label">Summary</span>
+      </div>
+      <div class="nav-group-label">Vendors</div>
+      <div class="nav-item" data-page="vendors">
+        <i class="fa-solid fa-building" aria-hidden="true"></i>
+        <span class="nav-label">All Vendors</span>
+        <span class="nav-badge" id="nav-vendor-count">0</span>
+      </div>
+      <div class="nav-group-label">Resources</div>
+      <div class="nav-item" data-page="upload-responses">
+        <i class="fa-solid fa-upload" aria-hidden="true"></i>
+        <span class="nav-label">Upload Responses</span>
+      </div>
+      <div class="nav-item" data-page="resources">
+        <i class="fa-solid fa-folder-open" aria-hidden="true"></i>
+        <span class="nav-label">Resources</span>
+      </div>
+    </div>
+    <div class="sidebar-bottom">
+      <div class="nav-item" data-page="configurations">
+        <i class="fa-solid fa-gear" aria-hidden="true"></i>
+        <span class="nav-label">Configurations</span>
+      </div>
+    </div>
+  </div>
+  <div id="main">
+    <div id="topbar">
+      <div class="topbar-left">
+        <div class="breadcrumb">
+          Udder RFP <span class="breadcrumb-sep">/</span>
+          <span id="breadcrumb-current">Dashboard</span>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <button class="topbar-btn" onclick="window.openWizard()">
+          <i class="fa-solid fa-plus" aria-hidden="true"></i> New Requirement
+        </button>
+        <div class="avatar-circle">AD</div>
+      </div>
+    </div>
+    <div id="oldVersionBanner" style="
+            background: #fffbeb;
+            border-bottom: 1px solid #fde68a;
+            font-family: var(--font, 'Geist', system-ui, sans-serif);
+            font-size: 12.5px;
+            padding: 9px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+          ">
+            <span style="
+              background: #111827;
+              color: #fff;
+              font-size: 10px;
+              font-weight: 700;
+              letter-spacing: 0.08em;
+              text-transform: uppercase;
+              padding: 2px 8px;
+              border-radius: 20px;
+            ">New</span>
+            <span style="color: #92400e;">You're viewing the new experience — <a href="../dashboard/" style="color:#111827;text-decoration:underline;font-weight:600;">click here to go back to the current version</a>.</span>
+            <button onclick="document.getElementById('oldVersionBanner').style.display='none'" style="
+              margin-left: auto;
+              background: none;
+              border: none;
+              color: #d97706;
+              font-size: 16px;
+              cursor: pointer;
+              line-height: 1;
+              padding: 0;
+            ">&times;</button>
+          </div>
+    <div id="content">
+      <div class="page active" id="page-home">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Overview</div>
+            <div class="page-subtitle">RFP pipeline status at a glance</div>
+          </div>
+          <div class="header-actions">
+            <button class="btn btn-secondary btn-sm" onclick="window.navigateTo('requirements')">View client review</button>
+            <button class="btn btn-primary btn-sm" onclick="window.openWizard()">+ New requirement</button>
+          </div>
+        </div>
+        <div id="home-alert" style="display:none" class="alert">
+          <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+          <div id="home-alert-text"></div>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">Vendor Review</div>
+            <div class="stat-value" id="stat-active-req">0</div>
+            <div class="stat-sub">Active requirements</div>
+          </div>
+          <div class="stat-card amber">
+            <div class="stat-label">Client Review</div>
+            <div class="stat-value" id="stat-draft-req">0</div>
+            <div class="stat-sub">Awaiting client input</div>
+          </div>
+          <div class="stat-card green">
+            <div class="stat-label">Completed</div>
+            <div class="stat-value" id="stat-completed-req">0</div>
+            <div class="stat-sub">Requirements finalised</div>
+          </div>
+          <div class="stat-card gray">
+            <div class="stat-label">Total Vendors</div>
+            <div class="stat-value" id="stat-vendors">0</div>
+            <div class="stat-sub">Registered vendors</div>
+          </div>
+        </div>
+        <div class="two-col">
+          <div class="info-card">
+            <div class="info-card-title">Vendor response completion</div>
+            <div id="completion-list"><p style="font-size:13px;color:var(--muted);">Loading&hellip;</p></div>
+          </div>
+          <div class="info-card">
+            <div class="info-card-title">Needs attention</div>
+            <div id="attention-list"><p style="font-size:13px;color:var(--muted);">Loading&hellip;</p></div>
+          </div>
+        </div>
+        <div class="info-card">
+          <div class="info-card-title">Pipeline status</div>
+          <div class="pipeline-grid">
+            <div class="pipe-tile"><div class="pipe-value" id="pipe-client">0</div><div class="pipe-label">client review</div></div>
+            <div class="pipe-tile"><div class="pipe-value" id="pipe-awaiting">0</div><div class="pipe-label">awaiting client</div></div>
+            <div class="pipe-tile"><div class="pipe-value" id="pipe-scoring">0</div><div class="pipe-label">ready to score</div></div>
+            <div class="pipe-tile"><div class="pipe-value" id="pipe-completed">0</div><div class="pipe-label">completed</div></div>
+            <div class="pipe-tile warn"><div class="pipe-value" id="pipe-attention">0</div><div class="pipe-label">needs attention</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="page" id="page-requirements">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Client Review</div>
+            <div class="page-subtitle">Requirements awaiting client confirmation</div>
+          </div>
+          <div class="header-actions">
+            <button class="btn btn-primary btn-sm" onclick="window.openWizard()">+ New requirement</button>
+          </div>
+        </div>
+        <div class="table-card">
+          <table id="drafts-table" class="rfp-table display nowrap" style="width:100%">
+            <thead><tr>
+              <th>Company</th><th>Title</th><th>Contact person</th><th>Email</th><th>Phone</th><th>Country</th>
+            </tr></thead>
+            <tbody id="drafts-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="page" id="page-vendor-review">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Vendor Review</div>
+            <div class="page-subtitle">Active requirements sent to vendors</div>
+          </div>
+        </div>
+        <div class="table-card">
+          <table id="active-table" class="rfp-table display nowrap" style="width:100%">
+            <thead><tr>
+              <th></th><th>Submitted on</th><th>Company</th><th>Title</th><th>Contact person</th><th>Email</th><th>Country</th><th>Status</th>
+            </tr></thead>
+            <tbody id="active-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="page" id="page-completed">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Completed requirements</div>
+            <div class="page-subtitle">Finalised and approved requirements</div>
+          </div>
+          <div class="header-actions">
+            <button class="btn btn-secondary btn-sm">Export</button>
+          </div>
+        </div>
+        <div class="table-card">
+          <table id="completed-table" class="rfp-table display nowrap" style="width:100%">
+            <thead><tr>
+              <th>Submitted on</th><th>Company</th><th>Title</th><th>Contact person</th><th>Email</th><th>Country</th>
+            </tr></thead>
+            <tbody id="completed-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="page" id="page-vendors">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Vendors</div>
+            <div class="page-subtitle">Registered vendor directory</div>
+          </div>
+          <div class="header-actions">
+            <button class="btn btn-primary btn-sm" id="open-vendor-panel-btn">+ Add vendor</button>
+          </div>
+        </div>
+        <div class="table-card">
+          <div class="table-toolbar"><span class="table-title">All vendors</span></div>
+          <table id="vendors-table" class="rfp-table display nowrap" style="width:100%">
+            <thead><tr>
+              <th></th><th>Company</th><th>HQ location</th><th>Contact person</th><th>Email</th><th>Phone</th><th>Verified</th>
+            </tr></thead>
+            <tbody id="vendors-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="page" id="page-resources">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Resources</div>
+            <div class="page-subtitle">Templates and supporting files</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px">
+          <div class="info-card" style="display:flex;flex-direction:column;gap:8px">
+            <div style="font-size:14px;font-weight:600">Requirement template</div>
+            <div style="font-size:13px;color:var(--muted);line-height:1.5">Excel template for uploading new requirements.</div>
+            <a href="../resources/template.xlsx" download class="btn btn-secondary btn-sm" style="width:fit-content;text-decoration:none">Download</a>
+          </div>
+        </div>
+      </div>
+      <div class="page" id="page-configurations">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Configurations</div>
+            <div class="page-subtitle">Manage form field values used across workflows</div>
+          </div>
+        </div>
+        <div class="header-tabs">
+          <button class="htab active" data-htab="form-fields">Form fields</button>
+        </div>
+        <div class="tab-pane active" id="htab-form-fields">
+          <p style="font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.6">Define the dropdown and selection values used in vendor and requirement submission forms.</p>
+          <div class="configs-grid">
+            <div class="config-card">
+              <h3>Area / category values</h3>
+              <div class="config-input-row">
+                <input type="text" id="cfg-area-input" placeholder="Add area&hellip;">
+                <button class="config-add-btn" data-cfg="area">Add</button>
+              </div>
+              <div class="config-list" id="cfg-area-list"></div>
+            </div>
+            <div class="config-card">
+              <h3>System part values</h3>
+              <div class="config-input-row">
+                <input type="text" id="cfg-syspart-input" placeholder="Add system part&hellip;">
+                <button class="config-add-btn" data-cfg="system_parts">Add</button>
+              </div>
+              <div class="config-list" id="cfg-syspart-list"></div>
+            </div>
+            <div class="config-card">
+              <h3>Vendor feedback values</h3>
+              <div class="config-input-row">
+                <input type="text" id="cfg-feedback-input" placeholder="Add feedback value&hellip;" disabled>
+                <button class="config-add-btn" data-cfg="vendor_feedback" disabled>Add</button>
+              </div>
+              <div class="config-list" id="cfg-feedback-list"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- UPLOAD RESPONSES -->
+      <div class="page" id="page-upload-responses">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Upload Responses</div>
+            <div class="page-subtitle">Upload one or more vendor response Excel files</div>
+          </div>
+        </div>
+
+        <!-- Step 1: Title input -->
+        <div id="ur-step-title">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start">
+            <div class="info-card">
+              <div class="info-card-title">Requirements</div>
+              <div style="font-size:12.5px;color:var(--t2);line-height:1.7">
+                <p style="margin-bottom:8px">Each Excel file you upload should contain the following columns:</p>
+                <ul style="padding-left:16px;display:flex;flex-direction:column;gap:4px">
+                  <li><strong>area</strong> — the functional area or category</li>
+                  <li><strong>requirement</strong> — the requirement description</li>
+                  <li><strong>priority</strong> — Must-Have, Should-Have, or Could-Have</li>
+                  <li><strong>system_part</strong> — the system module or component</li>
+                  <li><strong>response</strong> — the vendor's response value</li>
+                  <li><strong>notes</strong> — any additional comments</li>
+                </ul>
+                <p style="margin-top:12px;color:var(--t3);font-size:11.5px">Column headers are case-insensitive. The filename will be used as the vendor name.</p>
+              </div>
+            </div>
+            <div class="info-card">
+              <div class="info-card-title">Step 1 — Enter a title</div>
+              <p style="font-size:13px;color:var(--t2);margin-bottom:16px;line-height:1.6">Give this upload a title so you can identify which requirement set these responses belong to.</p>
+              <div style="display:flex;flex-direction:column;gap:6px">
+                <label style="font-size:10.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--t3);display:block">Title</label>
+                <input type="text" id="ur-title-input" placeholder="e.g. HRIS RFP 2025 — Vendor Responses"
+                  style="width:100%;padding:9px 11px;border:1px solid var(--b2);border-radius:var(--radius-btn);font-family:inherit;font-size:13px;background:var(--off2);color:var(--t1);outline:none;transition:border-color .12s">
+              </div>
+              <p id="ur-title-error" style="font-size:12px;color:#b91c1c;margin-top:8px;display:none">Please enter a title before continuing.</p>
+              <div style="margin-top:16px;display:flex;justify-content:flex-end">
+                <button class="btn btn-primary btn-sm" id="ur-title-next-btn">
+                  Next <i class="fa-solid fa-arrow-right" style="font-size:11px"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2: File upload (hidden until title entered) -->
+        <div id="ur-step-files" style="display:none">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+            <button class="act-btn" id="ur-back-btn"><i class="fa-solid fa-arrow-left" style="font-size:11px"></i> Back</button>
+            <span style="font-size:13px;color:var(--muted)">Title: <strong id="ur-title-display" style="color:var(--text)"></strong></span>
+          </div>
+
+          <!-- Drop zone -->
+          <div id="ur-dropzone">
+            <i class="fa-solid fa-file-excel" style="font-size:28px;color:var(--faint);margin-bottom:10px"></i>
+            <p style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px">Drag &amp; drop Excel files here</p>
+            <p style="font-size:12px;color:var(--muted);margin-bottom:14px">or click below to browse</p>
+            <button class="btn btn-secondary btn-sm" id="ur-add-files-btn">
+              <i class="fa-solid fa-plus" style="font-size:11px"></i> Add files
+            </button>
+            <input type="file" id="ur-file-input" accept=".xlsx,.xls" multiple hidden>
+            <p style="font-size:11px;color:var(--faint);margin-top:12px">.xlsx and .xls only — headers: area, requirement, priority, system_part, response, notes</p>
+          </div>
+
+          <!-- File list -->
+          <div id="ur-file-list" style="display:none">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+              <span style="font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)" id="ur-file-count">0 files selected</span>
+              <div style="display:flex;gap:8px">
+                <button class="btn btn-secondary btn-sm" id="ur-clear-btn">Clear all</button>
+                <button class="btn btn-primary btn-sm" id="ur-upload-btn">
+                  <i class="fa-solid fa-upload" style="font-size:11px"></i> Upload all
+                </button>
+              </div>
+            </div>
+            <div id="ur-file-items"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ACTIVE REQUIREMENTS SUMMARY -->
+      <div class="page" id="page-active-summary">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Active Requirements</div>
+            <div class="page-subtitle">Area breakdown by priority across system parts</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:16px;margin-top: 30px;">
+          <div style="width:200px;flex-shrink:0;border-right:1px solid var(--b2);padding-right:0;margin-right:4px;">
+            <div id="req-sidebar-list"></div>
+          </div>
+          <div style="flex:1;background:#fff;padding:20px;min-width:0;overflow-x:auto;">
+            <div id="req-tabs" style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:16px;"></div>
+            <div id="req-tab-content"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    </div>
+  </div>
+</div>
+<div id="vendorPanel">
+  <h4>Add vendor</h4>
+  <div class="form-group"><label>Company name *</label><input type="text" id="vp-company" placeholder="Enter company name"></div>
+  <div class="form-group"><label>Description</label><textarea id="vp-description" rows="3" placeholder="Brief description"></textarea></div>
+  <div class="form-group"><label>HQ location</label><input type="text" id="vp-hq" placeholder="City, Country"></div>
+  <hr style="border:none;border-top:.5px solid var(--border);margin:16px 0">
+  <h4 style="font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600">Contact person</h4>
+  <div class="form-group"><label>Full name *</label><input type="text" id="vp-contact" placeholder="Contact person"></div>
+  <div class="form-group"><label>Email *</label><input type="email" id="vp-email" placeholder="Email address"></div>
+  <div class="form-group"><label>Phone</label><input type="tel" id="vp-phone" placeholder="Phone number"></div>
+  <div class="panel-actions">
+    <button class="btn btn-primary btn-sm" id="vp-submit-btn">Add vendor</button>
+    <button class="btn btn-secondary btn-sm" id="close-vendor-panel-btn">Cancel</button>
+  </div>
+</div>
+<div id="edit-vendor-modal" class="modal-overlay">
+  <div class="modal-box">
+    <button class="close-modal" id="close-edit-modal">&times;</button>
+    <h2>Edit vendor</h2>
+    <form id="edit-vendor-form"></form>
+  </div>
+</div>
+<div id="wizard-modal" class="wizard-overlay">
+  <div class="wizard-box">
+    <button class="close-modal" id="close-wizard-btn" style="position:absolute;top:16px;right:18px;font-size:18px;color:var(--muted);cursor:pointer;background:none;border:none">&times;</button>
+    <div class="wizard-steps" id="wizard-steps">
+      <div class="wizard-step active">1</div>
+      <div class="wizard-step">2</div>
+      <div class="wizard-step">3</div>
+    </div>
+    <div class="wizard-step-label" id="wizard-step-label">Step 1</div>
+    <h2 id="wizard-title"></h2>
+    <p class="wizard-desc" id="wizard-desc"></p>
+    <div id="wizard-body"></div>
+    <div class="wizard-actions">
+      <button class="btn btn-secondary btn-sm" id="wizard-back-btn">Restart</button>
+      <button class="btn btn-primary btn-sm" id="wizard-next-btn" disabled>Next</button>
+    </div>
+  </div>
+</div>
+<script type="module">
+  import { customError, loggedIn } from '../assets/js/app.js';
+
+  $(function(){
+    if (!loggedIn()){
+        location.href = '../login.html';
+        return;
+    }
+  });
+
+const MOCK = {
+  drafts: [
+    { company:'Acme Corp', title:'ERP System RFP 2025', contact:'Sarah Dlamini', email:'sarah@acme.co.za', phone:'021 555 0101', country:'South Africa' },
+    { company:'BluePeak Ltd', title:'HR Platform Evaluation', contact:'James Osei', email:'james@bluepeak.com', phone:'', country:'Ghana' },
+    { company:'Meridian Group', title:'Cloud Infrastructure Requirements', contact:'Priya Naidoo', email:'priya@meridian.co.za', phone:'011 200 3300', country:'South Africa' },
+  ],
+  active: [
+    { submitted:'12 May 2025', company:'Acme Corp', title:'ERP System RFP 2025', contact:'Sarah Dlamini', email:'sarah@acme.co.za', country:'South Africa', status:'In progress', vendors:['Vendor A','Vendor B'], responses:1 },
+    { submitted:'05 Apr 2025', company:'Meridian Group', title:'Cloud Infrastructure Requirements', contact:'Priya Naidoo', email:'priya@meridian.co.za', country:'South Africa', status:'All responses in', vendors:['Vendor A','Vendor C','Vendor D'], responses:3 },
+    { submitted:'18 Mar 2025', company:'BluePeak Ltd', title:'HR Platform Evaluation', contact:'James Osei', email:'james@bluepeak.com', country:'Ghana', status:'No responses', vendors:['Vendor B'], responses:0 },
+  ],
+  completed: [
+    { submitted:'10 Jan 2025', company:'Telco SA', title:'Network Upgrade RFP', contact:'Mark Sithole', email:'mark@telco.co.za', country:'South Africa' },
+  ],
+  vendors: [
+    { id:1, company:'TechServe Solutions', desc:'Enterprise software and consulting', hq:'Johannesburg, ZA', contact:'Alan Botha', email:'alan@techserve.co.za', phone:'011 300 4400', verified:'Yes' },
+    { id:2, company:'CloudBridge Africa', desc:'Cloud infrastructure provider', hq:'Cape Town, ZA', contact:'Nomvula Khumalo', email:'nomvula@cloudbridge.co.za', phone:'021 600 1122', verified:'Yes' },
+    { id:3, company:'DataFlow Inc', desc:'Data analytics and reporting', hq:'Nairobi, KE', contact:'Peter Mwangi', email:'peter@dataflow.io', phone:'', verified:'No' },
+    { id:4, company:'Nexus Platforms', desc:'HR and payroll SaaS', hq:'Pretoria, ZA', contact:'Chantal du Plessis', email:'chantal@nexus.co.za', phone:'012 450 7700', verified:'Yes' },
+  ],
+  formFields: {
+    area: ['Finance','HR','Operations','IT Infrastructure','Procurement'],
+    system_parts: ['Core System','Reporting Module','Integration Layer','Mobile App'],
+    vendor_feedback: ['Full Match','Partial Match','No Match'],
+  }
+};
+let formFields = { ...MOCK.formFields };
+const breadcrumbs = { home:'Dashboard', requirements:'Client Review', 'vendor-review':'Vendor Review', completed:'Completed', vendors:'Vendors', resources:'Resources', configurations:'Configurations', 'active-summary':'Summary' };
+function navigateTo(page) {
+  const overlay = document.getElementById('page-transition');
+
+  // Fade in overlay with spinner
+  overlay.style.display = 'flex';
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => { overlay.style.opacity = '1'; });
+  });
+
+  setTimeout(() => {
+    // Swap page
+    document.querySelectorAll('.nav-item[data-page]').forEach(n => n.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    const navItem = document.querySelector('.nav-item[data-page="' + page + '"]');
+    if (navItem) navItem.classList.add('active');
+    const pageEl = document.getElementById('page-' + page);
+    if (pageEl) pageEl.classList.add('active');
+    document.getElementById('breadcrumb-current').textContent = breadcrumbs[page] || page;
+    loadPage(page);
+
+    // Fade out overlay
+    overlay.style.opacity = '0';
+    setTimeout(() => { overlay.style.display = 'none'; }, 200);
+  }, 280);
+}
+document.querySelectorAll('.nav-item[data-page]').forEach(item => { item.addEventListener('click', () => window.navigateTo(item.dataset.page)); });
+function loadPage(page) {
+  if (page === 'home') loadHome();
+  if (page === 'requirements') loadDrafts();
+  if (page === 'vendor-review') loadActive();
+  if (page === 'completed') loadCompleted();
+  if (page === 'vendors') loadVendors();
+  if (page === 'configurations') loadConfigurations();
+  if (page === 'active-summary') loadActiveSummary();
+  if (page === 'upload-responses') initUploadResponses();
+}
+// function loadHome() {
+//   const active = MOCK.active;
+//   const $completion = document.getElementById('completion-list');
+//   const $attention = document.getElementById('attention-list');
+//   $completion.innerHTML = '';
+//   $attention.innerHTML = '';
+//   let statClient = 0, statAwaiting = 0, statScoring = 0, statCompleted = MOCK.completed.length, statAttention = 0;
+//   active.forEach(req => {
+//     const total = req.vendors.length;
+//     const responded = req.responses;
+//     const allIn = total > 0 && responded === total;
+//     const noneIn = total > 0 && responded === 0;
+//     const pct = total > 0 ? Math.round((responded / total) * 100) : 0;
+//     if (allIn) statScoring++;
+//     else if (req.status === 'Awaiting client') statAwaiting++;
+//     else statClient++;
+//     $completion.innerHTML += '<div class="completion-row"><div style="flex:1;min-width:0"><div class="completion-name">' + req.title + '</div><div class="completion-meta">' + (req.vendors.join(', ') || '—') + '</div></div><div class="completion-bar"><div class="completion-fill" style="width:' + pct + '%"></div></div><div class="completion-count">' + responded + ' / ' + total + '</div></div>';
+//     if (noneIn) { statAttention++; $attention.innerHTML += attentionRow('red', req.title + ' — no vendors have responded', total + ' vendor' + (total>1?'s':'') + ' assigned'); }
+//     else if (allIn) { $attention.innerHTML += attentionRow('blue', req.title + ' — ready to score', 'All responses received'); }
+//     else if (!allIn && !noneIn) { statAttention++; $attention.innerHTML += attentionRow('amber', req.title + ' — ' + (total - responded) + ' vendor' + ((total-responded)>1?'s':'') + ' pending', responded + ' of ' + total + ' responded'); }
+//   });
+//   if ($attention.innerHTML === '') $attention.innerHTML = '<p style="font-size:13px;color:var(--muted);padding:12px 0">All requirements are on track.</p>';
+//   document.getElementById('stat-active-req').textContent = MOCK.active.length;
+//   document.getElementById('stat-draft-req').textContent = MOCK.drafts.length;
+//   document.getElementById('stat-completed-req').textContent = MOCK.completed.length;
+//   document.getElementById('pipe-client').textContent = statClient;
+//   document.getElementById('pipe-awaiting').textContent = statAwaiting;
+//   document.getElementById('pipe-scoring').textContent = statScoring;
+//   document.getElementById('pipe-completed').textContent = statCompleted;
+//   document.getElementById('pipe-attention').textContent = statAttention;
+//   document.getElementById('nav-draft-count').textContent = MOCK.drafts.length;
+//   document.getElementById('nav-active-count').textContent = MOCK.active.length;
+//   if (statAttention > 0) { document.getElementById('home-alert').style.display = 'flex'; document.getElementById('home-alert-text').textContent = statAttention + ' requirement' + (statAttention>1?'s':'') + ' need attention — review vendor responses.'; }
+// }
+function attentionRow(color, text, meta) {
+  const dots = { red:'#E24B4A', amber:'#BA7517', blue:'#378ADD' };
+  return '<div class="attention-row"><div class="attention-dot" style="background:' + (dots[color]||'#888') + '"></div><div><div class="attention-text">' + text + '</div><div class="attention-meta">' + meta + '</div></div></div>';
+}
+let draftsTable = null;
+function loadDrafts() {
+  const tbody = document.getElementById('drafts-tbody');
+  tbody.innerHTML = '';
+  MOCK.drafts.forEach(d => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = '<td class="cell-primary">' + d.company + '</td><td class="cell-primary"><a href="#" style="color:var(--blue);text-decoration:none">' + d.title + '</a></td><td>' + d.contact + '</td><td>' + d.email + '</td><td>' + (d.phone||'—') + '</td><td>' + d.country + '</td>';
+    tbody.appendChild(tr);
+  });
+  if (draftsTable) { draftsTable.destroy(); }
+  draftsTable = $('#drafts-table').DataTable({ responsive:true, pageLength:10, dom:'frtip', language:{search:'',searchPlaceholder:'Search…'} });
+}
+let activeTable = null;
+function loadActive() {
+  const tbody = document.getElementById('active-tbody');
+  tbody.innerHTML = '';
+  MOCK.active.forEach(r => {
+    const allIn = r.responses === r.vendors.length;
+    const noneIn = r.responses === 0;
+    const badge = allIn ? '<span class="badge b-green">All in</span>' : noneIn ? '<span class="badge b-amber">No responses</span>' : '<span class="badge b-blue">' + r.responses + '/' + r.vendors.length + ' in</span>';
+    const tr = document.createElement('tr');
+    tr.innerHTML = '<td></td><td>' + r.submitted + '</td><td class="cell-primary">' + r.company + '</td><td class="cell-primary"><a href="#" style="color:var(--blue);text-decoration:none">' + r.title + '</a></td><td>' + r.contact + '</td><td>' + r.email + '</td><td>' + r.country + '</td><td>' + badge + '</td>';
+    tbody.appendChild(tr);
+  });
+  if (activeTable) { activeTable.destroy(); }
+  activeTable = $('#active-table').DataTable({ responsive:true, pageLength:10 });
+}
+let completedTable = null;
+function loadCompleted() {
+  const tbody = document.getElementById('completed-tbody');
+  tbody.innerHTML = '';
+  MOCK.completed.forEach(r => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = '<td>' + r.submitted + '</td><td class="cell-primary">' + r.company + '</td><td class="cell-primary"><a href="#" style="color:var(--blue);text-decoration:none">' + r.title + '</a></td><td>' + r.contact + '</td><td>' + r.email + '</td><td>' + r.country + '</td>';
+    tbody.appendChild(tr);
+  });
+  if (completedTable) { completedTable.destroy(); }
+  completedTable = $('#completed-table').DataTable({ responsive:true, pageLength:10 });
+}
+let vendorsTable = null;
+function loadVendors() {
+  const tbody = document.getElementById('vendors-tbody');
+  tbody.innerHTML = '';
+  MOCK.vendors.forEach(v => {
+    const tr = document.createElement('tr');
+    const verBadge = v.verified === 'Yes' ? '<span class="badge b-green">Verified</span>' : '<span class="badge b-gray">Unverified</span>';
+    tr.innerHTML = '<td></td><td class="cell-primary">' + v.name + '</td><td>' + (v.hq_location || '') + '</td><td>' + (v.contact_person?.name || '') + '</td><td>' + (v.contact_person?.email || '') + '</td><td>' + (v.contact_person?.phone || '—') + '</td><td>' + verBadge + '</td>';
+    tbody.appendChild(tr);
+  });
+  if (vendorsTable) { vendorsTable.destroy(); }
+  vendorsTable = $('#vendors-table').DataTable({ responsive:true, pageLength:10 });
+}
+function loadConfigurations() {
+  renderConfigList('area', 'cfg-area-list', 'cfg-area-input');
+  renderConfigList('system_parts', 'cfg-syspart-list', 'cfg-syspart-input');
+  renderConfigList('vendor_feedback', 'cfg-feedback-list', 'cfg-feedback-input');
+}
+function renderConfigList(key, listId, inputId) {
+  const list = document.getElementById(listId);
+  list.innerHTML = '';
+  (formFields[key] || []).forEach(val => {
+    const div = document.createElement('div');
+    div.className = 'config-item';
+    div.innerHTML = '<span>' + val + '</span><button data-key="' + key + '" data-val="' + val + '" aria-label="Remove">×</button>';
+    list.appendChild(div);
+  });
+}
+document.querySelectorAll('.config-add-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const key = btn.dataset.cfg;
+    const inputId = key === 'area' ? 'cfg-area-input' : key === 'system_parts' ? 'cfg-syspart-input' : 'cfg-feedback-input';
+    const listId = key === 'area' ? 'cfg-area-list' : key === 'system_parts' ? 'cfg-syspart-list' : 'cfg-feedback-list';
+    const input = document.getElementById(inputId);
+    const val = input.value.trim();
+    if (!val) return;
+    if (!formFields[key]) formFields[key] = [];
+    formFields[key].push(val);
+    input.value = '';
+    renderConfigList(key, listId, inputId);
+  });
+});
+document.addEventListener('click', e => {
+  if (e.target.matches('.config-item button')) {
+    const key = e.target.dataset.key;
+    const val = e.target.dataset.val;
+    formFields[key] = formFields[key].filter(v => v !== val);
+    const listId = key === 'area' ? 'cfg-area-list' : key === 'system_parts' ? 'cfg-syspart-list' : 'cfg-feedback-list';
+    renderConfigList(key, listId, '');
+  }
+});
+document.querySelectorAll('.htab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.htab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('htab-' + tab.dataset.htab).classList.add('active');
+  });
+});
+document.getElementById('open-vendor-panel-btn').addEventListener('click', () => { document.getElementById('vendorPanel').classList.add('open'); });
+document.getElementById('close-vendor-panel-btn').addEventListener('click', () => { document.getElementById('vendorPanel').classList.remove('open'); });
+document.getElementById('vp-submit-btn').addEventListener('click', () => {
+  const company = document.getElementById('vp-company').value.trim();
+  const contact = document.getElementById('vp-contact').value.trim();
+  const email = document.getElementById('vp-email').value.trim();
+  if (!company || !contact || !email) { alert('Company name, contact name, and email are required.'); return; }
+  MOCK.vendors.push({ id: MOCK.vendors.length + 1, company, desc: document.getElementById('vp-description').value.trim(), hq: document.getElementById('vp-hq').value.trim(), contact, email, phone: document.getElementById('vp-phone').value.trim(), verified: 'No' });
+  document.getElementById('vendorPanel').classList.remove('open');
+  ['vp-company','vp-description','vp-hq','vp-contact','vp-email','vp-phone'].forEach(id => document.getElementById(id).value = '');
+  if (document.getElementById('page-vendors').classList.contains('active')) loadVendors();
+  document.getElementById('nav-vendor-count').textContent = MOCK.vendors.length;
+});
+document.getElementById('close-edit-modal').addEventListener('click', () => { document.getElementById('edit-vendor-modal').classList.remove('open'); });
+document.getElementById('edit-vendor-modal').addEventListener('click', e => { if (e.target === document.getElementById('edit-vendor-modal')) document.getElementById('edit-vendor-modal').classList.remove('open'); });
+let wizardStep = 1;
+let uploadedFile = null;
+let fileContents = [];
+function openWizard() { wizardStep = 1; uploadedFile = null; fileContents = []; renderWizardStep(); document.getElementById('wizard-modal').classList.add('open'); }
+document.getElementById('close-wizard-btn').addEventListener('click', () => { document.getElementById('wizard-modal').classList.remove('open'); });
+document.getElementById('wizard-modal').addEventListener('click', e => { if (e.target === document.getElementById('wizard-modal')) document.getElementById('wizard-modal').classList.remove('open'); });
+function renderWizardStep() {
+  document.querySelectorAll('.wizard-step').forEach((s, i) => { s.classList.toggle('active', i < wizardStep); });
+  document.getElementById('wizard-step-label').textContent = 'Step ' + wizardStep;
+  document.getElementById('wizard-back-btn').textContent = wizardStep === 1 ? 'Cancel' : 'Back';
+  document.getElementById('wizard-next-btn').textContent = wizardStep === 3 ? 'Finish' : 'Next';
+  document.getElementById('wizard-next-btn').disabled = wizardStep === 1;
+  if (wizardStep === 1) {
+    document.getElementById('wizard-title').textContent = 'File upload requirements';
+    document.getElementById('wizard-desc').innerHTML = 'Use the template below, then upload your Excel file.<br><small style="color:var(--muted)">Only .xlsx / .xls files are accepted.</small>';
+    document.getElementById('wizard-body').innerHTML = '<div class="file-upload-box"><p style="font-size:13px;color:var(--muted)">Required columns (case-sensitive):<br><strong>area | requirement | priority | system_part</strong></p><a href="../resources/template.xlsx" download class="upload-label" style="display:inline-block;text-decoration:none;margin-right:8px">Download template</a><label class="upload-label">Choose file<input type="file" id="wizard-file-input" accept=".xlsx,.xls" hidden></label><div id="wizard-file-name" style="margin-top:10px;font-size:12px;color:var(--muted)">No file selected</div></div>';
+    document.getElementById('wizard-file-input').addEventListener('change', function() { uploadedFile = this.files[0]; document.getElementById('wizard-file-name').textContent = uploadedFile ? uploadedFile.name : 'No file selected'; document.getElementById('wizard-next-btn').disabled = !uploadedFile; });
+  }
+  if (wizardStep === 2) {
+    document.getElementById('wizard-title').textContent = 'Requirements validation';
+    document.getElementById('wizard-desc').textContent = 'Running checks on your uploaded file…';
+    document.getElementById('wizard-next-btn').disabled = true;
+    document.getElementById('wizard-body').innerHTML = '<div class="checklist-item" id="chk-headings"><span>File headers</span><span id="chk-headings-status">⏳</span></div><div class="checklist-item" id="chk-area"><span>Area listing</span><span id="chk-area-status">⏳</span></div><div class="checklist-item" id="chk-priority"><span>Priority listing</span><span id="chk-priority-status">⏳</span></div><div class="checklist-item" id="chk-system"><span>System part listing</span><span id="chk-system-status">⏳</span></div>';
+    setTimeout(() => { ['headings','area','priority','system'].forEach(k => { document.getElementById('chk-' + k + '-status').textContent = '✅'; }); document.getElementById('wizard-next-btn').disabled = false; }, 900);
+  }
+  if (wizardStep === 3) {
+    document.getElementById('wizard-title').textContent = 'Requirement details';
+    document.getElementById('wizard-desc').textContent = 'Enter the company and contact details below.';
+    document.getElementById('wizard-body').innerHTML = '<div class="wizard-form"><div class="form-group"><label>Title</label><input type="text" id="wz-title" placeholder="Requirement title"></div><div class="two-form-cols"><div class="form-group"><label>Company name</label><input type="text" id="wz-company" placeholder="Company name"></div><div class="form-group"><label>Country</label><input type="text" id="wz-country" placeholder="Country"></div></div><div class="two-form-cols"><div class="form-group"><label>Contact name</label><input type="text" id="wz-contact" placeholder="Full name"></div><div class="form-group"><label>Email address</label><input type="email" id="wz-email" placeholder="Email"></div></div></div>';
+  }
+}
+document.getElementById('wizard-next-btn').addEventListener('click', () => {
+  if (wizardStep < 3) { wizardStep++; renderWizardStep(); return; }
+  const title = document.getElementById('wz-title').value.trim();
+  const company = document.getElementById('wz-company').value.trim();
+  const contact = document.getElementById('wz-contact').value.trim();
+  const email = document.getElementById('wz-email').value.trim();
+  const country = document.getElementById('wz-country').value.trim();
+  if (!title || !company) { alert('Title and company name are required.'); return; }
+  MOCK.drafts.push({ company, title, contact, email, phone:'', country });
+  document.getElementById('wizard-modal').classList.remove('open');
+  document.getElementById('stat-draft-req').textContent = MOCK.drafts.length;
+  document.getElementById('nav-draft-count').textContent = MOCK.drafts.length;
+  window.navigateTo('requirements');
+});
+document.getElementById('wizard-back-btn').addEventListener('click', () => {
+  if (wizardStep === 1) { document.getElementById('wizard-modal').classList.remove('open'); return; }
+  wizardStep--;
+  renderWizardStep();
+});
+
+/* ══ ACTIVE REQUIREMENTS SUMMARY ══ */
+let activeSummaryData = [];
+let selectedReqId = null;
+let cachedFormFields = null;
+
+const MUST_HAVE = 'Must-Have';
+const COULD_HAVE = 'Could-Have';
+const SHOULD_HAVE = 'Should-Have';
+const mustHaveMultiplier = 1.5;
+const couldHaveMultiplier = 1;
+const shouldHaveMultiplier = 1.25;
+
+async function loadActiveSummary() {
+  
+  document.getElementById('req-tab-content').innerHTML = '<div style="padding:40px;display:flex;justify-content:center"><div style="width:22px;height:22px;border-radius:50%;border:2.5px solid var(--b2);border-top-color:var(--o);animation:spin .7s linear infinite"></div></div>';
+  try {
+    const response = await fetch('/api/supabase?action=getActiveRequirements');
+    const result = await response.json();
+    if (result.error) { console.error(result.error); return; }
+    activeSummaryData = result.data;
+
+    // Also pre-load form fields (system_parts needed for tabs)
+    const ffRes = await fetch('/api/supabase?action=getFormFields');
+    const ffResult = await ffRes.json();
+    if (!ffResult.error) cachedFormFields = ffResult.data;
+
+    renderReqSidebar();
+    if (activeSummaryData.length > 0) selectReq(activeSummaryData[0].id);
+  } catch (err) {
+    console.error('Failed to load active summary:', err);
+  }
+}
+
+function renderReqSidebar() {
+  const sidebar = document.getElementById('req-sidebar-list');
+  sidebar.innerHTML = '';
+  activeSummaryData.forEach(req => {
+    const item = document.createElement('div');
+    item.className = 'req-sidebar-item' + (selectedReqId === req.id ? ' active' : '');
+    item.textContent = req.title;
+    item.addEventListener('click', () => selectReq(req.id));
+    sidebar.appendChild(item);
+  });
+}
+
+function selectReq(id) {
+  selectedReqId = id;
+  renderReqSidebar();
+  const req = activeSummaryData.find(r => r.id === id);
+  if (!req) return;
+  renderReqTabs(req);
+}
+
+function renderReqTabs(req) {
+  const tabsEl = document.getElementById('req-tabs');
+  const contentEl = document.getElementById('req-tab-content');
+  tabsEl.innerHTML = '';
+  contentEl.innerHTML = '';
+
+  const systemParts = (cachedFormFields && cachedFormFields.system_parts) ? cachedFormFields.system_parts : [];
+  const vendors = req.assigned_vendors || [];
+  const hasVendors = vendors.length > 0;
+
+  // Build tab list: All Areas + each system part + Response Count + Match Scores (if vendors)
+  const tabs = [{ key: 'all', label: 'All Areas' }];
+  systemParts.forEach(p => tabs.push({ key: p, label: p }));
+  if (hasVendors) {
+    tabs.push({ key: 'response-count', label: 'Response Count' });
+    tabs.push({ key: 'match-scores',   label: 'Match Scores'   });
+  }
+
+  tabs.forEach((tab, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'req-tab' + (i === 0 ? ' active' : '');
+    btn.textContent = tab.label;
+    btn.dataset.tabKey = tab.key;
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.req-tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      if (tab.key === 'all')             renderReqTable(req, null);
+      else if (tab.key === 'response-count') renderResponseCount(req);
+      else if (tab.key === 'match-scores')   renderMatchScores(req);
+      else                               renderReqTable(req, tab.key);
+    });
+    tabsEl.appendChild(btn);
+  });
+
+  // Render first tab (All Areas)
+  renderReqTable(req, null);
+}
+
+/* ── RESPONSE COUNT ── */
+function vendorResponsesByPriority(vendors, requirements, type) {
+  const responses = {};
+  vendors.forEach(vendor => {
+    const feedback = vendor.feedback || [];
+    feedback.forEach((fb, index) => {
+      if (!requirements[index]) return;
+      const priority = requirements[index].priority;
+      const f = fb.feedback;
+      if (!responses[vendor.name]) responses[vendor.name] = {};
+      if (!responses[vendor.name][f]) responses[vendor.name][f] = 0;
+      if (priority === type) responses[vendor.name][f]++;
+    });
+  });
+  return responses;
+}
+
+function renderResponseCount(req) {
+  const contentEl = document.getElementById('req-tab-content');
+  const vendors = req.assigned_vendors || [];
+  const requirements = req.requirements || [];
+  const vendorFeedbackValues = (cachedFormFields && cachedFormFields.vendor_feedback) ? cachedFormFields.vendor_feedback : [];
+
+  const mustHaveResp   = vendorResponsesByPriority(vendors, requirements, MUST_HAVE);
+  const couldHaveResp  = vendorResponsesByPriority(vendors, requirements, COULD_HAVE);
+  const shouldHaveResp = vendorResponsesByPriority(vendors, requirements, SHOULD_HAVE);
+
+  // Header: Vendor Responses | VendorA (Could/Must/Should) | VendorB ...
+  let thead = '<tr><th rowspan="2" style="vertical-align:middle">Vendor Responses</th>';
+  vendors.forEach(v => {
+    thead += '<th colspan="3" style="text-align:center">' + v.name + '</th>';
+  });
+  thead += '</tr><tr>';
+  vendors.forEach(() => {
+    thead += '<th>' + COULD_HAVE + '</th><th>' + MUST_HAVE + '</th><th>' + SHOULD_HAVE + '</th>';
+  });
+  thead += '</tr>';
+
+  let tbody = '';
+  vendorFeedbackValues.forEach(fb => {
+    tbody += '<tr><td>' + fb + '</td>';
+    vendors.forEach(v => {
+      const c = (couldHaveResp[v.name] && couldHaveResp[v.name][fb]) || 0;
+      const m = (mustHaveResp[v.name]  && mustHaveResp[v.name][fb])  || 0;
+      const s = (shouldHaveResp[v.name] && shouldHaveResp[v.name][fb]) || 0;
+      tbody += '<td class="center"><strong>' + c + '</strong></td>'
+             + '<td class="center"><strong>' + m + '</strong></td>'
+             + '<td class="center"><strong>' + s + '</strong></td>';
+    });
+    tbody += '</tr>';
+  });
+
+  contentEl.innerHTML = '<div style="margin-bottom:10px;display:flex;justify-content:flex-end">'
+    + '<button data-export-table="response-count-table" data-export-name="response_count" class="act-btn export-req-btn"><i class="fa-solid fa-download" style="font-size:11px;margin-right:5px"></i>Export</button>'
+    + '</div>'
+    + '<div style="overflow-x:auto;-webkit-overflow-scrolling:touch">'
+    + '<table id="response-count-table" class="req-table" style="min-width:600px"><thead>' + thead + '</thead><tbody>' + tbody + '</tbody></table>'
+    + '</div>';
+}
+
+/* ── MATCH SCORES ── */
+function getSolutionMultipliers(vendorFeedback, vendorFormFields, scoring) {
+  const multipliers = [];
+  if (vendorFeedback === undefined) return multipliers;
+  vendorFeedback.forEach(vendor => {
+    const feedback = vendor.feedback;
+    for (var i = 0; i < vendorFormFields.length; i++) {
+      if (vendorFormFields[i] === feedback) {
+        multipliers.push(scoring[i]);
+        break;
+      }
+    }
+  });
+  return multipliers;
+}
+
+function renderMatchScores(req) {
+  const contentEl = document.getElementById('req-tab-content');
+  const vendors = req.assigned_vendors || [];
+  const requirements = req.requirements || [];
+  const systemParts = (cachedFormFields && cachedFormFields.system_parts) ? cachedFormFields.system_parts : [];
+  const vendorFeedbackValues = (cachedFormFields && cachedFormFields.vendor_feedback) ? cachedFormFields.vendor_feedback : [];
+
+  const scoring = solutionMultiplier;
+
+  const allParts = ['All Areas', ...systemParts];
+
+  let thead = '<tr><th>Area</th>';
+  vendors.forEach(v => { thead += '<th>' + v.name + '</th>'; });
+  thead += '</tr>';
+
+  let tbody = '';
+  allParts.forEach(part => {
+    tbody += '<tr><td>' + part + '</td>';
+    vendors.forEach(v => {
+      if (v.feedback && v.feedback.length) {
+        let score = 0;
+        const multipliers = getSolutionMultipliers(v.feedback, vendorFeedbackValues, scoring);
+        requirements.forEach((r, idx) => {
+          const inPart = part === 'All Areas' || r.system_part === part;
+          if (inPart) score += (priorityWeighting[r.priority] || 0) * (multipliers[idx] || 0);
+        });
+        let pct = requirements.length > 0 ? (score / (requirements.length * 1.5)) * 100 : 0;
+        if (isNaN(pct)) pct = 0;
+        tbody += '<td class="center">' + Math.round(pct) + '%</td>';
+      } else {
+        tbody += '<td class="center">—</td>';
+      }
+    });
+    tbody += '</tr>';
+  });
+
+  contentEl.innerHTML = '<div style="margin-bottom:10px;display:flex;justify-content:flex-end">'
+    + '<button data-export-table="match-scores-table" data-export-name="match_scores" class="act-btn export-req-btn"><i class="fa-solid fa-download" style="font-size:11px;margin-right:5px"></i>Export</button>'
+    + '</div>'
+    + '<div style="overflow-x:auto;-webkit-overflow-scrolling:touch">'
+    + '<table id="match-scores-table" class="req-table" style="min-width:500px"><thead>' + thead + '</thead><tbody>' + tbody + '</tbody></table>'
+    + '</div>';
+}
+
+const priorityWeighting = {
+  [MUST_HAVE]: 1.5,
+  [COULD_HAVE]: 1,
+  [SHOULD_HAVE]: 1.25
+};
+
+const solutionMultiplier = [1, 0.8, 0.6, 0.4, 0];
+
+
+
+function summaryAreaByPriority(requirements, systemPartFilter) {
+  const summary = {};
+  requirements.forEach(r => {
+    if (systemPartFilter && r.system_part !== systemPartFilter) return;
+    if (!summary[r.area]) summary[r.area] = {};
+    if (!summary[r.area][r.priority]) summary[r.area][r.priority] = 0;
+    summary[r.area][r.priority]++;
+  });
+  return Object.fromEntries(Object.entries(summary).sort(([a], [b]) => a.localeCompare(b)));
+}
+
+function renderReqTable(req, systemPartFilter) {
+  const contentEl = document.getElementById('req-tab-content');
+  const requirements = req.requirements || [];
+  const sortedList = summaryAreaByPriority(requirements, systemPartFilter);
+
+  let grandC = 0, grandM = 0, grandS = 0;
+
+  let rows = '';
+  Object.entries(sortedList).forEach(([area, priorities]) => {
+    const c = priorities[COULD_HAVE] || 0;
+    const m = priorities[MUST_HAVE] || 0;
+    const s = priorities[SHOULD_HAVE] || 0;
+    const total = c + m + s;
+    grandC += c; grandM += m; grandS += s;
+    rows += '<tr>'
+      + '<td>' + area + '</td>'
+      + '<td class="center">' + (c || '') + '</td>'
+      + '<td class="center">' + (m || '') + '</td>'
+      + '<td class="center">' + (s || '') + '</td>'
+      + '<td class="center" style="background:#f0ede8;font-weight:600">' + total + '</td>'
+      + '</tr>';
+  });
+
+  const grandTotal = grandC + grandM + grandS;
+  const maxC = grandC * couldHaveMultiplier;
+  const maxM = grandM * mustHaveMultiplier;
+  const maxS = grandS * shouldHaveMultiplier;
+  const maxTotal = maxC + maxM + maxS;
+
+  contentEl.innerHTML = '<table class="req-table">'
+    + '<thead><tr>'
+    + '<th>Area</th>'
+    + '<th>Could-Have</th>'
+    + '<th>Must-Have</th>'
+    + '<th>Should-Have</th>'
+    + '<th>Grand Total</th>'
+    + '</tr></thead>'
+    + '<tbody>'
+    + rows
+    + '<tr class="grand-total">'
+    + '<td>Grand Total</td>'
+    + '<td class="center">' + grandC + '</td>'
+    + '<td class="center">' + grandM + '</td>'
+    + '<td class="center">' + grandS + '</td>'
+    + '<td class="center">' + grandTotal + '</td>'
+    + '</tr>'
+    + '<tr><td colspan="5" style="padding:4px 0;border:none;background:#fff"></td></tr>'
+    + '<tr class="max-points">'
+    + '<td>MAX Points - All</td>'
+    + '<td class="center" title="' + grandC + ' x ' + couldHaveMultiplier + '">' + maxC + '</td>'
+    + '<td class="center" title="' + grandM + ' x ' + mustHaveMultiplier + '">' + maxM.toFixed(2) + '</td>'
+    + '<td class="center" title="' + grandS + ' x ' + shouldHaveMultiplier + '">' + maxS.toFixed(2) + '</td>'
+    + '<td class="center">' + maxTotal + '</td>'
+    + '</tr>'
+    + '</tbody></table>';
+}
+
+/* ══ UPLOAD RESPONSES ══ */
+let urFiles = [];
+
+let urTitle = '';
+
+function initUploadResponses() {
+  urFiles = [];
+  urTitle = '';
+
+  // Reset to step 1
+  document.getElementById('ur-step-title').style.display = 'block';
+  document.getElementById('ur-step-files').style.display = 'none';
+  document.getElementById('ur-title-input').value = '';
+  document.getElementById('ur-title-error').style.display = 'none';
+  document.getElementById('ur-file-list').style.display = 'none';
+  document.getElementById('ur-dropzone').style.display = 'flex';
+
+  // Step 1: Next button
+  document.getElementById('ur-title-next-btn').onclick = function() {
+    const val = document.getElementById('ur-title-input').value.trim();
+    if (!val) {
+      document.getElementById('ur-title-error').style.display = 'block';
+      return;
+    }
+    document.getElementById('ur-title-error').style.display = 'none';
+    urTitle = val;
+    document.getElementById('ur-title-display').textContent = urTitle;
+    document.getElementById('ur-step-title').style.display = 'none';
+    document.getElementById('ur-step-files').style.display = 'block';
+    setupFileStep();
+  };
+
+  // Allow Enter key on title input
+  document.getElementById('ur-title-input').onkeydown = function(e) {
+    if (e.key === 'Enter') document.getElementById('ur-title-next-btn').click();
+  };
+}
+
+function setupFileStep() {
+  const dropzone = document.getElementById('ur-dropzone');
+  const input    = document.getElementById('ur-file-input');
+
+  dropzone.onclick = (e) => {
+    if (!e.target.closest('button')) input.click();
+  };
+  document.getElementById('ur-add-files-btn').onclick = (e) => {
+    e.stopPropagation();
+    input.click();
+  };
+
+  input.onchange = function() {
+    addFiles(Array.from(this.files));
+    this.value = '';
+  };
+
+  dropzone.ondragover = e => { e.preventDefault(); dropzone.classList.add('drag-over'); };
+  dropzone.ondragleave = () => dropzone.classList.remove('drag-over');
+  dropzone.ondrop = e => {
+    e.preventDefault();
+    dropzone.classList.remove('drag-over');
+    addFiles(Array.from(e.dataTransfer.files).filter(f => /\.xlsx?$/i.test(f.name)));
+  };
+
+  document.getElementById('ur-back-btn').onclick = function() {
+    urFiles = [];
+    document.getElementById('ur-step-files').style.display = 'none';
+    document.getElementById('ur-step-title').style.display = 'block';
+  };
+
+  document.getElementById('ur-clear-btn').onclick = function() {
+    urFiles = [];
+    renderUrFileList();
+  };
+
+  document.getElementById('ur-upload-btn').onclick = uploadAllFiles;
+}
+
+function addFiles(newFiles) {
+  newFiles.forEach(f => {
+    if (!f.name.match(/\.xlsx?$/i)) return;
+    // Avoid duplicates by name
+    if (!urFiles.find(existing => existing.file.name === f.name)) {
+      urFiles.push({ file: f, status: 'pending' });
+    }
+  });
+  renderUrFileList();
+}
+
+function formatFileSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+}
+
+function renderUrFileList() {
+  const listEl   = document.getElementById('ur-file-list');
+  const itemsEl  = document.getElementById('ur-file-items');
+  const countEl  = document.getElementById('ur-file-count');
+  const dropzone = document.getElementById('ur-dropzone');
+
+  if (urFiles.length === 0) {
+    listEl.style.display   = 'none';
+    dropzone.style.display = 'flex';
+    return;
+  }
+
+  dropzone.style.display = 'none';
+  listEl.style.display   = 'block';
+  countEl.textContent    = urFiles.length + ' file' + (urFiles.length > 1 ? 's' : '') + ' selected';
+
+  itemsEl.innerHTML = '';
+  urFiles.forEach((entry, idx) => {
+    const statusHtml = entry.status === 'uploading'
+      ? '<span style="color:var(--muted)"><i class="fa-solid fa-spinner fa-spin" style="font-size:11px"></i> Parsing…</span>'
+      : entry.status === 'parsed'
+      ? '<span style="color:var(--muted)"><i class="fa-solid fa-spinner fa-spin" style="font-size:11px"></i> Uploading…</span>'
+      : entry.status === 'done'
+      ? '<span style="color:#2d7a50"><i class="fa-solid fa-check" style="font-size:11px"></i> Done</span>'
+      : entry.status === 'error'
+      ? '<span style="color:#b91c1c" title="' + (entry.errorMsg || '') + '"><i class="fa-solid fa-xmark" style="font-size:11px"></i> ' + (entry.errorMsg || 'Error') + '</span>'
+      : '<span style="color:var(--faint)">Pending</span>';
+
+    itemsEl.innerHTML +=
+      '<div class="ur-file-item" id="ur-item-' + idx + '">'
+      + '<div class="ur-file-icon"><i class="fa-solid fa-file-excel"></i></div>'
+      + '<div class="ur-file-name">' + entry.file.name + '</div>'
+      + '<div class="ur-file-size">' + formatFileSize(entry.file.size) + '</div>'
+      + '<div class="ur-file-status">' + statusHtml + '</div>'
+      + (entry.status === 'pending'
+          ? '<button class="ur-file-remove" data-idx="' + idx + '" title="Remove">&times;</button>'
+          : '')
+      + '</div>';
+  });
+
+  // Remove button handler
+  itemsEl.querySelectorAll('.ur-file-remove').forEach(btn => {
+    btn.addEventListener('click', () => {
+      urFiles.splice(parseInt(btn.dataset.idx), 1);
+      renderUrFileList();
+    });
+  });
+}
+
+async function parseResponseFile(file) {
+  const vendorName = file.name.replace(/\.[^/.]+$/, ''); // strip extension
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+
+        if (!rows.length) { resolve([]); return; }
+
+        // Validate required headers (case-insensitive)
+        const requiredHeaders = ['area', 'requirement', 'priority', 'system_part', 'response', 'notes'];
+        const actualHeaders = Object.keys(rows[0]).map(h => h.trim().toLowerCase());
+        const missingHeaders = requiredHeaders.filter(h => !actualHeaders.includes(h));
+        if (missingHeaders.length) {
+          reject(new Error('Missing columns: ' + missingHeaders.join(', ')));
+          return;
+        }
+
+        // Normalise all row keys to lowercase for safe access
+        // Also pad missing trailing cells (e.g. empty notes) with empty string
+        const normaliseRow = row => {
+          const out = {};
+          Object.keys(row).forEach(k => { out[k.trim().toLowerCase()] = (row[k] !== undefined && row[k] !== null) ? String(row[k]) : ''; });
+          return out;
+        };
+        const normalisedRows = rows.map(normaliseRow);
+
+        // Vendor name derived from filename (passed in), not from file contents
+        // Group requirements by area
+        const areaMap = {};
+        normalisedRows.forEach(row => {
+          const area = row['area'] || '';
+          if (!area) return; // skip blank rows
+          if (!areaMap[area]) areaMap[area] = [];
+          areaMap[area].push({
+            requirement: row['requirement'] || '',
+            priority:    row['priority']    || '',
+            system_part: row['system_part'] || '',
+            feedback:    row['response']    || '',
+            notes:       row['notes']       || ''
+          });
+        });
+
+        const result = Object.entries(areaMap).map(([area, requirements]) => ({
+          area,
+          requirement: requirements,
+          vendor: vendorName
+        }));
+
+        resolve({ vendorName, areas: result });
+      } catch (err) {
+        reject(err);
+      }
+    };
+    reader.onerror = reject;
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+async function uploadAllFiles() {
+  const pending = urFiles.filter(e => e.status === 'pending');
+  if (pending.length === 0) return;
+
+  // Step 1: Parse all pending files first, marking status as we go
+  for (let i = 0; i < urFiles.length; i++) {
+    if (urFiles[i].status !== 'pending') continue;
+    urFiles[i].status = 'uploading';
+    renderUrFileList();
+
+    try {
+      const parsed = await parseResponseFile(urFiles[i].file);
+      urFiles[i].parsed = parsed.areas;
+      urFiles[i].vendor = parsed.vendorName;
+      urFiles[i].status = 'parsed';
+    } catch (err) {
+      console.error('Parse failed:', err);
+      urFiles[i].status = 'error';
+      urFiles[i].errorMsg = err.message || 'Failed to parse file';
+    }
+
+    renderUrFileList();
+  }
+
+  // Step 2: Combine all successfully parsed files — one object per vendor
+  const combined = [];
+  urFiles.forEach(entry => {
+    if (entry.status === 'parsed' && entry.parsed) {
+      combined.push({ vendor: entry.vendor, responses: entry.parsed });
+    }
+  });
+
+  if (!combined.length) return;
+
+  const assignedVendors = [];
+  const reqs = [];
+
+  combined.forEach(v => {
+    let feedback = [];
+
+    v.responses.forEach(req => {
+      req.requirement.forEach(d => {
+        feedback.push({
+          "feedback": d.feedback,
+          "comment": d.notes
+        });
+
+        if (!reqs.some(function(r) { return r.area === req.area; })) {
+          reqs.push({
+            "area": req.area,
+            "requirement": d.requirement,
+            "priority": d.priority,
+            "system_part": d.system_part,
+            "recommendation": "Keep",
+            "comment": ""
+          });
+        }
+      });
+    });
+
+    assignedVendors.push({
+      "contact_person": {
+        "name": "",
+        "email": "",
+        "phone": ""
+      },
+      "id": "",
+      "name": v.vendor,
+      "feedback": feedback
+    });
+  });
+
+  // get vendor or insert if it doesn't exists
+  await Promise.all(assignedVendors.map(async function(vendor, index) {
+      const res = await fetch('/api/supabase?action=upsertVendor', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ payload: { name: vendor.name } })
+      });
+      const result = await res.json();
+
+      if (!result.error) { assignedVendors[index].id = result.data.id; }
+  }));
+
+  const requirement = { 
+    title: urTitle,
+    requirements: reqs,
+    assigned_vendors: assignedVendors,
+    status: 'active',
+    client: {
+      "company": "",
+      "name": "",
+      "email": "",
+      "phone": "__",
+      "country": "",
+      "headcount": "__",
+      "timeline": "__"
+    }
+  };
+
+  try {
+    const res = await fetch('/api/supabase?action=uploadVendorResponse', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({payload: requirement})
+    });
+    const result = await res.json();
+
+    const finalStatus = result.error ? 'error' : 'done';
+    const finalError  = result.error ? (result.error || 'Upload failed') : null;
+
+    urFiles.forEach(entry => {
+      if (entry.status === 'parsed') {
+        entry.status = finalStatus;
+        if (finalError) entry.errorMsg = finalError;
+      }
+    });
+  } catch (err) {
+    console.error('Upload failed:', err);
+    urFiles.forEach(entry => {
+      if (entry.status === 'parsed') {
+        entry.status = 'error';
+        entry.errorMsg = err.message || 'Upload failed';
+      }
+    });
+  }
+
+  renderUrFileList();
+}
+
+function exportReqTable(tableId, filename) {
+  const table = document.getElementById(tableId);
+  if (!table) return;
+  const wb = XLSX.utils.table_to_book(table, { sheet: 'Sheet1' });
+  XLSX.writeFile(wb, filename + '.xlsx');
+}
+
+document.addEventListener('click', function(e) {
+  const btn = e.target.closest('.export-req-btn');
+  if (!btn) return;
+  exportReqTable(btn.dataset.exportTable, btn.dataset.exportName);
+});
+
+/* ══ INIT ══ */
+loadDrafts();
+
+async function updateVendorCount() {
+  try {
+    const response = await fetch('/api/supabase?action=getVendors');
+    const result = await response.json();
+    if (result.error) { console.error(result.error); return; }
+    MOCK.vendors = result.data;
+    document.getElementById('stat-vendors').textContent = result.data.length;
+    document.getElementById('nav-vendor-count').textContent = result.data.length;
+  } catch (err) {
+    console.error('Failed to fetch vendors:', err);
+  }
+}
+
+updateVendorCount();
+
+async function updateActiveRequirementsCount() {
+  try {
+    const response = await fetch('/api/supabase?action=getActiveRequirements');
+    const result = await response.json();
+    if (result.error) { console.error(result.error); return; }
+    document.getElementById('stat-active-req').textContent = result.data.length;
+    document.getElementById('nav-active-count').textContent = result.data.length;
+  } catch (err) {
+    console.error('Failed to fetch active requirements:', err);
+  }
+}
+
+updateActiveRequirementsCount();
+
+async function updateDraftRequirementsCount() {
+  try {
+    const response = await fetch('/api/supabase?action=getAllDraftRequirement');
+    const result = await response.json();
+    if (result.error) { console.error(result.error); return; }
+    document.getElementById('stat-draft-req').textContent = result.data.length;
+    document.getElementById('nav-draft-count').textContent = result.data.length;
+  } catch (err) {
+    console.error('Failed to fetch draft requirements:', err);
+  }
+}
+
+updateDraftRequirementsCount();
+
+async function loadHome() {
+  try {
+    const response = await fetch('/api/supabase?action=getActiveRequirements');
+    const result = await response.json();
+    if (result.error) { console.error(result.error); return; }
+    renderMainSummary(result.data);
+  } catch (err) {
+    console.error('Failed to fetch active requirements:', err);
+  }
+}
+
+function renderMainSummary(requirements) {
+  const $completion = document.getElementById('completion-list');
+  const $attention  = document.getElementById('attention-list');
+  $completion.innerHTML = '';
+  $attention.innerHTML = '';
+
+  let statActive = 0, statAwaiting = 0, statScoring = 0, statCompleted = 0, statAttention = 0;
+
+  requirements.forEach(req => {
+    const vendors   = req.assigned_vendors ?? [];
+    const total     = vendors.length;
+    const responded = vendors.filter(v => v.feedback && v.feedback.length).length;
+    const allIn     = total > 0 && responded === total;
+    const noneIn    = total > 0 && responded === 0;
+    const isApproved = req.approved === 'Y';
+    const pct       = total > 0 ? Math.round((responded / total) * 100) : 0;
+
+    if (isApproved)                          statCompleted++;
+    else if (allIn)                          statScoring++;
+    else if (req.status === 'awaiting_client') statAwaiting++;
+    else                                     statActive++;
+
+    $completion.innerHTML += '<div class="completion-row"><div style="flex:1;min-width:0"><div class="completion-name">' + req.title + '</div><div class="completion-meta">' + (vendors.map(v => v.name).join(', ') || '—') + '</div></div><div class="completion-bar"><div class="completion-fill" style="width:' + pct + '%"></div></div><div class="completion-count">' + responded + ' / ' + total + '</div></div>';
+
+    if (noneIn && !isApproved) {
+      statAttention++;
+      $attention.innerHTML += attentionRow('red', req.title + ' — no vendors have responded', total + ' vendor' + (total > 1 ? 's' : '') + ' assigned');
+    } else if (allIn && !isApproved) {
+      $attention.innerHTML += attentionRow('blue', req.title + ' — ready to score', 'All responses in');
+    } else if (!allIn && !noneIn && !isApproved) {
+      statAttention++;
+      $attention.innerHTML += attentionRow('amber', req.title + ' — ' + (total - responded) + ' vendor' + ((total - responded) > 1 ? 's' : '') + ' pending', responded + ' of ' + total + ' responded');
+    }
+  });
+
+  if ($attention.innerHTML === '') {
+    $attention.innerHTML = '<p style="font-size:13px;color:var(--muted);padding:12px 0">All requirements are on track.</p>';
+  }
+
+  document.getElementById('pipe-client').textContent    = statActive;
+  document.getElementById('pipe-awaiting').textContent  = statAwaiting;
+  document.getElementById('pipe-scoring').textContent   = statScoring;
+  document.getElementById('pipe-completed').textContent = statCompleted;
+  document.getElementById('pipe-attention').textContent = statAttention;
+
+  if (statAttention > 0) {
+    document.getElementById('home-alert').style.display = 'flex';
+    document.getElementById('home-alert-text').textContent = statAttention + ' requirement' + (statAttention > 1 ? 's' : '') + ' need attention — review vendor responses.';
+  } else {
+    document.getElementById('home-alert').style.display = 'none';
+  }
+}
+window.navigateTo = navigateTo;
+window.openWizard = openWizard;
+loadHome();
+</script>
+</body>
+</html>

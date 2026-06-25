@@ -71,7 +71,7 @@ export default async function handler(req, res) {
             res.status(500).json({ error: 'Internal error' });
         }
     }
-
+    
     if (action === 'addNewRequirement'){
         if (req.method !== "POST") {
             return res.status(405).json({ error: "Only POST allowed" });
@@ -80,6 +80,20 @@ export default async function handler(req, res) {
         try {
             const { requirement, status } = req.body;
             return await addNewRequirement(res, requirement, status);
+        } catch (err) {
+            console.error(err);
+            res.status(500).json({ error: 'Internal error' });
+        }
+    }
+
+    if (action === 'uploadVendorResponse'){
+        if (req.method !== "POST") {
+            return res.status(405).json({ error: "Only POST allowed" });
+        }
+
+        try {
+            const { payload } = req.body;
+            return await uploadVendorResponse(res, payload);
         } catch (err) {
             console.error(err);
             res.status(500).json({ error: 'Internal error' });
@@ -136,6 +150,20 @@ export default async function handler(req, res) {
         try {
             const { ids } = req.body;
             return await getVendorsByIdList(res, ids);
+        } catch (err) {
+            console.error(err);
+            res.status(500).json({ error: 'Internal error' });
+        }
+    }
+    
+    if (action === 'upsertVendor'){
+        if (req.method !== "POST") {
+            return res.status(405).json({ error: "Only POST allowed" });
+        }
+
+        try {
+            const { payload } = req.body;
+            return await upsertVendor(res, payload);
         } catch (err) {
             console.error(err);
             res.status(500).json({ error: 'Internal error' });
@@ -263,6 +291,17 @@ async function getVendorByName(res, name) {
     return res.status(200).json({ data });
 }
 
+async function upsertVendor(res, payload) {
+    const { data, error } = await supabase
+        .from('tblvendors')
+        .upsert(payload, { onConflict: 'name' })
+        .select('*')
+        .maybeSingle();
+
+    if (error) return res.status(500).json({ data: null, error: error.message });
+    return res.status(200).json({ data });
+}
+
 async function addVendor(res, payload) {
     const { data, error } = await supabase
     .from('tblvendors')
@@ -295,6 +334,17 @@ async function addNewRequirement(res, payload, status = 'pending') {
     .insert([
       { title: payload['title'], client:  payload['client'], requirements: payload['requirements'], status: status},
     ])
+    .select('*')
+    .single();
+
+    if (error) return res.status(500).json({ data: null, error: error.message });
+    return res.status(200).json({ data });
+}
+
+async function uploadVendorResponse(res, payload) {
+   const { data, error } = await supabase
+    .from('tblrfprequirements')
+    .insert(payload)
     .select('*')
     .single();
 

@@ -35,6 +35,8 @@
       --blue-border:  #bfdbfe;
       --font: 'Geist', system-ui, sans-serif;
       --mono: 'Geist Mono', monospace;
+      --topbar-h: 52px;
+      --sidebar-w: 200px;
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -48,24 +50,24 @@
       min-height: 100vh;
     }
 
+    /* ─────────────────────────────────────────
+       TOPBAR
+    ───────────────────────────────────────── */
     .topbar {
-      position: sticky; top: 0; z-index: 100;
+      position: fixed; top: 0; left: 0; right: 0; z-index: 200;
       background: var(--white);
       border-bottom: 1px solid var(--border);
-      padding: 0 28px; height: 52px;
+      padding: 0 20px; height: var(--topbar-h);
       display: flex; align-items: center; justify-content: space-between;
     }
-
     .topbar-left { display: flex; align-items: center; gap: 10px; }
-
     .logo-chip {
       width: 26px; height: 26px; background: var(--text);
       border-radius: 5px; display: flex; align-items: center; justify-content: center;
     }
     .logo-chip svg { width: 12px; height: 12px; fill: white; }
-
     .topbar-title { font-size: 13px; font-weight: 500; }
-    .topbar-title span { color: var(--light); font-weight: 400; margin-left: 6px; }
+    .topbar-meta { font-size: 12px; color: var(--light); margin-left: 4px; font-weight: 400; }
     .topbar-right { display: flex; align-items: center; gap: 8px; }
 
     .btn {
@@ -80,8 +82,108 @@
     .btn-ghost { background: var(--surface); color: var(--muted); border: 1px solid var(--border); }
     .btn-ghost:hover { color: var(--text); border-color: #c8c5be; }
 
-    .report-wrap { max-width: 1000px; margin: 0 auto; padding: 28px 24px 60px; }
+    /* ─────────────────────────────────────────
+       PAGE SHELL
+    ───────────────────────────────────────── */
+    .page-shell {
+      display: flex;
+      padding-top: var(--topbar-h);
+      min-height: 100vh;
+    }
 
+    /* ─────────────────────────────────────────
+       SIDEBAR
+    ───────────────────────────────────────── */
+    .sidebar {
+      position: fixed;
+      top: var(--topbar-h);
+      left: 0;
+      width: var(--sidebar-w);
+      height: calc(100vh - var(--topbar-h));
+      background: var(--white);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      z-index: 100;
+    }
+
+    .sidebar-project {
+      padding: 16px 14px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .sidebar-project-label {
+      font-size: 10px; font-weight: 600; letter-spacing: 0.09em;
+      text-transform: uppercase; color: var(--light); margin-bottom: 4px;
+    }
+    .sidebar-project-name {
+      font-size: 12px; font-weight: 600; color: var(--text);
+      line-height: 1.3; word-break: break-word;
+    }
+    .sidebar-project-sub {
+      font-size: 11px; color: var(--muted); margin-top: 2px;
+    }
+
+    .sidebar-nav { padding: 10px 8px; flex: 1; }
+    .nav-group { margin-bottom: 4px; }
+    .nav-group-label {
+      font-size: 10px; font-weight: 600; letter-spacing: 0.09em;
+      text-transform: uppercase; color: var(--light);
+      padding: 6px 8px 4px;
+    }
+
+    .nav-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 6px 8px; border-radius: 6px;
+      cursor: pointer; transition: all 0.12s;
+      text-decoration: none; color: var(--muted);
+      font-size: 12px; font-weight: 500;
+      position: relative;
+    }
+    .nav-item:hover { background: var(--surface); color: var(--text); }
+    .nav-item.active {
+      background: var(--surface);
+      color: var(--text);
+    }
+    .nav-item.active::before {
+      content: '';
+      position: absolute; left: 0; top: 50%;
+      transform: translateY(-50%);
+      width: 2px; height: 14px;
+      background: var(--text);
+      border-radius: 2px;
+    }
+    .nav-item i { font-size: 13px; width: 14px; text-align: center; flex-shrink: 0; }
+    .nav-badge {
+      margin-left: auto; font-size: 10px; font-weight: 600;
+      font-family: var(--mono); color: var(--light);
+      background: var(--surface); border: 1px solid var(--border);
+      padding: 1px 5px; border-radius: 4px;
+    }
+
+    .sidebar-footer {
+      padding: 12px 14px;
+      border-top: 1px solid var(--border);
+    }
+    .sidebar-stat-pair { display: flex; gap: 8px; }
+    .sidebar-stat { flex: 1; }
+    .sidebar-stat-val { font-size: 16px; font-weight: 600; color: var(--text); line-height: 1; }
+    .sidebar-stat-lbl { font-size: 10px; color: var(--light); margin-top: 2px; }
+
+    /* ─────────────────────────────────────────
+       MAIN CONTENT
+    ───────────────────────────────────────── */
+    .main-content {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      min-width: 0;
+      padding: 28px 32px 80px;
+      max-width: calc(100% - var(--sidebar-w));
+    }
+
+    /* ─────────────────────────────────────────
+       LOADING
+    ───────────────────────────────────────── */
     .loading {
       display: flex; flex-direction: column;
       align-items: center; justify-content: center;
@@ -97,22 +199,51 @@
     @keyframes spin { to { transform: rotate(360deg); } }
     .loading p { font-size: 13px; color: var(--light); }
 
-    .page-header { margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
-    .page-eyebrow { font-size: 11px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; color: var(--light); margin-bottom: 6px; }
+    /* ─────────────────────────────────────────
+       PAGE HEADER
+    ───────────────────────────────────────── */
+    .page-header {
+      margin-bottom: 28px; padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .page-eyebrow {
+      font-size: 11px; font-weight: 600; letter-spacing: 0.09em;
+      text-transform: uppercase; color: var(--light); margin-bottom: 6px;
+    }
     .page-title { font-size: 22px; font-weight: 600; letter-spacing: -0.03em; color: var(--text); margin-bottom: 2px; }
     .page-subtitle { font-size: 14px; color: var(--muted); }
     .meta-row { display: flex; gap: 24px; flex-wrap: wrap; margin-top: 16px; }
-    .meta-item label { font-size: 10px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; color: var(--light); display: block; margin-bottom: 2px; }
+    .meta-item label {
+      font-size: 10px; font-weight: 600; letter-spacing: 0.09em;
+      text-transform: uppercase; color: var(--light); display: block; margin-bottom: 2px;
+    }
     .meta-item span { font-size: 13px; color: var(--text); font-weight: 500; }
 
-    .section { margin-bottom: 28px; }
-    .section-label {
-      font-size: 11px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase;
-      color: var(--light); margin-bottom: 12px;
-      display: flex; align-items: center; gap: 8px;
+    /* ─────────────────────────────────────────
+       SECTIONS
+    ───────────────────────────────────────── */
+    .section {
+      margin-bottom: 40px;
+      scroll-margin-top: calc(var(--topbar-h) + 20px);
     }
-    .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+    .section-header {
+      display: flex; align-items: baseline; gap: 10px;
+      margin-bottom: 16px;
+    }
+    .section-eyebrow {
+      font-size: 10px; font-weight: 600; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--light); flex-shrink: 0;
+    }
+    .section-title {
+      font-size: 15px; font-weight: 600; color: var(--text);
+    }
+    .section-header-line {
+      flex: 1; height: 1px; background: var(--border);
+    }
 
+    /* ─────────────────────────────────────────
+       CARDS
+    ───────────────────────────────────────── */
     .card { background: var(--white); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
     .card-header {
       padding: 12px 16px; border-bottom: 1px solid var(--border);
@@ -121,27 +252,45 @@
     }
     .card-body { padding: 0; }
 
-    /* ── PIE CHARTS ── */
-    .pie-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-bottom: 14px; }
+    /* ─────────────────────────────────────────
+       PIE CHARTS
+    ───────────────────────────────────────── */
+    .pie-row {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+      gap: 12px; margin-bottom: 14px;
+    }
     .pie-card { background: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
     .pie-card-vendor { font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--light); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .pie-card-score { font-size: 22px; font-weight: 600; line-height: 1; margin-bottom: 10px; }
-    .pie-canvas-wrap { position: relative; width: 100%; height: 140px; }
+    .pie-canvas-wrap { position: relative; width: 100%; height: 130px; }
     .pie-legend { margin-top: 10px; display: flex; flex-direction: column; gap: 4px; }
     .pie-legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); }
     .pie-legend-sq { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
 
-    /* ── HEATMAP TABLE ── */
+    /* ─────────────────────────────────────────
+       HEATMAP
+    ───────────────────────────────────────── */
     .heatmap-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-    .heatmap-table thead th { padding: 9px 14px; text-align: center; font-size: 10.5px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--light); background: var(--surface); border-bottom: 1px solid var(--border); white-space: nowrap; }
+    .heatmap-table thead th {
+      padding: 9px 14px; text-align: center;
+      font-size: 10.5px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--light); background: var(--surface); border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
     .heatmap-table thead th:first-child { text-align: left; }
     .heatmap-table tbody td { padding: 9px 14px; border-bottom: 1px solid #f0ede8; font-size: 12px; text-align: center; color: var(--muted); }
     .heatmap-table tbody td:first-child { text-align: left; color: var(--text); font-weight: 500; }
     .heatmap-table tbody tr:last-child td { border-bottom: none; }
     .heatmap-table tbody tr:hover { background: var(--surface); }
-    .heatmap-cell { display: inline-flex; align-items: center; justify-content: center; width: 54px; height: 26px; border-radius: 5px; font-size: 12px; font-weight: 600; font-family: var(--mono); }
+    .heatmap-cell {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 54px; height: 26px; border-radius: 5px;
+      font-size: 12px; font-weight: 600; font-family: var(--mono);
+    }
 
-    /* ── SCORE CARDS ── */
+    /* ─────────────────────────────────────────
+       SCORE CARDS / GRID
+    ───────────────────────────────────────── */
     .score-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
     .score-card { background: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 16px; text-align: center; }
     .score-card-vendor { font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--light); margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -151,9 +300,15 @@
     .score-value.low  { color: var(--red); }
     .score-label { font-size: 11.5px; color: var(--light); margin-top: 4px; }
 
-    /* ── REPORT TABLE ── */
+    /* ─────────────────────────────────────────
+       REPORT TABLE
+    ───────────────────────────────────────── */
     .report-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    .report-table thead th { padding: 9px 14px; text-align: left; font-size: 10.5px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--light); background: var(--surface); border-bottom: 1px solid var(--border); white-space: nowrap; }
+    .report-table thead th {
+      padding: 9px 14px; text-align: left;
+      font-size: 10.5px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--light); background: var(--surface); border-bottom: 1px solid var(--border); white-space: nowrap;
+    }
     .report-table thead th:not(:first-child) { text-align: center; }
     .report-table tbody tr { border-bottom: 1px solid #f0ede8; }
     .report-table tbody tr:last-child { border-bottom: none; }
@@ -167,14 +322,64 @@
     .pill.mid  { background: var(--amber-bg); color: var(--amber); border: 1px solid var(--amber-border); }
     .pill.low  { background: var(--red-bg);   color: var(--red);   border: 1px solid var(--red-border);   }
 
-    /* ── MUST-HAVE TILES ── */
+    /* ─────────────────────────────────────────
+       CORE PLATFORM TILES (Section 2)
+    ───────────────────────────────────────── */
+    .core-tile {
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: 10px; padding: 16px;
+    }
+    .core-tile-vendor {
+      font-size: 11px; font-weight: 600; letter-spacing: 0.05em;
+      text-transform: uppercase; color: var(--light);
+      margin-bottom: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .core-stat-row {
+      display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px;
+    }
+    .core-stat {
+      align-items: center; justify-content: space-between;
+      gap: 8px; padding: 0;
+    }
+    .core-stat-right {
+      display: flex; align-items: baseline; gap: 6px; flex-shrink: 0;
+    }
+    .core-divider { display: none; }
+    .core-stat-value { font-size: 18px; font-weight: 600; letter-spacing: -0.02em; line-height: 1; white-space: nowrap; }
+    .core-denom { font-size: 12px; font-weight: 400; color: var(--light); }
+    .core-stat-label { display: flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 500; white-space: nowrap; flex: 1; }
+    .core-stat-pct { font-size: 12px; color: var(--muted); text-align: right; }
+    .core-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .core-green { color: var(--green); }
+    .core-dot-green { background: #22c55e; }
+    .core-amber { color: #b45309; }
+    .core-dot-amber { background: #f59e0b; }
+    .core-red { color: var(--red); }
+    .core-dot-red { background: #ef4444; }
+    .core-stat:nth-child(1) .core-stat-label { color: var(--green); }
+    .core-stat:nth-child(2) .core-stat-label { color: #b45309; }
+    .core-stat:nth-child(3) .core-stat-label { color: var(--red); }
+    .core-bar-track {
+      display: flex; height: 5px; border-radius: 3px;
+      overflow: hidden; background: var(--border);
+    }
+    .core-bar-seg { height: 100%; }
+    .core-seg-green { background: #22c55e; }
+    .core-seg-amber { background: #f59e0b; }
+    .core-seg-red   { background: #ef4444; }
+
+    /* ─────────────────────────────────────────
+       MUST-HAVE TILES (Section 3)
+    ───────────────────────────────────────── */
     .must-tile { background: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
-    .must-tile-vendor { font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--light); margin-bottom: 8px; }
+    .must-tile-vendor { font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--light); margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .must-tile-fraction { font-size: 22px; font-weight: 600; letter-spacing: -0.02em; color: var(--text); line-height: 1; }
     .must-tile-fraction span { font-size: 14px; color: var(--light); font-weight: 400; }
     .must-tile-pct { font-size: 12px; color: var(--muted); margin-top: 4px; }
 
-    /* ── GAP ITEMS ── */
+    /* ─────────────────────────────────────────
+       GAP ITEMS (Section 4)
+    ───────────────────────────────────────── */
     .gap-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 16px; border-bottom: 1px solid #f0ede8; }
     .gap-item:last-child { border-bottom: none; }
     .gap-num { font-size: 11px; font-weight: 600; font-family: var(--mono); color: var(--light); min-width: 24px; padding-top: 1px; }
@@ -185,15 +390,40 @@
     .tag { font-size: 11.5px; font-weight: 500; padding: 2px 8px; border-radius: 5px; }
     .tag-workaround { background: var(--amber-bg); color: var(--amber); border: 1px solid var(--amber-border); }
     .tag-partial    { background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; }
-    .tag-fail       { background: var(--red-bg);   color: var(--red);   border: 1px solid var(--red-border);   }
-    .tag-minor      { background: var(--blue-bg);  color: var(--blue);  border: 1px solid var(--blue-border);  }
+    .tag-fail       { background: var(--red-bg);   color: var(--red);   border: 1px solid var(--red-border); }
+    .tag-minor      { background: var(--blue-bg);  color: var(--blue);  border: 1px solid var(--blue-border); }
     .tag-default    { background: var(--surface); color: var(--muted); border: 1px solid var(--border); }
 
-    /* ── BREAKDOWN ── */
+    /* ─────────────────────────────────────────
+       VENDOR DIVIDER
+    ───────────────────────────────────────── */
+    .vd { display: flex; align-items: center; gap: 10px; margin: 20px 0 14px; }
+    .vd:first-child { margin-top: 4px; }
+    .vd-avatar {
+      width: 26px; height: 26px; border-radius: 5px;
+      background: var(--surface); border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 600; color: var(--muted); text-transform: uppercase; flex-shrink: 0;
+    }
+    .vd-name  { font-size: 13px; font-weight: 600; color: var(--text); }
+    .vd-line  { flex: 1; height: 1px; background: var(--border); }
+    .vd-count { font-size: 12px; color: var(--light); white-space: nowrap; }
+
+    /* ─────────────────────────────────────────
+       BREAKDOWN (Section 5)
+    ───────────────────────────────────────── */
     .breakdown-wrap { padding: 12px 16px; }
-    .vendor-heading { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 12px 0 8px; padding-top: 12px; border-top: 1px solid var(--border); }
+    .vendor-heading {
+      font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--muted);
+      margin: 12px 0 8px; padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
     .vendor-heading:first-child { margin-top: 0; padding-top: 0; border-top: none; }
-    .area-heading { font-size: 11px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--light); margin: 10px 0 6px; }
+    .area-heading {
+      font-size: 11px; font-weight: 600; letter-spacing: 0.07em;
+      text-transform: uppercase; color: var(--light); margin: 12px 0 6px;
+    }
     .bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 5px; }
     .bar-label { font-size: 12px; color: var(--text); min-width: 140px; flex-shrink: 0; }
     .bar-track { flex: 1; height: 5px; border-radius: 3px; background: var(--border); overflow: hidden; }
@@ -204,25 +434,71 @@
     .bar-orange { background: #f97316; }
     .bar-red    { background: #ef4444; }
     .bar-counts { display: flex; gap: 10px; min-width: 90px; justify-content: flex-end; flex-shrink: 0; }
-    .bar-count { font-size: 11.5px; font-family: var(--mono); color: var(--muted); min-width: 36px; text-align: right; }
+    .bar-count  { font-size: 11.5px; font-family: var(--mono); color: var(--muted); min-width: 36px; text-align: right; }
+    .bd-count   { color: var(--text); font-weight: 600; }
+    .bd-pct     { color: var(--muted); }
 
-    /* ── VENDOR DIVIDER ── */
-    .vd { display: flex; align-items: center; gap: 10px; margin: 20px 0 14px; }
-    .vd-avatar { width: 26px; height: 26px; border-radius: 5px; background: var(--surface); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; color: var(--muted); text-transform: uppercase; flex-shrink: 0; }
-    .vd-name  { font-size: 13px; font-weight: 600; color: var(--text); }
-    .vd-line  { flex: 1; height: 1px; background: var(--border); }
-    .vd-count { font-size: 12px; color: var(--light); white-space: nowrap; }
+    /* Breakdown summary table */
+    .bdt-wrap {
+      margin: 10px 0 18px; border: 1px solid var(--border);
+      border-radius: 8px; overflow: hidden;
+    }
+    .bdt-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .bdt-table thead th {
+      padding: 7px 12px; text-align: left;
+      font-size: 10.5px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--light); background: var(--surface); border-bottom: 1px solid var(--border); white-space: nowrap;
+    }
+    .bdt-th-n, .bdt-th-pct { text-align: right; }
+    .bdt-th-bar { width: 30%; }
+    .bdt-row td { padding: 7px 12px; border-bottom: 1px solid #f0ede8; vertical-align: middle; }
+    .bdt-row:last-of-type td { border-bottom: 1px solid var(--border); }
+    .bdt-status { display: flex; align-items: center; gap: 6px; color: var(--text); font-weight: 500; }
+    .bdt-n, .bdt-pct { text-align: right; color: var(--muted); font-family: var(--mono); }
+    .bdt-n { color: var(--text); font-weight: 600; }
+    .bdt-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .dot-green  { background: #22c55e; }
+    .dot-blue   { background: #3b82f6; }
+    .dot-amber  { background: #f59e0b; }
+    .dot-orange { background: #f97316; }
+    .dot-red    { background: #ef4444; }
+    .bdt-track { height: 5px; border-radius: 3px; background: var(--border); overflow: hidden; }
+    .bdt-fill  { height: 100%; border-radius: 3px; }
+    .bdt-total td {
+      padding: 7px 12px; font-size: 11.5px; font-weight: 600;
+      color: var(--muted); background: var(--surface);
+    }
+    .bdt-total td:nth-child(2) { text-align: right; color: var(--text); font-family: var(--mono); }
+    .bdt-total td:nth-child(3) { text-align: right; font-family: var(--mono); }
 
+    /* ─────────────────────────────────────────
+       MISC
+    ───────────────────────────────────────── */
     .empty-note { font-size: 13px; color: var(--light); padding: 8px 0 14px; }
     .hide { display: none !important; }
+
+    /* ─────────────────────────────────────────
+       SCROLL PROGRESS BAR
+    ───────────────────────────────────────── */
+    .scroll-progress {
+      position: fixed; top: var(--topbar-h); left: var(--sidebar-w);
+      right: 0; height: 2px; z-index: 150;
+      background: var(--border);
+    }
+    .scroll-progress-fill {
+      height: 100%; background: var(--text);
+      width: 0%; transition: width 0.1s linear;
+    }
   </style>
 </head>
 <body>
 
+  <!-- TOPBAR -->
   <header class="topbar">
     <div class="topbar-left">
       <div class="logo-chip"><svg viewBox="0 0 14 14"><path d="M7 1L1 5v8h4V9h4v4h4V5L7 1z"/></svg></div>
-      <span class="topbar-title">Udder <span>Vendor Evaluation Report</span></span>
+      <span class="topbar-title">Vendor Evaluation Report</span>
+      <span class="topbar-meta" id="topbarMeta"></span>
     </div>
     <div class="topbar-right">
       <button class="btn btn-ghost" id="backBtn">← Back</button>
@@ -232,104 +508,229 @@
     </div>
   </header>
 
-  <div class="report-wrap">
+  <!-- SCROLL PROGRESS -->
+  <div class="scroll-progress"><div class="scroll-progress-fill" id="scrollFill"></div></div>
 
-    <div class="loading" id="loadingState">
-      <div class="spinner"></div>
-      <p>Building report…</p>
-    </div>
+  <div class="page-shell">
 
-    <div id="reportContent" class="hide">
-
-      <!-- PAGE HEADER -->
-      <div class="page-header">
-        <div class="page-eyebrow">Vendor Evaluation Report</div>
-        <div class="page-title" id="rTitle">—</div>
-        <div class="page-subtitle" id="rCompany">—</div>
-        <div class="meta-row">
-          <div class="meta-item"><label>Client</label><span id="rClient">—</span></div>
-          <div class="meta-item"><label>Country</label><span id="rCountry">—</span></div>
-          <div class="meta-item"><label>Timeline</label><span id="rTimeline">—</span></div>
-          <div class="meta-item"><label>Headcount</label><span id="rHeadcount">—</span></div>
-          <div class="meta-item"><label>Vendors</label><span id="rVendorCount">—</span></div>
-          <div class="meta-item"><label>Requirements</label><span id="rReqCount">—</span></div>
-        </div>
+    <!-- SIDEBAR (hidden until data loads) -->
+    <aside class="sidebar hide" id="sidebar">
+      <div class="sidebar-project">
+        <div class="sidebar-project-label">Project</div>
+        <div class="sidebar-project-name" id="sidebarTitle">—</div>
+        <div class="sidebar-project-sub" id="sidebarCompany">—</div>
       </div>
 
-      <!-- SECTION 0: OVERVIEW CHARTS -->
-      <div class="section">
-        <div class="section-label">Overview</div>
+      <nav class="sidebar-nav">
+        <div class="nav-group">
+          <div class="nav-group-label">Report</div>
+          <a class="nav-item active" data-section="sec-overview" href="#sec-overview">
+            <i class="fa-solid fa-chart-pie"></i> Overview
+          </a>
+          <a class="nav-item" data-section="sec-scores" href="#sec-scores">
+            <i class="fa-solid fa-trophy"></i> Match Scores
+          </a>
+        </div>
+        <div class="nav-group">
+          <div class="nav-group-label">Must-Haves</div>
+          <a class="nav-item" data-section="sec-core" href="#sec-core">
+            <i class="fa-solid fa-shield-halved"></i> Core Platform
+          </a>
+          <a class="nav-item" data-section="sec-must" href="#sec-must">
+            <i class="fa-solid fa-list-check"></i> Summary
+          </a>
+          <a class="nav-item" data-section="sec-gaps" href="#sec-gaps">
+            <i class="fa-solid fa-triangle-exclamation"></i> Gaps
+            <span class="nav-badge" id="navGapCount">—</span>
+          </a>
+        </div>
+        <div class="nav-group">
+          <div class="nav-group-label">Detail</div>
+          <a class="nav-item" data-section="sec-breakdown" href="#sec-breakdown">
+            <i class="fa-solid fa-table-cells"></i> Breakdown
+          </a>
+        </div>
+      </nav>
 
-        <div class="pie-row" id="chartPieRow"></div>
-
-        <div class="card">
-          <div class="card-header">Match score by area</div>
-          <div class="card-body">
-
-            <!-- Legend (populated by JS) -->
-            <div id="heatmapLegend" style="display:flex;flex-wrap:wrap;gap:14px;padding:12px 16px;border-bottom:1px solid #e2e0db;"></div>
-
-            <!-- Bar chart -->
-            <div style="padding:16px 16px 8px;">
-              <div id="heatmapBarWrap" style="position:relative;width:100%;height:280px;">
-                <canvas id="heatmapBarChart"
-                  role="img"
-                  aria-label="Grouped horizontal bar chart showing vendor match scores per area.">
-                </canvas>
-              </div>
-            </div>
-
-            <!-- Table -->
-            <table class="heatmap-table" style="border-top:1px solid #e2e0db;">
-              <thead id="heatmapHead"></thead>
-              <tbody id="heatmapBody"></tbody>
-            </table>
-
+      <div class="sidebar-footer">
+        <div class="sidebar-stat-pair">
+          <div class="sidebar-stat">
+            <div class="sidebar-stat-val" id="sidebarVendors">—</div>
+            <div class="sidebar-stat-lbl">Vendors</div>
+          </div>
+          <div class="sidebar-stat">
+            <div class="sidebar-stat-val" id="sidebarReqs">—</div>
+            <div class="sidebar-stat-lbl">Requirements</div>
           </div>
         </div>
       </div>
+    </aside>
 
-      <!-- SECTION 1: MATCH SCORES -->
-      <div class="section">
-        <div class="section-label">1 — Match Scores</div>
-        <div class="score-grid" id="scoreCards"></div>
-        <div style="margin-top:14px;">
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+
+      <div class="loading" id="loadingState">
+        <div class="spinner"></div>
+        <p>Building report…</p>
+      </div>
+
+      <div id="reportContent" class="hide">
+
+        <!-- PAGE HEADER -->
+        <div class="page-header">
+          <div class="page-eyebrow">Vendor Evaluation Report</div>
+          <div class="page-title" id="rTitle">—</div>
+          <div class="page-subtitle" id="rCompany">—</div>
+          <div class="meta-row">
+            <div class="meta-item"><label>Client</label><span id="rClient">—</span></div>
+            <div class="meta-item"><label>Country</label><span id="rCountry">—</span></div>
+            <div class="meta-item"><label>Timeline</label><span id="rTimeline">—</span></div>
+            <div class="meta-item"><label>Headcount</label><span id="rHeadcount">—</span></div>
+            <div class="meta-item"><label>Vendors</label><span id="rVendorCount">—</span></div>
+            <div class="meta-item"><label>Requirements</label><span id="rReqCount">—</span></div>
+          </div>
+        </div>
+
+        <!-- SECTION 0: OVERVIEW -->
+        <div class="section" id="sec-overview">
+          <div class="section-header">
+            <span class="section-eyebrow">Overview</span>
+            <span class="section-title">Match overview</span>
+            <span class="section-header-line"></span>
+          </div>
+
+          <div class="pie-row" id="chartPieRow"></div>
+
           <div class="card">
-            <div class="card-header">Score by area</div>
+            <div class="card-header">Match score by area</div>
             <div class="card-body">
-              <table class="report-table">
-                <thead id="scoreTableHead"></thead>
-                <tbody id="scoreTableBody"></tbody>
+              <div id="heatmapLegend" style="display:flex;flex-wrap:wrap;gap:14px;padding:12px 16px;border-bottom:1px solid #e2e0db;"></div>
+              <div style="padding:16px 16px 8px;">
+                <div id="heatmapBarWrap" style="position:relative;width:100%;height:280px;">
+                  <canvas id="heatmapBarChart" role="img" aria-label="Grouped horizontal bar chart showing vendor match scores per area."></canvas>
+                </div>
+              </div>
+              <table class="heatmap-table" style="border-top:1px solid #e2e0db;">
+                <thead id="heatmapHead"></thead>
+                <tbody id="heatmapBody"></tbody>
               </table>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- SECTION 2: MUST-HAVE SUMMARY -->
-      <div class="section">
-        <div class="section-label">2 — Must-Have Requirements</div>
-        <div class="score-grid" id="mustCards"></div>
-      </div>
-
-      <!-- SECTION 3: MUST-HAVE GAPS -->
-      <div class="section">
-        <div class="section-label">3 — Must-Have Gaps</div>
-        <div class="card">
-          <div class="card-body" id="gapList"></div>
+        <!-- SECTION 1: MATCH SCORES -->
+        <div class="section" id="sec-scores">
+          <div class="section-header">
+            <span class="section-eyebrow">01</span>
+            <span class="section-title">Match Scores</span>
+            <span class="section-header-line"></span>
+          </div>
+          <div class="score-grid" id="scoreCards"></div>
+          <div style="margin-top:14px;">
+            <div class="card">
+              <div class="card-header">Score by area</div>
+              <div class="card-body">
+                <table class="report-table">
+                  <thead id="scoreTableHead"></thead>
+                  <tbody id="scoreTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
 
-      <!-- SECTION 4: BREAKDOWN BY AREA -->
-      <div class="section">
-        <div class="section-label">4 — Breakdown by Area &amp; Priority</div>
-        <div class="card">
-          <div class="breakdown-wrap" id="breakdownWrap"></div>
+        <!-- SECTION 2: CORE PLATFORM -->
+        <div class="section" id="sec-core">
+          <div class="section-header">
+            <span class="section-eyebrow">02</span>
+            <span class="section-title">Must-Have Requirements — Core Platform</span>
+            <span class="section-header-line"></span>
+          </div>
+          <div class="score-grid" id="coreCards"></div>
         </div>
-      </div>
 
-    </div>
-  </div>
+        <!-- SECTION 3: MUST-HAVE SUMMARY -->
+        <div class="section" id="sec-must">
+          <div class="section-header">
+            <span class="section-eyebrow">03</span>
+            <span class="section-title">Must-Have Requirements</span>
+            <span class="section-header-line"></span>
+          </div>
+          <div class="score-grid" id="mustCards"></div>
+        </div>
+
+        <!-- SECTION 4: MUST-HAVE GAPS -->
+        <div class="section" id="sec-gaps">
+          <div class="section-header">
+            <span class="section-eyebrow">04</span>
+            <span class="section-title">Must-Have Gaps</span>
+            <span class="section-header-line"></span>
+          </div>
+          <div class="card">
+            <div class="card-body" id="gapList"></div>
+          </div>
+        </div>
+
+        <!-- SECTION 5: BREAKDOWN -->
+        <div class="section" id="sec-breakdown">
+          <div class="section-header">
+            <span class="section-eyebrow">05</span>
+            <span class="section-title">Breakdown by Area &amp; Priority</span>
+            <span class="section-header-line"></span>
+          </div>
+          <div class="card">
+            <div class="breakdown-wrap" id="breakdownWrap"></div>
+          </div>
+        </div>
+
+      </div><!-- /reportContent -->
+    </main>
+  </div><!-- /page-shell -->
+
+  <script>
+    // ── Sidebar nav active state + scroll spy ──────────────────────
+    const SECTIONS = [
+      'sec-overview','sec-scores','sec-core',
+      'sec-must','sec-gaps','sec-breakdown'
+    ];
+
+    function setActive(id) {
+      document.querySelectorAll('.nav-item').forEach(el => {
+        el.classList.toggle('active', el.dataset.section === id);
+      });
+    }
+
+    // Smooth scroll on nav click
+    document.querySelectorAll('.nav-item').forEach(el => {
+      el.addEventListener('click', e => {
+        e.preventDefault();
+        const target = document.getElementById(el.dataset.section);
+        if (target) {
+          const offset = parseInt(getComputedStyle(document.documentElement)
+            .getPropertyValue('--topbar-h')) + 20;
+          window.scrollTo({ top: target.offsetTop - offset, behavior: 'smooth' });
+        }
+      });
+    });
+
+    // Scroll spy + progress bar
+    window.addEventListener('scroll', () => {
+      // Progress bar
+      const scrollTop  = window.scrollY;
+      const docHeight  = document.documentElement.scrollHeight - window.innerHeight;
+      const pct        = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+      document.getElementById('scrollFill').style.width = pct + '%';
+
+      // Active section
+      const topbarH = 52 + 40;
+      let current = SECTIONS[0];
+      SECTIONS.forEach(id => {
+        const el = document.getElementById(id);
+        if (el && el.getBoundingClientRect().top <= topbarH) current = id;
+      });
+      setActive(current);
+    }, { passive: true });
+  </script>
 
 </body>
 </html>

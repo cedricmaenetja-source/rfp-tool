@@ -409,7 +409,7 @@ async function loadRequirements(requirementId) {
         alert('Failed to load data');
         return;
     }
-
+    
     requirementData = data;
     if (data.status == App.COMPLETED){
         //$('.add-btn-vendor').addClass('hide');

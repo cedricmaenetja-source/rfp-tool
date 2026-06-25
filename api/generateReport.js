@@ -282,7 +282,7 @@ export default async function handler(req, res) {
     const allAreas = ['All areas', ...sysParts];
 
     const wb = new ExcelJS.Workbook();
-    wb.creator = 'Udder RFP Tool';
+    wb.creator = 'Udder Udder RFP Management Tool';
     wb.created = new Date();
 
     allAreas.forEach(part => {
