@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign in — Udder RFP Management Tool</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+<link rel="stylesheet" type="text/css" href="../assets/css/common.css" />
+<script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --o:#f04e23;--o2:#c93d18;--os:rgba(240,78,35,.08);--om:rgba(240,78,35,.15);
+  --k:#0f0f0f;--k2:#1c1c1c;--w:#ffffff;--off:#fafaf9;--off2:#f3f2ef;
+  --b1:rgba(15,15,15,.05);--b2:rgba(15,15,15,.09);--b3:rgba(15,15,15,.16);
+  --t1:#111110;--t2:#4a4a46;--t3:#8a8a85;--t4:#b8b8b2;
+  --sans:'Poppins','Helvetica Neue',Arial,sans-serif;
+  --radius-card:5px;--radius-btn:4px;
+}
+body{
+  font-family:var(--sans);
+  background:var(--off);
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:var(--t1);
+  font-size:13px;
+  padding:20px;
+}
+.auth-wrap{width:100%;max-width:380px}
+.auth-logo{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:24px}
+.auth-logo-mark{width:30px;height:30px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.auth-logo-mark img{width:100%;height:100%;object-fit:contain;display:block}
+.auth-logo-text strong{display:block;font-size:14px;font-weight:600;color:var(--t1);letter-spacing:.01em}
+.auth-logo-text span{font-size:9.5px;color:var(--t3);letter-spacing:.05em;text-transform:uppercase}
+.auth-card{background:var(--w);border:1px solid var(--b2);border-radius:var(--radius-card);padding:28px 28px 24px}
+.auth-title{font-size:17px;font-weight:600;color:var(--t1);letter-spacing:-.01em;margin-bottom:4px}
+.auth-subtitle{font-size:12.5px;color:var(--t3);margin-bottom:22px;line-height:1.5}
+.form-group{display:flex;flex-direction:column;margin-bottom:14px}
+.form-group label{font-size:10.5px;font-weight:600;letter-spacing:.04em;color:var(--t3);margin-bottom:6px;text-transform:uppercase}
+.input-wrap{position:relative;display:flex;align-items:center}
+.input-wrap i{position:absolute;left:11px;color:var(--t4);font-size:13px}
+.form-group input{
+  padding:10px 12px 10px 34px;
+  border:1px solid var(--b2);
+  border-radius:var(--radius-btn);
+  font-family:var(--sans);
+  font-size:13px;
+  background:var(--off2);
+  color:var(--t1);
+  outline:none;
+  width:100%;
+  transition:border-color .12s,background .12s;
+}
+.form-group input:focus{border-color:var(--b3);background:var(--w)}
+.input-wrap .toggle-pw{
+  position:absolute;right:11px;left:auto;color:var(--t4);font-size:13px;cursor:pointer;background:none;border:none;padding:0;
+}
+.input-wrap .toggle-pw:hover{color:var(--t2)}
+.form-row-between{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;margin-top:-4px}
+.remember{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--t2)}
+.remember input{width:13px;height:13px;accent-color:var(--o);cursor:pointer}
+.forgot-link{font-size:12px;color:var(--o);text-decoration:none;font-weight:500}
+.forgot-link:hover{color:var(--o2);text-decoration:underline}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  padding:10px 14px;border-radius:var(--radius-btn);font-size:13px;font-family:var(--sans);
+  cursor:pointer;font-weight:500;transition:all .12s,transform .08s,opacity .08s;border:none;width:100%;
+}
+.btn-primary{background:var(--o);color:#fff}
+.btn-primary:hover{background:var(--o2)}
+.btn-primary:active{transform:scale(.98);opacity:.9}
+.btn-primary:disabled{background:var(--t4);cursor:not-allowed}
+.divider{display:flex;align-items:center;gap:10px;margin:20px 0;font-size:11px;color:var(--t4);text-transform:uppercase;letter-spacing:.05em}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--b2)}
+.alert-error{
+  display:flex;align-items:flex-start;gap:9px;background:#fdecea;border:1px solid #f5c2bd;
+  border-radius:var(--radius-card);padding:9px 12px;margin-bottom:16px;font-size:12px;color:#b91c1c;
+  display:none;
+}
+.alert-error i{margin-top:1px}
+.auth-footer{text-align:center;margin-top:18px;font-size:12.5px;color:var(--t3)}
+.auth-footer a{color:var(--o);text-decoration:none;font-weight:500}
+.auth-footer a:hover{color:var(--o2);text-decoration:underline}
+.back-link{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--t2);text-decoration:none;margin-bottom:18px}
+.back-link:hover{color:var(--t1)}
+.spinner{width:14px;height:14px;border-radius:50%;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;animation:spin .7s linear infinite;display:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+.form-group input{background: white;}
+.page-loader{
+  position:fixed;inset:0;background:var(--off);
+  display:flex;align-items:center;justify-content:center;
+  z-index:999;
+}
+.page-loader .spinner-lg{
+  width:28px;height:28px;border-radius:50%;
+  border:3px solid var(--b2);border-top-color:var(--o);
+  animation:spin .7s linear infinite;
+}
+.auth-wrap{display:none}
+</style>
+</head>
+<body>
+    <div class="page-loader" id="page-loader">
+        <div class="spinner-lg"></div>
+    </div>
+<div class="auth-wrap">
+  <div class="auth-logo">
+    <div class="auth-logo-mark">
+      <img src="../assets/images/udder.png" alt="Udder logo">
+    </div>
+    <div class="auth-logo-text">
+      <strong>Udder RFP</strong>
+      <span>Management Tool</span>
+    </div>
+  </div>
+
+  <div class="auth-card">
+    <div class="auth-title">Sign in</div>
+    <div class="auth-subtitle">Enter your credentials to access your workspace.</div>
+
+    <div class="alert-error" id="login-error">
+      <i class="fa-solid fa-circle-exclamation"></i>
+      <span id="login-error-text">Invalid email or password.</span>
+    </div>
+
+    <form id="login-form" novalidate>
+      <div class="form-group">
+        <label for="login-email">Email</label>
+        <div class="input-wrap">
+          <i class="fa-solid fa-envelope"></i>
+          <input type="email" id="login-email" placeholder="you@company.com" autocomplete="username" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="login-password">Password</label>
+        <div class="input-wrap">
+          <i class="fa-solid fa-lock"></i>
+          <input type="password" id="login-password" placeholder="Enter your password" autocomplete="current-password" required>
+          <button type="button" class="toggle-pw" id="toggle-pw" aria-label="Show password">
+            <i class="fa-solid fa-eye"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- <div class="form-row-between">
+        <label class="remember">
+          <input type="checkbox" id="remember-me">
+          Remember me
+        </label>
+      </div> -->
+
+      <button type="button" class="btn btn-primary" id="login-submit-btn">
+        <span class="spinner" id="login-spinner"></span>
+        <span id="login-btn-text">Sign in</span>
+      </button>
+    </form>
+  </div>
+
+  <div class="auth-footer">
+    Need access? <a href="#">Contact your administrator</a>
+  </div>
+</div>
+
+<script type="module">
+    import { showNotification, lockBtn } from '../assets/js/app.js';
+    import { initAuth, getCurrentUser, login } from '../assets/js/core/_auth.js';
+
+    $(async function(){
+        const token = await initAuth();
+        if (token) {
+            window.location.href = './';
+            return;
+        }
+
+        $('#page-loader').hide();
+        $('.auth-wrap').css('display', 'block');
+
+        $('#login-submit-btn').on('click', async function(){
+            const email = $('#login-email').val().trim();
+            const pwd = $('#login-password').val();
+
+            if (!email || !pwd){showNotification('Email and password required.', 'error');return;}
+
+            const reset = lockBtn($(this));
+            if (!reset) return;
+
+            const result = await login(email, password);
+            if (result.error) {showNotification(result.error, 'error');reset();return;}
+
+            if (result.accessToken) {
+                localStorage.setItem('udder_token', result.accessToken);
+            }
+
+            location.href = './';
+        });    
+    });
+</script>
+</body>
+</html>

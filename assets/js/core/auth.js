@@ -1,16 +1,40 @@
+import { PAGES } from '../utils/constants.js';
+
 const AUTH_USER = {
   user: "admin",
   password: "955453edda726f62efc7e35a612b007d5e65266c2cbf7a5909cf166e14990e0f"
 };
 
 export async function auth(user, pwd){
-    const password = await sha256(pwd);
+    //const { success } = await fetch(`/api/auth`);
+    
     if (user == AUTH_USER.user && password ==  AUTH_USER.password){
         setCookie('loggedIn', true, 365);
         return true;
     }
 
     return false;
+}
+
+async function login(email, password) {
+    const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include', 
+        body: JSON.stringify({ email, password })
+    });
+
+    if (!res.ok) {
+        const { error } = await res.json();
+        throw new Error(error || 'Login failed');
+    }
+
+    const { accessToken, user } = await res.json();
+
+    setAccessToken(accessToken);
+    setCurrentUser(user);
+
+    return user;
 }
 
 async function sha256(text) {

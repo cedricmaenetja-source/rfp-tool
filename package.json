@@ -21,6 +21,8 @@
   "homepage": "https://github.com/youngcet/rfp-tool#readme",
   "dependencies": {
     "@supabase/supabase-js": "^2.99.1",
-    "exceljs": "^4.4.0"
+    "bcrypt": "^6.0.0",
+    "exceljs": "^4.4.0",
+    "jsonwebtoken": "^9.0.3"
   }
 }

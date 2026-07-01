@@ -7,6 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
 <link href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css" rel="stylesheet" />
+<link rel="stylesheet" type="text/css" href="../assets/css/common.css" />
 <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
 <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -109,7 +110,7 @@ table.dataTable.order-column.stripe tbody tr.even>.sorting_1:hover {
 }
 table.dataTable tbody tr:hover td.sorting_1{background:var(--w) !important}
 .rfp-table{width:100% !important;border-collapse:collapse !important;font-size:12.5px;font-family:var(--sans)}
-.rfp-table thead th{background:var(--w);color:var(--t3);font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;padding:8px 14px;border-bottom:1px solid var(--b1);white-space:nowrap}
+.rfp-table thead th{background:var(--w);color:var(--t3);font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;padding:8px 14px;border-bottom:1px solid var(--b1);white-space:nowrap;text-align: left;}
 .rfp-table thead th.sorting,.rfp-table thead th.sorting_asc,.rfp-table thead th.sorting_desc{background-image:none !important;padding-right:22px;position:relative}
 .rfp-table thead th.sorting::after{content:'↕';position:absolute;right:7px;color:var(--t4);font-size:9px}
 .rfp-table thead th.sorting_asc::after{content:'↑';position:absolute;right:7px;color:var(--t3);font-size:9px}
@@ -156,7 +157,7 @@ table.dataTable tbody tr:hover td.sorting_1{background:var(--w) !important}
 #vendorPanel h4{margin:0 0 12px;font-size:14px;font-weight:600;color:var(--t1)}
 #vendorPanel .form-group{display:flex;flex-direction:column;margin-bottom:10px}
 #vendorPanel .form-group label{font-size:10.5px;font-weight:600;letter-spacing:.04em;color:var(--t3);margin-bottom:4px;text-transform:uppercase}
-#vendorPanel .form-group input,#vendorPanel .form-group textarea{padding:8px 10px;border:1px solid var(--b2);border-radius:var(--radius-btn);font-family:var(--sans);font-size:12.5px;background:var(--off2);color:var(--t1);outline:none;transition:border-color .12s,background .12s}
+#vendorPanel .form-group input,#vendorPanel .form-group textarea{padding:8px 10px;border:1px solid var(--b2);border-radius:var(--radius-btn);font-family:var(--sans);font-size:12.5px;background:var(--w);color:var(--t1);outline:none;transition:border-color .12s,background .12s}
 #vendorPanel .form-group input:focus,#vendorPanel .form-group textarea:focus{border-color:var(--b3);background:var(--w)}
 .panel-actions{margin-top:14px;display:flex;justify-content:flex-end;gap:8px}
 .pipeline-grid{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
@@ -185,7 +186,7 @@ table.dataTable tbody tr:hover td.sorting_1{background:var(--w) !important}
 .config-card{background:var(--w);border:1px solid var(--b2);border-radius:var(--radius-card);padding:12px 14px}
 .config-card h3{font-size:12.5px;font-weight:600;color:var(--t1);margin:0 0 12px;letter-spacing:-.01em}
 .config-input-row{display:flex;gap:8px;margin-bottom:10px}
-.config-input-row input{flex:1;padding:7px 10px;border:1px solid var(--b2);border-radius:var(--radius-btn);font-family:var(--sans);font-size:12.5px;background:var(--off2);color:var(--t1);outline:none;transition:border-color .12s}
+.config-input-row input{flex:1;padding:7px 10px;border:1px solid var(--b2);border-radius:var(--radius-btn);font-family:var(--sans);font-size:12.5px;background:var(--w);color:var(--t1);outline:none;transition:border-color .12s}
 .config-input-row input:focus{border-color:var(--b3);background:var(--w)}
 .config-add-btn{padding:6px 12px;font-size:12.5px;font-family:var(--sans);border:1px solid var(--b2);border-radius:var(--radius-btn);background:var(--w);color:var(--t1);cursor:pointer;white-space:nowrap;transition:background .12s,transform .08s,opacity .08s}
 .config-add-btn:hover{background:var(--off2)}
@@ -197,8 +198,13 @@ table.dataTable tbody tr:hover td.sorting_1{background:var(--w) !important}
 .config-item button:active{transform:scale(.9)}
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.22);z-index:500;align-items:center;justify-content:center}
 .modal-overlay.open{display:flex}
-.modal-box{background:var(--w);border:1px solid var(--b2);border-radius:var(--radius-card);padding:20px 22px;width:480px;max-width:95vw;position:relative}
+.modal-box{background:var(--w);border:1px solid var(--b2);border-radius:var(--radius-card);padding:20px 22px;width:620px;max-width:95vw;position:relative}
 .modal-box h2{font-size:15px;font-weight:600;margin-bottom:16px;letter-spacing:-.01em}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.22);z-index:500;align-items:center;justify-content:center;opacity:0;transition:opacity .2s ease}
+.modal-overlay.open{display:flex;animation:modalFadeIn .2s ease forwards}
+.modal-box{transform:scale(.96);transition:transform .2s cubic-bezier(.34,1.56,.64,1)}
+.modal-overlay.open .modal-box{transform:scale(1)}
+@keyframes modalFadeIn{from{opacity:0}to{opacity:1}}
 .modal-box .close-modal{position:absolute;top:14px;right:16px;font-size:18px;color:var(--t3);cursor:pointer;background:none;border:none;line-height:1}
 .modal-box .close-modal:hover{color:var(--t1)}
 .wizard-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.22);z-index:600;align-items:center;justify-content:center}
@@ -217,7 +223,7 @@ table.dataTable tbody tr:hover td.sorting_1{background:var(--w) !important}
 .checklist-item{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:var(--off2);border:1px solid var(--b1);border-radius:var(--radius-btn);font-size:12.5px;margin-bottom:6px}
 .wizard-form .form-group{display:flex;flex-direction:column;margin-bottom:10px}
 .wizard-form .form-group label{font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--t3);margin-bottom:4px}
-.wizard-form .form-group input,.wizard-form .form-group select{padding:8px 10px;border:1px solid var(--b2);border-radius:var(--radius-btn);font-family:var(--sans);font-size:12.5px;background:var(--off2);color:var(--t1);outline:none;width:100%;transition:border-color .12s}
+.wizard-form .form-group input,.wizard-form .form-group select{padding:8px 10px;border:1px solid var(--b2);border-radius:var(--radius-btn);font-family:var(--sans);font-size:12.5px;background:var(--w);color:var(--t1);outline:none;width:100%;transition:border-color .12s}
 .wizard-form .form-group input:focus,.wizard-form .form-group select:focus{border-color:var(--b3);background:var(--w)}
 .two-form-cols{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 
@@ -260,6 +266,24 @@ table.dataTable tbody tr:hover td.sorting_1{background:var(--w) !important}
 .req-table td:last-child{border-right:none}
 .req-table th:first-child{border-left:none}
 .req-table th:last-child{border-right:none}
+#userPanel{position:fixed;top:0;right:-380px;width:340px;height:100%;background:var(--w);border-left:1px solid var(--b2);padding:14px 16px;transition:right .28s cubic-bezier(.22,.61,.36,1);z-index:1000;overflow-y:auto}
+#userPanel.open{right:0}
+#userPanel h4{margin:0 0 12px;font-size:14px;font-weight:600;color:var(--t1)}
+#userPanel .form-group{display:flex;flex-direction:column;margin-bottom:10px}
+#userPanel .form-group label{font-size:10.5px;font-weight:600;letter-spacing:.04em;color:var(--t3);margin-bottom:4px;text-transform:uppercase}
+#userPanel .form-group input,#userPanel .form-group select{padding:8px 10px;border:1px solid var(--b2);border-radius:var(--radius-btn);font-family:var(--sans);font-size:12.5px;background:var(--w);color:var(--t1);outline:none;transition:border-color .12s,background .12s}
+#userPanel .form-group input:focus,#userPanel .form-group select:focus{border-color:var(--b3);background:var(--w)}
+.panel-scrim{display:none;position:fixed;inset:0;background:rgba(0,0,0,.18);z-index:999}
+.panel-scrim.open{display:block}
+.row-menu-wrap{position:relative;display:inline-block;}
+.row-menu-btn{background:none;border:none;cursor:pointer;color:var(--t3);font-size:14px;padding:4px 8px;border-radius:var(--radius-btn);line-height:1;transition:background .1s,color .1s}
+.row-menu-btn:hover{background:var(--off2);color:var(--t1)}
+.row-menu-dropdown{display:none;position:fixed;background:var(--w);border:1px solid var(--b2);border-radius:var(--radius-btn);box-shadow:0 4px 16px rgba(0,0,0,.08);min-width:130px;z-index:2000;overflow:hidden}
+.row-menu-dropdown.open{display:block}
+.row-menu-item{display:flex;align-items:center;gap:8px;width:100%;padding:8px 12px;font-size:12.5px;color:var(--t1);background:none;border:none;cursor:pointer;text-align:left;font-family:var(--sans);transition:background .1s}
+.row-menu-item:hover{background:var(--off2)}
+.row-menu-item.danger{color:#E24B4A}
+.row-menu-item.danger:hover{background:#fdecea}
 </style>
 </head>
 <body>
@@ -294,10 +318,10 @@ table.dataTable tbody tr:hover td.sorting_1{background:var(--w) !important}
         <span class="nav-label">Vendor Review</span>
         <span class="nav-badge" id="nav-active-count">0</span>
       </div>
-      <div class="nav-item" data-page="completed">
+      <!-- <div class="nav-item" data-page="completed">
         <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
         <span class="nav-label">Completed</span>
-      </div>
+      </div> -->
       <div class="nav-item" data-page="active-summary">
         <i class="fa-solid fa-table-list" aria-hidden="true"></i>
         <span class="nav-label">Summary</span>
@@ -307,6 +331,12 @@ table.dataTable tbody tr:hover td.sorting_1{background:var(--w) !important}
         <i class="fa-solid fa-building" aria-hidden="true"></i>
         <span class="nav-label">All Vendors</span>
         <span class="nav-badge" id="nav-vendor-count">0</span>
+      </div>
+      <div class="nav-group-label admin">Users</div>
+      <div class="nav-item admin" data-page="users">
+        <i class="fa-solid fa-users" aria-hidden="true"></i>
+        <span class="nav-label">Users</span>
+        <span class="nav-badge" id="nav-user-count">0</span>
       </div>
       <div class="nav-group-label">Resources</div>
       <div class="nav-item" data-page="upload-responses">
@@ -400,11 +430,11 @@ table.dataTable tbody tr:hover td.sorting_1{background:var(--w) !important}
             <div class="stat-value" id="stat-draft-req">0</div>
             <div class="stat-sub">Awaiting client input</div>
           </div>
-          <div class="stat-card green">
+          <!-- <div class="stat-card green">
             <div class="stat-label">Completed</div>
             <div class="stat-value" id="stat-completed-req">0</div>
             <div class="stat-sub">Requirements finalised</div>
-          </div>
+          </div> -->
           <div class="stat-card gray">
             <div class="stat-label">Total Vendors</div>
             <div class="stat-value" id="stat-vendors">0</div>
@@ -438,17 +468,19 @@ table.dataTable tbody tr:hover td.sorting_1{background:var(--w) !important}
             <div class="page-title">Client Review</div>
             <div class="page-subtitle">Requirements awaiting client confirmation</div>
           </div>
-          <div class="header-actions">
-            <button class="btn btn-primary btn-sm" onclick="window.openWizard()">+ New requirement</button>
-          </div>
+          <!-- <div class="header-actions">
+            <button class="btn btn-primary btn-sm" onclick="openWizard()">+ New requirement</button>
+          </div> -->
         </div>
-        <div class="table-card">
-          <table id="drafts-table" class="rfp-table display nowrap" style="width:100%">
-            <thead><tr>
-              <th>Company</th><th>Title</th><th>Contact person</th><th>Email</th><th>Phone</th><th>Country</th>
-            </tr></thead>
-            <tbody id="drafts-tbody"></tbody>
-          </table>
+        <div style="display:flex;gap:16px;margin-top: 30px;">
+          <div style="width:200px;flex-shrink:0;border-right:1px solid var(--b2);padding-right:0;margin-right:4px;">
+            <div id="drafts-sidebar-list"></div>
+          </div>
+          <div style="flex:1;min-width:0;" id="drafts-detail-panel">
+            <div style="display:flex;align-items:center;justify-content:center;height:200px;color:var(--t4);font-size:13px;">
+              Select a requirement to view details
+            </div>
+          </div>
         </div>
       </div>
       <div class="page" id="page-vendor-review">
@@ -497,12 +529,30 @@ table.dataTable tbody tr:hover td.sorting_1{background:var(--w) !important}
           </div>
         </div>
         <div class="table-card">
-          <div class="table-toolbar"><span class="table-title">All vendors</span></div>
           <table id="vendors-table" class="rfp-table display nowrap" style="width:100%">
             <thead><tr>
               <th></th><th>Company</th><th>HQ location</th><th>Contact person</th><th>Email</th><th>Phone</th><th>Verified</th>
             </tr></thead>
             <tbody id="vendors-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="page" id="page-users">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Users</div>
+            <div class="page-subtitle">People with access to this workspace</div>
+          </div>
+          <div class="header-actions">
+            <button class="btn btn-primary btn-sm" id="open-user-modal-btn">+ Add user</button>
+          </div>
+        </div>
+        <div class="table-card">
+          <table id="users-table" class="rfp-table display nowrap" style="width:100%">
+            <thead><tr>
+              <th>First Name</th><th>Last Name</th><th>Email</th><th>Role</th><th>Status</th><th></th>
+            </tr></thead>
+            <tbody id="users-tbody"></tbody>
           </table>
         </div>
       </div>
@@ -589,19 +639,48 @@ table.dataTable tbody tr:hover td.sorting_1{background:var(--w) !important}
                 <p style="margin-top:12px;color:var(--t3);font-size:11.5px">Column headers are case-insensitive. The filename will be used as the vendor name.</p>
               </div>
             </div>
-            <div class="info-card">
-              <div class="info-card-title">Step 1 — Enter a title</div>
-              <p style="font-size:13px;color:var(--t2);margin-bottom:16px;line-height:1.6">Give this upload a title so you can identify which requirement set these responses belong to.</p>
-              <div style="display:flex;flex-direction:column;gap:6px">
-                <label style="font-size:10.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--t3);display:block">Title</label>
-                <input type="text" id="ur-title-input" placeholder="e.g. HRIS RFP 2025 — Vendor Responses"
-                  style="width:100%;padding:9px 11px;border:1px solid var(--b2);border-radius:var(--radius-btn);font-family:inherit;font-size:13px;background:var(--off2);color:var(--t1);outline:none;transition:border-color .12s">
+            <div style="display:flex;flex-direction:column;gap:12px">
+              <div class="info-card">
+                <div class="info-card-title">Step 1 — Enter a title</div>
+                <p style="font-size:13px;color:var(--t2);margin-bottom:16px;line-height:1.6">Give this upload a title so you can identify which requirement set these responses belong to.</p>
+                <div style="display:flex;flex-direction:column;gap:6px">
+                  <label style="font-size:10.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--t3);display:block">Title</label>
+                  <input type="text" id="ur-title-input" placeholder="e.g. HRIS RFP 2025 — Vendor Responses"
+                    style="width:100%;padding:9px 11px;border:1px solid var(--b2);border-radius:var(--radius-btn);font-family:inherit;font-size:13px;background:var(--w);color:var(--t1);outline:none;transition:border-color .12s">
+                </div>
+                <p id="ur-title-error" style="font-size:12px;color:#b91c1c;margin-top:8px;display:none">Please enter a title before continuing.</p>
+                <div style="margin-top:16px;display:flex;justify-content:flex-end">
+                  <button class="btn btn-primary btn-sm" id="ur-title-next-btn">
+                    Next <i class="fa-solid fa-arrow-right" style="font-size:11px"></i>
+                  </button>
+                </div>
               </div>
-              <p id="ur-title-error" style="font-size:12px;color:#b91c1c;margin-top:8px;display:none">Please enter a title before continuing.</p>
-              <div style="margin-top:16px;display:flex;justify-content:flex-end">
-                <button class="btn btn-primary btn-sm" id="ur-title-next-btn">
-                  Next <i class="fa-solid fa-arrow-right" style="font-size:11px"></i>
-                </button>
+              <div class="info-card">
+                <div class="info-card-title">Company details <span style="font-weight:400;color:var(--t4);font-size:10px;text-transform:none;letter-spacing:0">optional</span></div>
+                <div style="display:flex;flex-direction:column;gap:10px">
+                  <div>
+                    <label style="font-size:10.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--t3);display:block;margin-bottom:5px">Company name</label>
+                    <input type="text" id="ur-company" placeholder="e.g. Acme Corp"
+                      style="width:100%;padding:9px 11px;border:1px solid var(--b2);border-radius:var(--radius-btn);font-family:inherit;font-size:13px;background:var(--w);color:var(--t1);outline:none;transition:border-color .12s">
+                  </div>
+                  <div>
+                    <label style="font-size:10.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--t3);display:block;margin-bottom:5px">Contact person</label>
+                    <input type="text" id="ur-contact-name" placeholder="Full name"
+                      style="width:100%;padding:9px 11px;border:1px solid var(--b2);border-radius:var(--radius-btn);font-family:inherit;font-size:13px;background:var(--w);color:var(--t1);outline:none;transition:border-color .12s">
+                  </div>
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+                    <div>
+                      <label style="font-size:10.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--t3);display:block;margin-bottom:5px">Email</label>
+                      <input type="email" id="ur-contact-email" placeholder="email@company.com"
+                        style="width:100%;padding:9px 11px;border:1px solid var(--b2);border-radius:var(--radius-btn);font-family:inherit;font-size:13px;background:var(--w);color:var(--t1);outline:none;transition:border-color .12s">
+                    </div>
+                    <div>
+                      <label style="font-size:10.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--t3);display:block;margin-bottom:5px">Phone</label>
+                      <input type="tel" id="ur-contact-phone" placeholder="+1 234 567 8900"
+                        style="width:100%;padding:9px 11px;border:1px solid var(--b2);border-radius:var(--radius-btn);font-family:inherit;font-size:13px;background:var(--w);color:var(--t1);outline:none;transition:border-color .12s">
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -680,11 +759,49 @@ table.dataTable tbody tr:hover td.sorting_1{background:var(--w) !important}
     <button class="btn btn-secondary btn-sm" id="close-vendor-panel-btn">Cancel</button>
   </div>
 </div>
+<div id="userPanel">
+  <h4 id="user-panel-title">Add user</h4>
+  <div class="form-group"><label>First name *</label><input type="text" id="first-name" placeholder="First name"></div>
+  <div class="form-group"><label>Last name *</label><input type="text" id="last-name" placeholder="Last name"></div>
+  <div class="form-group"><label>Email *</label><input type="email" id="user-email" placeholder="Email address"></div>
+  <div class="form-group">
+    <label>Role</label>
+    <select id="user-role">
+      <option value="admin" selected>Admin</option>
+      <option value="editor">Editor</option>
+      <option value="viewer">Viewer</option>
+    </select>
+  </div>
+  <div class="form-group">
+    <label>Active</label>
+    <select id="user-status">
+      <option value="yes" selected>YES</option>
+      <option value="no">NO</option>
+    </select>
+  </div>
+  <div class="panel-actions">
+    <button class="btn btn-primary btn-sm" id="save-user-btn">Save</button>
+    <button class="btn btn-secondary btn-sm" id="cancel-user-modal">Cancel</button>
+  </div>
+</div>
 <div id="edit-vendor-modal" class="modal-overlay">
   <div class="modal-box">
     <button class="close-modal" id="close-edit-modal">&times;</button>
     <h2>Edit vendor</h2>
     <form id="edit-vendor-form"></form>
+  </div>
+</div>
+<div id="confirm-modal" class="modal-overlay">
+  <div class="modal-box" style="width:380px;text-align:center;padding:32px 26px 24px">
+    <div id="confirm-modal-icon" style="width:48px;height:48px;border-radius:50%;background:#fdecea;display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
+      <i class="fa-solid fa-trash-can" style="color:#E24B4A;font-size:18px"></i>
+    </div>
+    <h2 id="confirm-modal-title" style="margin-bottom:8px">Remove user?</h2>
+    <p id="confirm-modal-message" style="font-size:12.5px;color:var(--t2);line-height:1.6;margin-bottom:22px">This action cannot be undone.</p>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-secondary btn-sm" id="confirm-modal-cancel" style="flex:1">Cancel</button>
+      <button class="btn btn-sm" id="confirm-modal-confirm" style="flex:1;background:#E24B4A;color:#fff">Remove</button>
+    </div>
   </div>
 </div>
 <div id="wizard-modal" class="wizard-overlay">
@@ -706,14 +823,24 @@ table.dataTable tbody tr:hover td.sorting_1{background:var(--w) !important}
   </div>
 </div>
 <script type="module">
-  import { customError, loggedIn } from '../assets/js/app.js';
+  import { customError, showNotification, lockBtn } from '../assets/js/app.js';
+  import { initAuth, getCurrentUser } from '../assets/js/core/_auth.js';
 
-  $(function(){
-    if (!loggedIn()){
-        location.href = '../login.html';
-        return;
-    }
-  });
+  (async () => {
+      const token = await initAuth();
+      if (token.error){ window.location.href = `${window.location.origin}/v2/login.html`;return;}
+      
+      const user = await getCurrentUser();
+      if (!user) {
+          window.location.href = `${window.location.origin}/v2/login.html`;
+          return;
+      }
+
+      window._user = user;
+  })();
+
+  let cachedDrafts = [];
+  let cachedActiveRequirements = [];
 
 const MOCK = {
   drafts: [
@@ -729,12 +856,7 @@ const MOCK = {
   completed: [
     { submitted:'10 Jan 2025', company:'Telco SA', title:'Network Upgrade RFP', contact:'Mark Sithole', email:'mark@telco.co.za', country:'South Africa' },
   ],
-  vendors: [
-    { id:1, company:'TechServe Solutions', desc:'Enterprise software and consulting', hq:'Johannesburg, ZA', contact:'Alan Botha', email:'alan@techserve.co.za', phone:'011 300 4400', verified:'Yes' },
-    { id:2, company:'CloudBridge Africa', desc:'Cloud infrastructure provider', hq:'Cape Town, ZA', contact:'Nomvula Khumalo', email:'nomvula@cloudbridge.co.za', phone:'021 600 1122', verified:'Yes' },
-    { id:3, company:'DataFlow Inc', desc:'Data analytics and reporting', hq:'Nairobi, KE', contact:'Peter Mwangi', email:'peter@dataflow.io', phone:'', verified:'No' },
-    { id:4, company:'Nexus Platforms', desc:'HR and payroll SaaS', hq:'Pretoria, ZA', contact:'Chantal du Plessis', email:'chantal@nexus.co.za', phone:'012 450 7700', verified:'Yes' },
-  ],
+  vendors: [],
   formFields: {
     area: ['Finance','HR','Operations','IT Infrastructure','Procurement'],
     system_parts: ['Core System','Reporting Module','Integration Layer','Mobile App'],
@@ -742,7 +864,7 @@ const MOCK = {
   }
 };
 let formFields = { ...MOCK.formFields };
-const breadcrumbs = { home:'Dashboard', requirements:'Client Review', 'vendor-review':'Vendor Review', completed:'Completed', vendors:'Vendors', resources:'Resources', configurations:'Configurations', 'active-summary':'Summary' };
+const breadcrumbs = { home:'Dashboard', requirements:'Client Review', 'vendor-review':'Vendor Review', completed:'Completed', vendors:'Vendors', users:'Users', resources:'Resources', configurations:'Configurations', 'active-summary':'Summary' };
 function navigateTo(page) {
   const overlay = document.getElementById('page-transition');
 
@@ -778,6 +900,7 @@ function loadPage(page) {
   if (page === 'configurations') loadConfigurations();
   if (page === 'active-summary') loadActiveSummary();
   if (page === 'upload-responses') initUploadResponses();
+  if (page === 'users') loadUsers();
 }
 // function loadHome() {
 //   const active = MOCK.active;
@@ -819,30 +942,232 @@ function attentionRow(color, text, meta) {
 }
 let draftsTable = null;
 function loadDrafts() {
-  const tbody = document.getElementById('drafts-tbody');
-  tbody.innerHTML = '';
-  MOCK.drafts.forEach(d => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = '<td class="cell-primary">' + d.company + '</td><td class="cell-primary"><a href="#" style="color:var(--blue);text-decoration:none">' + d.title + '</a></td><td>' + d.contact + '</td><td>' + d.email + '</td><td>' + (d.phone||'—') + '</td><td>' + d.country + '</td>';
-    tbody.appendChild(tr);
+  const sidebar = document.getElementById('drafts-sidebar-list');
+  sidebar.innerHTML = '';
+
+  cachedDrafts.forEach((row, idx) => {
+    const d = row.data;
+    const item = document.createElement('div');
+    item.className = 'req-sidebar-item' + (idx === 0 ? ' active' : '');
+    item.textContent = d.title || '—';
+    item.addEventListener('click', () => {
+      document.querySelectorAll('#drafts-sidebar-list .req-sidebar-item').forEach(i => i.classList.remove('active'));
+      item.classList.add('active');
+      renderDraftDetail(row);
+    });
+    sidebar.appendChild(item);
   });
-  if (draftsTable) { draftsTable.destroy(); }
-  draftsTable = $('#drafts-table').DataTable({ responsive:true, pageLength:10, dom:'frtip', language:{search:'',searchPlaceholder:'Search…'} });
+
+  if (cachedDrafts.length > 0) renderDraftDetail(cachedDrafts[0]);
+}
+
+function renderDraftDetail(row) {
+  const d = row.data;
+  const panel = document.getElementById('drafts-detail-panel');
+
+  const priorityColor = p => p === 'Must-Have' ? 'color:var(--o)' : p === 'Should-Have' ? 'color:var(--t2)' : 'color:var(--t3)';
+
+  let rows = '';
+  (d.requirements || []).forEach((req, idx) => {
+    rows += '<tr>'
+      + '<td style="color:var(--o);font-weight:500">' + (req.area || '—') + '</td>'
+      + '<td>' + (req.requirement || '—') + '</td>'
+      + '<td style="' + priorityColor(req.priority) + ';font-weight:500;white-space:nowrap">' + (req.priority || '—') + '</td>'
+      + '<td>' + (req.system_part || '—') + '</td>'
+      + '<td>' + (req.recommendation || '—') + '</td>'
+      + '<td>' + (req.comment || '') + '</td>'
+      + '<td><button onclick="removeDraftReq(' + idx + ',\'' + row.id + '\')" style="background:none;border:none;color:#E24B4A;font-size:12.5px;cursor:pointer;font-family:var(--sans)">remove</button></td>'
+      + '</tr>';
+  });
+
+  panel.innerHTML = ''
+    + '<div class="info-card" style="margin-bottom:12px">'
+    +   '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">'
+    +     '<span class="info-card-title" style="margin-bottom:0">Client details</span>'
+    +     '<button class="act-btn" onclick="openClientEditModal(\'' + row.id + '\')">Edit</button>'
+    +   '</div>'
+    +   '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px 24px">'
+    +     '<div class="info-row"><span class="info-key">Company</span><span class="info-val">' + (d.client?.company || '—') + '</span></div>'
+    +     '<div class="info-row"><span class="info-key">Contact</span><span class="info-val">' + (d.client?.name || '—') + '</span></div>'
+    +     '<div class="info-row"><span class="info-key">Email</span><span class="info-val">' + (d.client?.email || '—') + '</span></div>'
+    +     '<div class="info-row"><span class="info-key">Country</span><span class="info-val">' + (d.client?.country || '—') + '</span></div>'
+    +     '<div class="info-row"><span class="info-key">Headcount</span><span class="info-val">' + (d.client?.headcount || '—') + '</span></div>'
+    +     '<div class="info-row"><span class="info-key">Timeline</span><span class="info-val">' + (d.client?.timeline || '—') + '</span></div>'
+    +   '</div>'
+    + '</div>'
+    + '<div id="client-edit-modal" class="modal-overlay" onclick="if(event.target===this)closeClientEditModal()">'
+    +   '<div class="modal-box" style="width:540px">'
+    +     '<button class="close-modal" onclick="closeClientEditModal()">&times;</button>'
+    +     '<h2>Edit client details</h2>'
+    +     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px">'
+    +       '<div class="wizard-form"><div class="form-group"><label>Company</label><input type="text" id="cedit-company"></div></div>'
+    +       '<div class="wizard-form"><div class="form-group"><label>Contact name</label><input type="text" id="cedit-name"></div></div>'
+    +       '<div class="wizard-form"><div class="form-group"><label>Email</label><input type="email" id="cedit-email"></div></div>'
+    +       '<div class="wizard-form"><div class="form-group"><label>Country</label><input type="text" id="cedit-country"></div></div>'
+    +       '<div class="wizard-form"><div class="form-group"><label>Headcount</label><input type="text" id="cedit-headcount"></div></div>'
+    +       '<div class="wizard-form"><div class="form-group"><label>Timeline</label><input type="text" id="cedit-timeline"></div></div>'
+    +     '</div>'
+    +     '<div style="display:flex;justify-content:flex-end;gap:8px;margin-top:20px">'
+    +       '<button class="btn btn-secondary btn-sm" onclick="closeClientEditModal()">Cancel</button>'
+    +       '<button class="btn btn-primary btn-sm" onclick="saveClientEdit(\'' + row.id + '\')">Save</button>'
+    +     '</div>'
+    +   '</div>'
+    + '</div>'
+    + '<div class="table-card">'
+    + '<div class="table-toolbar">'
+    +   '<span class="table-title">Requirements *</span>'
+    +   '<button class="act-btn" onclick="openAddReqModal(\'' + row.id + '\')">+ New requirement</button>'
+    + '</div>'
+    +   '<div style="overflow-x:auto">'
+    +     '<table class="req-table" style="width:100%">'
+    +       '<thead><tr>'
+    +         '<th>Category</th><th>Description</th><th>Priority</th><th>System Part</th><th>Recommendation</th><th>Comment</th><th></th>'
+    +       '</tr></thead>'
+    +       '<tbody>' + rows + '</tbody>'
+    +     '</table>'
+    +   '</div>'
+    + '<div id="add-req-modal" class="modal-overlay" onclick="if(event.target===this)closeAddReqModal()">'
+    +   '<div class="modal-box">'
+    +     '<button class="close-modal" onclick="closeAddReqModal()">&times;</button>'
+    +     '<h2>New requirement</h2>'
+    +     '<div style="display:flex;flex-direction:column;gap:10px;margin-top:4px">'
+    +       '<div class="wizard-form"><div class="form-group"><label>Category</label><input type="text" id="areq-area" placeholder="e.g. Absence management"></div></div>'
+    +       '<div class="wizard-form"><div class="form-group"><label>Description</label><textarea id="areq-requirement" rows="3" style="padding:8px 10px;border:1px solid var(--b2);border-radius:var(--radius-btn);font-family:var(--sans);font-size:12.5px;background:var(--w);color:var(--t1);outline:none;width:100%;resize:vertical" placeholder="Requirement description"></textarea></div></div>'
+    +       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
+    +         '<div class="wizard-form"><div class="form-group"><label>Priority</label><select id="areq-priority"><option>Must-Have</option><option>Should-Have</option><option>Could-Have</option></select></div></div>'
+    +         '<div class="wizard-form"><div class="form-group"><label>System Part</label><input type="text" id="areq-system-part" placeholder="e.g. HRIS"></div></div>'
+    +       '</div>'
+    +     '</div>'
+    +     '<div style="display:flex;justify-content:flex-end;gap:8px;margin-top:20px">'
+    +       '<button class="btn btn-secondary btn-sm" onclick="closeAddReqModal()">Cancel</button>'
+    +       '<button class="btn btn-primary btn-sm" onclick="saveNewReq(\'' + row.id + '\')">Add</button>'
+    +     '</div>'
+    +   '</div>'
+    + '</div>'
+    + '</div>';
+}
+
+function openAddReqModal(rowId) {
+  document.getElementById('areq-area').value = '';
+  document.getElementById('areq-requirement').value = '';
+  document.getElementById('areq-priority').value = 'Must-Have';
+  document.getElementById('areq-system-part').value = '';
+  document.getElementById('add-req-modal').classList.add('open');
+}
+
+function closeAddReqModal() {
+  const modal = document.getElementById('add-req-modal');
+  if (modal) modal.classList.remove('open');
+}
+
+function saveNewReq(rowId) {
+  const row = cachedDrafts.find(r => String(r.id) === String(rowId));
+  if (!row) return;
+  const area = document.getElementById('areq-area').value.trim();
+  const requirement = document.getElementById('areq-requirement').value.trim();
+  if (!area || !requirement) return;
+  row.data.requirements.push({
+    area,
+    requirement,
+    priority:       document.getElementById('areq-priority').value,
+    system_part:    document.getElementById('areq-system-part').value.trim(),
+    recommendation: '',
+    comment:        '',
+  });
+  closeAddReqModal();
+  renderDraftDetail(row);
+}
+
+function openClientEditModal(rowId) {
+  const row = cachedDrafts.find(r => String(r.id) === String(rowId));
+  if (!row) return;
+  const c = row.data.client || {};
+  document.getElementById('cedit-company').value   = c.company   || '';
+  document.getElementById('cedit-name').value      = c.name      || '';
+  document.getElementById('cedit-email').value     = c.email     || '';
+  document.getElementById('cedit-country').value   = c.country   || '';
+  document.getElementById('cedit-headcount').value = c.headcount || '';
+  document.getElementById('cedit-timeline').value  = c.timeline  || '';
+  document.getElementById('client-edit-modal').classList.add('open');
+}
+
+function closeClientEditModal() {
+  const modal = document.getElementById('client-edit-modal');
+  if (modal) modal.classList.remove('open');
+}
+
+function saveClientEdit(rowId) {
+  const row = cachedDrafts.find(r => String(r.id) === String(rowId));
+  if (!row) return;
+  row.data.client = {
+    company:   document.getElementById('cedit-company').value.trim(),
+    name:      document.getElementById('cedit-name').value.trim(),
+    email:     document.getElementById('cedit-email').value.trim(),
+    country:   document.getElementById('cedit-country').value.trim(),
+    headcount: document.getElementById('cedit-headcount').value.trim(),
+    timeline:  document.getElementById('cedit-timeline').value.trim(),
+  };
+  closeClientEditModal();
+  renderDraftDetail(row);
+}
+
+function removeDraftReq(idx, rowId) {
+  const row = cachedDrafts.find(r => String(r.id) === String(rowId));
+  if (!row) return;
+  row.data.requirements.splice(idx, 1);
+  renderDraftDetail(row);
 }
 let activeTable = null;
-function loadActive() {
+async function loadActive() {
+  if ($.fn.DataTable.isDataTable('#active-table')) {
+    $('#active-table').DataTable().destroy();
+  }
+
   const tbody = document.getElementById('active-tbody');
-  tbody.innerHTML = '';
-  MOCK.active.forEach(r => {
-    const allIn = r.responses === r.vendors.length;
-    const noneIn = r.responses === 0;
-    const badge = allIn ? '<span class="badge b-green">All in</span>' : noneIn ? '<span class="badge b-amber">No responses</span>' : '<span class="badge b-blue">' + r.responses + '/' + r.vendors.length + ' in</span>';
-    const tr = document.createElement('tr');
-    tr.innerHTML = '<td></td><td>' + r.submitted + '</td><td class="cell-primary">' + r.company + '</td><td class="cell-primary"><a href="#" style="color:var(--blue);text-decoration:none">' + r.title + '</a></td><td>' + r.contact + '</td><td>' + r.email + '</td><td>' + r.country + '</td><td>' + badge + '</td>';
-    tbody.appendChild(tr);
-  });
-  if (activeTable) { activeTable.destroy(); }
-  activeTable = $('#active-table').DataTable({ responsive:true, pageLength:10 });
+  tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:28px 14px"><div style="display:inline-block;width:20px;height:20px;border-radius:50%;border:2px solid var(--b2);border-top-color:var(--o);animation:spin .7s linear infinite"></div></td></tr>';
+  activeTable = null;
+
+  try {
+    const response = await fetch('/api/supabase?action=getActiveRequirements');
+    const result = await response.json();
+    if (result.error) { showNotification(result.error, 'error'); return; }
+
+    cachedActiveRequirements = result.data;
+    document.getElementById('stat-active-req').textContent = result.data.length;
+    document.getElementById('nav-active-count').textContent = result.data.length;
+
+    tbody.innerHTML = '';
+
+    cachedActiveRequirements.forEach(row => {
+      const vendors = row.assigned_vendors || [];
+      const responded = vendors.filter(v => v.feedback && v.feedback.length).length;
+      const total = vendors.length;
+      const allIn = total > 0 && responded === total;
+      const noneIn = total > 0 && responded === 0;
+      const badge = allIn
+        ? '<span class="badge b-green">All in</span>'
+        : noneIn
+        ? '<span class="badge b-amber">No responses</span>'
+        : '<span class="badge b-blue">' + responded + '/' + total + ' in</span>';
+
+      const tr = document.createElement('tr');
+      tr.innerHTML = ''
+        + '<td></td>'
+        + '<td>' + (row.created_at ? row.created_at.slice(0,10) : '—') + '</td>'
+        + '<td class="cell-primary">' + (row.client?.company || '—') + '</td>'
+        + '<td class="cell-primary"><a href="#" style="color:var(--blue);text-decoration:none">' + (row.title || '—') + '</a></td>'
+        + '<td>' + (row.client?.name || '—') + '</td>'
+        + '<td>' + (row.client?.email || '—') + '</td>'
+        + '<td>' + (row.client?.country || '—') + '</td>'
+        + '<td>' + badge + '</td>';
+      tbody.appendChild(tr);
+    });
+
+    activeTable = $('#active-table').DataTable({ responsive:true, pageLength:10 });
+  } catch (err) {
+    console.error('Failed to fetch active requirements:', err);
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:28px 14px;color:var(--t3);font-style:italic">Failed to load.</td></tr>';
+  }
 }
 let completedTable = null;
 function loadCompleted() {
@@ -1279,6 +1604,11 @@ function initUploadResponses() {
   urFiles = [];
   urTitle = '';
 
+  document.getElementById('ur-company').value = '';
+  document.getElementById('ur-contact-name').value = '';
+  document.getElementById('ur-contact-email').value = '';
+  document.getElementById('ur-contact-phone').value = '';
+
   // Reset to step 1
   document.getElementById('ur-step-title').style.display = 'block';
   document.getElementById('ur-step-files').style.display = 'none';
@@ -1538,9 +1868,9 @@ async function uploadAllFiles() {
 
     assignedVendors.push({
       "contact_person": {
-        "name": "",
-        "email": "",
-        "phone": ""
+        "name": document.getElementById('ur-contact-name').value.trim(),
+        "email": document.getElementById('ur-contact-email').value.trim(),
+        "phone": document.getElementById('ur-contact-phone').value.trim()
       },
       "id": "",
       "name": v.vendor,
@@ -1566,10 +1896,10 @@ async function uploadAllFiles() {
     assigned_vendors: assignedVendors,
     status: 'active',
     client: {
-      "company": "",
-      "name": "",
-      "email": "",
-      "phone": "__",
+      "company": document.getElementById('ur-company').value.trim(),
+      "name": document.getElementById('ur-contact-name').value.trim(),
+      "email": document.getElementById('ur-contact-email').value.trim(),
+      "phone": document.getElementById('ur-contact-phone').value.trim(),
       "country": "",
       "headcount": "__",
       "timeline": "__"
@@ -1642,6 +1972,7 @@ async function updateActiveRequirementsCount() {
     const response = await fetch('/api/supabase?action=getActiveRequirements');
     const result = await response.json();
     if (result.error) { console.error(result.error); return; }
+    cachedActiveRequirements = result.data;
     document.getElementById('stat-active-req').textContent = result.data.length;
     document.getElementById('nav-active-count').textContent = result.data.length;
   } catch (err) {
@@ -1655,7 +1986,9 @@ async function updateDraftRequirementsCount() {
   try {
     const response = await fetch('/api/supabase?action=getAllDraftRequirement');
     const result = await response.json();
+   
     if (result.error) { console.error(result.error); return; }
+    cachedDrafts = result.data;
     document.getElementById('stat-draft-req').textContent = result.data.length;
     document.getElementById('nav-draft-count').textContent = result.data.length;
   } catch (err) {
@@ -1664,6 +1997,20 @@ async function updateDraftRequirementsCount() {
 }
 
 updateDraftRequirementsCount();
+
+async function updateUsersCount() {
+  try {
+    const response = await fetch(`/api/supabase?action=getUsers`);
+    const result = await response.json();
+    if (result.error) { console.error(result.error); return; }
+    MOCK.vendors = result.data;
+    document.getElementById('nav-user-count').textContent = result.data.length;
+  } catch (err) {
+    console.error('Failed to fetch users:', err);
+  }
+}
+
+updateUsersCount();
 
 async function loadHome() {
   try {
@@ -1728,8 +2075,194 @@ function renderMainSummary(requirements) {
     document.getElementById('home-alert').style.display = 'none';
   }
 }
+
+let usersTable = null;
+let editingUserId = null;
+
+async function loadUsers() {
+  const tbody = document.getElementById('users-tbody');
+
+  tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:28px 14px"><div style="display:inline-block;width:20px;height:20px;border-radius:50%;border:2px solid var(--b2);border-top-color:var(--o);animation:spin .7s linear infinite"></div></td></tr>';
+   const response = await fetch(`/api/supabase?action=getUsers`);
+    const result = await response.json();
+    if (result.error) { console.error(result.error); return; }
+
+  tbody.innerHTML = '';
+  result.data.forEach(u => {
+    const roleBadge = u.role === 'Admin' ? 'b-green' : u.role === 'Editor' ? 'b-blue' : 'b-gray';
+    const status = u.active === true ? 'Active' : 'In-active';
+    const tr = document.createElement('tr');
+    tr.innerHTML = ''
+      + '<td class="cell-primary">' + u.first_name + '</td>'
+       + '<td class="cell-primary">' + u.last_name + '</td>'
+      + '<td>' + u.email + '</td>'
+      + '<td><span class="badge">' + u.role + '</span></td>'
+      + '<td><span class="badge">' + status + '</span></td>'
+      + '<td style="text-align:right;white-space:nowrap">'
+      +   '<button class="act-btn" onclick="openUserModal(' + u.id + ')">Edit</button> '
+      +   '<button class="act-btn" onclick="removeUser(\'' + u.id + '\')" style="color:#E24B4A">Remove</button>'
+      +   '<div class="row-menu-wrap">'
+      +     '<button class="row-menu-btn" onclick="toggleRowMenu(event, \'' + u.id + '\')"><i class="fa-solid fa-ellipsis-vertical"></i></button>'
+      +     '<div class="row-menu-dropdown" id="row-menu-' + u.id + '">'
+      +       '<button class="row-menu-item" onclick="emailPasswordReset(\'' + u.email + '\')">Email Password Reset Link</button>'
+      +       '<button class="row-menu-item" onclick="copyPasswordLink(\'' + u.id + '\')">Copy Password Reset Link</button>'
+      +     '</div>'
+      +   '</div>'
+      + '</td>';
+    tbody.appendChild(tr);
+  });
+  if (usersTable) { usersTable.destroy(); }
+  usersTable = $('#users-table').DataTable({ responsive:true, pageLength:10 });
+  document.getElementById('nav-user-count').textContent = result.data.length;
+}
+
+function openUserModal(id) {
+  editingUserId = id || null;
+  const user = id ? MOCK.users.find(u => u.id === id) : null;
+  document.getElementById('user-panel-title').textContent = user ? 'Edit user' : 'Add user';
+  document.getElementById('first-name').value = user ? user.first_name : '';
+  document.getElementById('last-name').value = user ? user.last_name : '';
+  document.getElementById('user-email').value = user ? user.email : '';
+  document.getElementById('user-role').value = user ? user.role : 'Editor';
+  document.getElementById('user-status').value = user ? user.status : 'Suspended';
+  document.getElementById('userPanel').classList.add('open');
+}
+
+function closeUserModal() {
+  document.getElementById('userPanel').classList.remove('open');
+  editingUserId = null;
+}
+
+async function saveUser() {
+  const fname = document.getElementById('first-name').value.trim();
+  const lname = document.getElementById('last-name').value.trim();
+  const email = document.getElementById('user-email').value.trim();
+  const role = document.getElementById('user-role').value;
+  const status = document.getElementById('user-status').value;
+  if (!fname || !email || !lname || !role || !status) { showNotification('All fields are required.', 'error'); return; }
+
+  const reset = lockBtn($('#save-user-btn'));
+  if (!reset) return;
+
+  const res = await fetch('/api/supabase?action=upsertUser', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ payload: { 
+        first_name: fname,
+        last_name: lname,
+        email: email,
+        role: role,
+        active: status 
+      } })
+  });
+  const result = await res.json();
+  if (result.error){showNotification(result.error, 'error');reset();return;}
+  reset();
+  closeUserModal();
+  loadUsers();
+}
+
+async function removeUser(id) {
+  const confirmed = await showConfirm(
+    'Remove user?',
+    'This will permanently remove the user from your workspace. This action cannot be undone.',
+    'Remove'
+  );
+  if (!confirmed) return;
+  
+  const res = await fetch('/api/supabase?action=deleteUser', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: id})
+  });
+  const result = await res.json();
+  if (result.error){showNotification(result.error, 'error');return;}
+  loadUsers();
+}
+
+async function emailPasswordReset(email){
+  const res = await fetch('/api/send-email?action=resetPasswordLink', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, host: `${window.location.origin}/v2/reset-password.html`})
+  });
+  const result = await res.json();
+  if (result.error){showNotification(result.error, 'error');return;}
+
+  showNotification('Email sent!', 'success');
+}
+
+function showConfirm(title, message, confirmLabel = 'Remove') {
+  return new Promise(resolve => {
+    const modal      = document.getElementById('confirm-modal');
+    const confirmBtn = document.getElementById('confirm-modal-confirm');
+    const cancelBtn  = document.getElementById('confirm-modal-cancel');
+
+    document.getElementById('confirm-modal-title').textContent   = title;
+    document.getElementById('confirm-modal-message').textContent = message;
+    confirmBtn.textContent = confirmLabel;
+
+    modal.classList.add('open');
+
+    function cleanup(result) {
+      modal.classList.remove('open');
+      confirmBtn.removeEventListener('click', onConfirm);
+      cancelBtn.removeEventListener('click', onCancel);
+      modal.removeEventListener('click', onOverlay);
+      resolve(result);
+    }
+    function onConfirm() { cleanup(true); }
+    function onCancel()  { cleanup(false); }
+    function onOverlay(e) { if (e.target === modal) cleanup(false); }
+
+    confirmBtn.addEventListener('click', onConfirm);
+    cancelBtn.addEventListener('click', onCancel);
+    modal.addEventListener('click', onOverlay);
+  });
+}
+
+document.getElementById('open-user-modal-btn').addEventListener('click', () => openUserModal(null));
+document.getElementById('cancel-user-modal').addEventListener('click', closeUserModal);
+document.getElementById('save-user-btn').addEventListener('click', saveUser);
+
+function toggleRowMenu(e, id) {
+  e.stopPropagation();
+  const menu = document.getElementById('row-menu-' + id);
+  const isOpen = menu.classList.contains('open');
+  document.querySelectorAll('.row-menu-dropdown.open').forEach(m => m.classList.remove('open'));
+  if (isOpen) return;
+
+  const btnRect = e.currentTarget.getBoundingClientRect();
+  menu.style.top = (btnRect.bottom + 4) + 'px';
+  menu.style.left = 'auto';
+  menu.style.right = (window.innerWidth - btnRect.right) + 'px';
+  menu.classList.add('open');
+}
+
+document.addEventListener('click', () => {
+  document.querySelectorAll('.row-menu-dropdown.open').forEach(m => m.classList.remove('open'));
+});
+
+function copyPasswordLink(id) {
+  navigator.clipboard.writeText(`${window.location.origin}/v2/reset-password.html?id=${id}`);
+  showNotification('Password reset link copied.', 'success');
+}
+
+window.copyPasswordLink = copyPasswordLink;
+window.emailPasswordReset = emailPasswordReset;
+
 window.navigateTo = navigateTo;
 window.openWizard = openWizard;
+window.openClientEditModal = openClientEditModal;
+window.closeClientEditModal = closeClientEditModal;
+window.saveClientEdit = saveClientEdit;
+window.openAddReqModal  = openAddReqModal;
+window.closeAddReqModal = closeAddReqModal;
+window.saveNewReq       = saveNewReq;
+window.openUserModal = openUserModal;
+window.removeUser = removeUser;
+window.toggleRowMenu = toggleRowMenu;
+
 loadHome();
 </script>
 </body>

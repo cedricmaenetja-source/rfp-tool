@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { verifySession } from './_verify-session';
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -6,6 +7,11 @@ const supabase = createClient(
 );
 
 export default async function handler(req, res) {
+    const session = await verifySession(req);
+    if (!session) {
+        return res.status(401).json({ error: 'Authorization failed.' });
+    }
+
     const { action, reqId } = req.query;
 
     if (action === 'getVendors') return await getVendors(res);
@@ -15,6 +21,8 @@ export default async function handler(req, res) {
     if (action === 'getAllDraftRequirement') return await getAllDraftRequirement(res);
     if (action === 'getCompletedRequirements') return await getCompletedRequirements(res);
     if (action === 'getDraftRequirement') return await getDraftRequirement(res, reqId);
+    if (action === 'getUsers') return await getUsers(res, session);
+    if (action === 'getAdminUsers') return await getAdminUsers(res);
 
     if (action === 'updateSystemPartsFormFields'){
         if (req.method !== "PUT") {
@@ -80,6 +88,34 @@ export default async function handler(req, res) {
         try {
             const { requirement, status } = req.body;
             return await addNewRequirement(res, requirement, status);
+        } catch (err) {
+            console.error(err);
+            res.status(500).json({ error: 'Internal error' });
+        }
+    } 
+
+    if (action === 'upsertUser'){
+        if (req.method !== "POST") {
+            return res.status(405).json({ error: "Only POST allowed" });
+        }
+
+        try {
+            const { payload } = req.body;
+            return await upsertUser(res, payload);
+        } catch (err) {
+            console.error(err);
+            res.status(500).json({ error: 'Internal error' });
+        }
+    }
+
+    if (action === 'deleteUser'){
+        if (req.method !== "POST") {
+            return res.status(405).json({ error: "Only POST allowed" });
+        }
+
+        try {
+            const { id } = req.body;
+            return await deleteUser(res, id);
         } catch (err) {
             console.error(err);
             res.status(500).json({ error: 'Internal error' });
@@ -204,6 +240,56 @@ async function getAssignedVendorsById(res, requirementId) {
     .from('tblrfprequirements')
     .select('assigned_vendors')
     .eq('id', requirementId);
+
+    if (error) return res.status(500).json({ data: null, error: error.message });
+    return res.status(200).json({ data });
+}
+
+async function deleteUser(res, id) {
+  if (!id) return res.status(400).json({ data: null, error: 'Missing user id' });
+
+  const { data, error } = await supabase
+    .from('tblrfpusers')
+    .update({active: false})
+    .eq('id', id)
+    .select();
+
+  if (error) return res.status(500).json({ data: null, error: error.message });
+
+  if (!data || data.length === 0) {
+    return res.status(404).json({ data: null, error: 'No user found with that id' });
+  }
+
+  return res.status(200).json({ data, error: null });
+}
+
+async function getUsers(res, session) {
+    if (session.role === 'admin') return getAdminUsers(res);
+    
+  const { data, error } = await supabase
+    .from('tblrfpusers')
+    .select('id, first_name, last_name, email, role, active')
+    .neq('first_name', 'Admin')
+    .eq('active', true); // except the admin user
+
+    if (error) return res.status(500).json({ data: null, error: error.message });
+    return res.status(200).json({ data });
+}
+
+async function getAdminUsers(res) {
+  const { data, error } = await supabase
+    .from('tblrfpusers')
+    .select('id, first_name, last_name, email, role, active')
+    .neq('first_name', 'Admin'); // except the admin user
+
+    if (error) return res.status(500).json({ data: null, error: error.message });
+    return res.status(200).json({ data });
+}
+
+async function upsertUser(res, payload) {
+  const { data, error } = await supabase
+    .from('tblrfpusers')
+    .upsert(payload, { onConflict: 'email' }); 
 
     if (error) return res.status(500).json({ data: null, error: error.message });
     return res.status(200).json({ data });
