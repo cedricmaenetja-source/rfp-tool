@@ -6,9 +6,11 @@
   <title>Client Requirements - Review</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
   <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+  <link rel="stylesheet" type="text/css" href="../assets/css/common.css" />
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -199,6 +201,19 @@
     .card-header-block {
       padding: 20px 28px;
       border-bottom: 1px solid var(--border);
+    }
+
+    .card-header {
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--border);
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: var(--muted);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
     }
 
     .section-title {
@@ -569,11 +584,143 @@
     .footer-text { font-size: 11px; color: #c4c1bb; letter-spacing: 0.04em; }
 
     .main { width: 70%; }
+    .swal2-show {width: 50%;}
+    /* ── TABS ── */
+    .tab-bar {
+      width: 100%;
+      display: flex;
+      gap: 4px;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      padding: 10px 4px;
+      margin-right: 20px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      border-radius: 0;
+      transition: color 0.14s ease, border-color 0.14s ease;
+    }
+
+    .tab-btn:hover { color: var(--text); }
+
+    .tab-btn.active {
+      color: var(--text);
+      border-bottom-color: var(--text);
+    }
+
+    .tab-panel { display: none; width: 100%; }
+    .tab-panel.active { display: block; }
+    /* ─────────────────────────────────────────
+       SECTIONS
+    ───────────────────────────────────────── */
+    .section {
+      margin-bottom: 40px;
+      scroll-margin-top: calc(var(--topbar-h) + 20px);
+    }
+    .section-header {
+      display: flex; align-items: baseline; gap: 10px;
+      margin-bottom: 16px;
+    }
+    .section-eyebrow {
+      font-size: 10px; font-weight: 600; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--light); flex-shrink: 0;
+    }
+    .section-title {
+      font-size: 15px; font-weight: 600; color: var(--text);
+    }
+    .section-header-line {
+      flex: 1; height: 1px; background: var(--border);
+    }
+
+    #tab-analysis .section-title {
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--text);
+        letter-spacing: unset;
+        text-transform: unset;
+        margin: 0;
+    }
+    /* ─────────────────────────────────────────
+       PIE CHARTS
+    ───────────────────────────────────────── */
+    .pie-row {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+      gap: 12px; margin-bottom: 14px;
+    }
+    .pie-card { background: white; border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+    .pie-card-vendor { font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--light); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .pie-card-score { font-size: 22px; font-weight: 600; line-height: 1; margin-bottom: 10px; }
+    .pie-canvas-wrap { position: relative; width: 100%; height: 130px; }
+    .pie-legend { margin-top: 10px; display: flex; flex-direction: column; gap: 4px; }
+    .pie-legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); }
+    .pie-legend-sq { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+
+    /* ─────────────────────────────────────────
+       HEATMAP
+    ───────────────────────────────────────── */
+    .heatmap-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .heatmap-table thead th {
+      padding: 9px 14px; text-align: center;
+      font-size: 10.5px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--light); background: var(--surface); border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    .heatmap-table thead th:first-child { text-align: left; }
+    .heatmap-table tbody td { padding: 9px 14px; border-bottom: 1px solid #f0ede8; font-size: 12px; text-align: center; color: var(--muted); }
+    .heatmap-table tbody td:first-child { text-align: left; color: var(--text); font-weight: 500; }
+    .heatmap-table tbody tr:last-child td { border-bottom: none; }
+    .heatmap-table tbody tr:hover { background: var(--surface); }
+    .heatmap-cell {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 54px; height: 26px; border-radius: 5px;
+      font-size: 12px; font-weight: 600; font-family: var(--mono);
+    }
+    /* ─────────────────────────────────────────
+       SCORE CARDS / GRID
+    ───────────────────────────────────────── */
+    .score-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+    .score-card { background: white; border: 1px solid var(--border); border-radius: 10px; padding: 16px; text-align: center; }
+    .score-card-vendor { font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--light); margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .score-value { font-size: 30px; font-weight: 600; letter-spacing: -0.03em; line-height: 1; }
+    .score-value.high { color: #15803d }
+    .score-value.mid  { color: #b45309; }
+    .score-value.low  { color: #b91c1c; }
+    .score-label { font-size: 11.5px; color: var(--light); margin-top: 4px; }
   </style>
 </head>
 
 <body>
-  <div class="loader" id="loader"></div>
+
+  <!-- Access Code Gate -->
+  <div id="codeGate" class="hide" style="position:fixed; inset:0; background:var(--bg); display:flex; align-items:center; justify-content:center; z-index:9999; padding:16px;">
+    <div class="card" style="width:360px; max-width:100%; margin:0;">
+      <div class="card-body" style="padding:32px 28px;">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:20px;">
+          <div class="logo-chip">
+            <svg viewBox="0 0 14 14"><path d="M7 1L1 5v8h4V9h4v4h4V5L7 1z"/></svg>
+          </div>
+          <span class="page-brand">Udder <span>&gt; Access</span></span>
+        </div>
+        <h2 style="margin-bottom:6px;">Enter access code</h2>
+        <p style="margin-bottom:18px;">This proposal is protected. Please enter the code you were given to continue.</p>
+        <div class="field-group" style="margin-bottom:6px;">
+          <label class="field-label" for="accessCode">Access code</label>
+          <input id="accessCode" type="text" inputmode="numeric" placeholder="" autocomplete="off" />
+        </div>
+        <p id="accessCodeError" class="hide" style="color:#dc2626; margin:6px 0 4px;">Incorrect code. Please try again.</p>
+        <button class="btn" id="accessCodeSubmit" style="width:100%; margin-top:12px;">Continue</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="loader hide" id="loader"></div>
 
   <div class="main hide" style="width: 70%;">
 
@@ -583,207 +730,319 @@
         <div class="logo-chip">
           <svg viewBox="0 0 14 14"><path d="M7 1L1 5v8h4V9h4v4h4V5L7 1z"/></svg>
         </div>
-        <span class="page-brand">Udder <span>&gt; Request For Proposal</span></span>
+        <span class="page-brand">Udder RFP Management Tool - Client Review</span>
       </div>
-      <span class="status-chip">Client Review</span>
     </div>
 
-    <!-- Client Information Card -->
-    <div class="card" style="margin-top: 0;">
+    <!-- Tab Bar -->
+    <div class="tab-bar">
+      <button class="tab-btn active" id="tabBtnRfp" data-tab="tab-rfp" type="button">Request For Proposal</button>
+      <button class="tab-btn" id="tabBtnAnalysis" data-tab="tab-analysis" type="button">Analysis &amp; Reports</button>
+    </div>
 
-      <!-- Collapsible trigger -->
-      <button class="collapse-trigger" id="clientInfoToggle" aria-expanded="true" aria-controls="clientInfoBody">
-        <div class="collapse-trigger-left">
-          <h2>Client Information</h2>
-          <p>Please review your details.</p>
+    <div id="tab-rfp" class="tab-panel active">
+        <!-- Client Information Card -->
+      <div class="card" style="margin-top: 0;">
+
+        <!-- Collapsible trigger -->
+        <button class="collapse-trigger" id="clientInfoToggle" aria-expanded="true" aria-controls="clientInfoBody">
+          <div class="collapse-trigger-left">
+            <h2>Client Information</h2>
+            <p>Please review your details.</p>
+          </div>
+          <span class="collapse-chevron">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="18 15 12 9 6 15"></polyline>
+            </svg>
+          </span>
+        </button>
+
+        <!-- Collapsible body -->
+        <div id="clientInfoBody" class="collapse-body">
+
+          <div class="section-title"></div>
+
+          <div class="input-row">
+            <div class="field-group">
+              <label class="field-label" for="clientName">Full name </label>
+              <input id="clientName" type="text" placeholder="e.g. Jane Smith" />
+            </div>
+          </div>
+
+          <div class="input-row">
+            <div class="field-group">
+              <label class="field-label" for="email">Email address </label>
+              <input id="email" type="email" placeholder="jane@company.com" />
+            </div>
+            <div class="field-group">
+              <label class="field-label" for="companyName">Company name </label>
+              <input id="companyName" type="text" placeholder="e.g. Acme Corp" />
+            </div>
+            <!-- <div class="field-group">
+              <label class="field-label" for="phone">Phone number</label>
+              <input id="phone" type="tel" placeholder="+27 000 000 0000" />
+            </div> -->
+          </div>
+
+          <!-- <div class="input-row" style="margin-top: 4px;">
+            <div class="field-group">
+              <label class="field-label" for="companyName">Company name </label>
+              <input id="companyName" type="text" placeholder="e.g. Acme Corp" />
+            </div>
+            <div class="field-group">
+              <label class="field-label" for="headcount">No. of employees</label>
+              <input id="headcount" type="number" placeholder="e.g. 250" />
+            </div>
+          </div> -->
+
+          <div class="input-row" style="margin-bottom: 8px;">
+            <div class="field-group">
+              <label class="field-label" for="country">Country</label>
+              <select id="country" name="country" style="width:100%">
+                <option value="">Select a country</option>
+                <option>Afghanistan</option><option>Albania</option><option>Algeria</option>
+                <option>Andorra</option><option>Angola</option><option>Antigua and Barbuda</option>
+                <option>Argentina</option><option>Armenia</option><option>Australia</option>
+                <option>Austria</option><option>Azerbaijan</option><option>Bahamas</option>
+                <option>Bahrain</option><option>Bangladesh</option><option>Barbados</option>
+                <option>Belarus</option><option>Belgium</option><option>Belize</option>
+                <option>Benin</option><option>Bhutan</option><option>Bolivia</option>
+                <option>Bosnia and Herzegovina</option><option>Botswana</option><option>Brazil</option>
+                <option>Brunei</option><option>Bulgaria</option><option>Burkina Faso</option>
+                <option>Burundi</option><option>Cambodia</option><option>Cameroon</option>
+                <option>Canada</option><option>Cape Verde</option><option>Central African Republic</option>
+                <option>Chad</option><option>Chile</option><option>China</option>
+                <option>Colombia</option><option>Comoros</option><option>Congo</option>
+                <option>Costa Rica</option><option>Croatia</option><option>Cuba</option>
+                <option>Cyprus</option><option>Czech Republic</option><option>Denmark</option>
+                <option>Djibouti</option><option>Dominica</option><option>Dominican Republic</option>
+                <option>Ecuador</option><option>Egypt</option><option>El Salvador</option>
+                <option>Equatorial Guinea</option><option>Eritrea</option><option>Estonia</option>
+                <option>Eswatini</option><option>Ethiopia</option><option>Fiji</option>
+                <option>Finland</option><option>France</option><option>Gabon</option>
+                <option>Gambia</option><option>Georgia</option><option>Germany</option>
+                <option>Ghana</option><option>Greece</option><option>Grenada</option>
+                <option>Guatemala</option><option>Guinea</option><option>Guinea-Bissau</option>
+                <option>Guyana</option><option>Haiti</option><option>Honduras</option>
+                <option>Hungary</option><option>Iceland</option><option>India</option>
+                <option>Indonesia</option><option>Iran</option><option>Iraq</option>
+                <option>Ireland</option><option>Israel</option><option>Italy</option>
+                <option>Jamaica</option><option>Japan</option><option>Jordan</option>
+                <option>Kazakhstan</option><option>Kenya</option><option>Kiribati</option>
+                <option>Kuwait</option><option>Kyrgyzstan</option><option>Laos</option>
+                <option>Latvia</option><option>Lebanon</option><option>Lesotho</option>
+                <option>Liberia</option><option>Libya</option><option>Liechtenstein</option>
+                <option>Lithuania</option><option>Luxembourg</option><option>Madagascar</option>
+                <option>Malawi</option><option>Malaysia</option><option>Maldives</option>
+                <option>Mali</option><option>Malta</option><option>Marshall Islands</option>
+                <option>Mauritania</option><option>Mauritius</option><option>Mexico</option>
+                <option>Micronesia</option><option>Moldova</option><option>Monaco</option>
+                <option>Mongolia</option><option>Montenegro</option><option>Morocco</option>
+                <option>Mozambique</option><option>Myanmar</option><option>Namibia</option>
+                <option>Nauru</option><option>Nepal</option><option>Netherlands</option>
+                <option>New Zealand</option><option>Nicaragua</option><option>Niger</option>
+                <option>Nigeria</option><option>North Korea</option><option>North Macedonia</option>
+                <option>Norway</option><option>Oman</option><option>Pakistan</option>
+                <option>Palau</option><option>Panama</option><option>Papua New Guinea</option>
+                <option>Paraguay</option><option>Peru</option><option>Philippines</option>
+                <option>Poland</option><option>Portugal</option><option>Qatar</option>
+                <option>Romania</option><option>Russia</option><option>Rwanda</option>
+                <option>Saudi Arabia</option><option>Senegal</option><option>Serbia</option>
+                <option>Seychelles</option><option>Sierra Leone</option><option>Singapore</option>
+                <option>Slovakia</option><option>Slovenia</option><option>Solomon Islands</option>
+                <option>Somalia</option><option>South Africa</option><option>South Korea</option>
+                <option>South Sudan</option><option>Spain</option><option>Sri Lanka</option>
+                <option>Sudan</option><option>Suriname</option><option>Sweden</option>
+                <option>Switzerland</option><option>Syria</option><option>Taiwan</option>
+                <option>Tajikistan</option><option>Tanzania</option><option>Thailand</option>
+                <option>Timor-Leste</option><option>Togo</option><option>Tonga</option>
+                <option>Trinidad and Tobago</option><option>Tunisia</option><option>Turkey</option>
+                <option>Turkmenistan</option><option>Tuvalu</option><option>Uganda</option>
+                <option>Ukraine</option><option>United Arab Emirates</option><option>United Kingdom</option>
+                <option>United States</option><option>Uruguay</option><option>Uzbekistan</option>
+                <option>Vanuatu</option><option>Vatican City</option><option>Venezuela</option>
+                <option>Vietnam</option><option>Palestine</option><option>Yemen</option>
+                <option>Zambia</option><option>Zimbabwe</option>
+              </select>
+            </div>
+            <!-- <div class="field-group">
+              <label class="field-label" for="timeline">Timeline</label>
+              <input id="timeline" type="text" placeholder="e.g. Q3 2025" />
+            </div> -->
+          </div>
+
+        </div><!-- /.collapse-body -->
+      </div><!-- /.card -->
+
+      <!-- Note bar -->
+      <div class="note">
+        <strong>Note:</strong>
+        <span id="note">You can close this page at any time. All changes are saved automatically.</span>
+      </div>
+
+      <!-- System Requirements Card -->
+      <div class="card" id="main-section">
+        <div class="card-header-block">
+          <h2>System Requirements</h2>
+          <p>Please review your requirements carefully.</p>
         </div>
-        <span class="collapse-chevron">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="18 15 12 9 6 15"></polyline>
-          </svg>
-        </span>
-      </button>
 
-      <!-- Collapsible body -->
-      <div id="clientInfoBody" class="collapse-body">
+        <div class="card-body">
+          <label class="section-title" style="display:block;margin-top:0;">
+            Title
+            <input id="title" type="input" placeholder="e.g. Payroll System *" style="width: 100%; margin-top: 8px;" />
+          </label>
 
-        <div class="section-title"></div>
+          <!-- Filter bar -->
+          <div class="filter-bar">
+            <label for="categoryFilter">Filter by Category</label>
+            <select id="categoryFilter" style="padding:7px 11px; border:1px solid var(--border); border-radius:6px; margin-left:0;">
+              <option value="">All Categories</option>
+            </select>
 
-        <div class="input-row">
-          <div class="field-group">
-            <label class="field-label" for="clientName">Full name </label>
-            <input id="clientName" type="text" placeholder="e.g. Jane Smith" />
-          </div>
-        </div>
+            <label for="keepAll" style="margin-left:8px;">Mark All as 'Keep'</label>
+            <input style="transform: scale(1.4); border:1px solid #ccc; border-radius:6px; cursor:pointer;" type="checkbox" name="keepAll" id="keepAll">
 
-        <div class="input-row">
-          <div class="field-group">
-            <label class="field-label" for="email">Email address </label>
-            <input id="email" type="email" placeholder="jane@company.com" />
-          </div>
-          <div class="field-group">
-            <label class="field-label" for="phone">Phone number</label>
-            <input id="phone" type="tel" placeholder="+27 000 000 0000" />
-          </div>
-        </div>
-
-        <div class="input-row" style="margin-top: 4px;">
-          <div class="field-group">
-            <label class="field-label" for="companyName">Company name </label>
-            <input id="companyName" type="text" placeholder="e.g. Acme Corp" />
-          </div>
-          <div class="field-group">
-            <label class="field-label" for="headcount">No. of employees</label>
-            <input id="headcount" type="number" placeholder="e.g. 250" />
-          </div>
-        </div>
-
-        <div class="input-row" style="margin-bottom: 8px;">
-          <div class="field-group">
-            <label class="field-label" for="country">Country</label>
-            <select id="country" name="country" style="width:100%">
-              <option value="">Select a country</option>
-              <option>Afghanistan</option><option>Albania</option><option>Algeria</option>
-              <option>Andorra</option><option>Angola</option><option>Antigua and Barbuda</option>
-              <option>Argentina</option><option>Armenia</option><option>Australia</option>
-              <option>Austria</option><option>Azerbaijan</option><option>Bahamas</option>
-              <option>Bahrain</option><option>Bangladesh</option><option>Barbados</option>
-              <option>Belarus</option><option>Belgium</option><option>Belize</option>
-              <option>Benin</option><option>Bhutan</option><option>Bolivia</option>
-              <option>Bosnia and Herzegovina</option><option>Botswana</option><option>Brazil</option>
-              <option>Brunei</option><option>Bulgaria</option><option>Burkina Faso</option>
-              <option>Burundi</option><option>Cambodia</option><option>Cameroon</option>
-              <option>Canada</option><option>Cape Verde</option><option>Central African Republic</option>
-              <option>Chad</option><option>Chile</option><option>China</option>
-              <option>Colombia</option><option>Comoros</option><option>Congo</option>
-              <option>Costa Rica</option><option>Croatia</option><option>Cuba</option>
-              <option>Cyprus</option><option>Czech Republic</option><option>Denmark</option>
-              <option>Djibouti</option><option>Dominica</option><option>Dominican Republic</option>
-              <option>Ecuador</option><option>Egypt</option><option>El Salvador</option>
-              <option>Equatorial Guinea</option><option>Eritrea</option><option>Estonia</option>
-              <option>Eswatini</option><option>Ethiopia</option><option>Fiji</option>
-              <option>Finland</option><option>France</option><option>Gabon</option>
-              <option>Gambia</option><option>Georgia</option><option>Germany</option>
-              <option>Ghana</option><option>Greece</option><option>Grenada</option>
-              <option>Guatemala</option><option>Guinea</option><option>Guinea-Bissau</option>
-              <option>Guyana</option><option>Haiti</option><option>Honduras</option>
-              <option>Hungary</option><option>Iceland</option><option>India</option>
-              <option>Indonesia</option><option>Iran</option><option>Iraq</option>
-              <option>Ireland</option><option>Israel</option><option>Italy</option>
-              <option>Jamaica</option><option>Japan</option><option>Jordan</option>
-              <option>Kazakhstan</option><option>Kenya</option><option>Kiribati</option>
-              <option>Kuwait</option><option>Kyrgyzstan</option><option>Laos</option>
-              <option>Latvia</option><option>Lebanon</option><option>Lesotho</option>
-              <option>Liberia</option><option>Libya</option><option>Liechtenstein</option>
-              <option>Lithuania</option><option>Luxembourg</option><option>Madagascar</option>
-              <option>Malawi</option><option>Malaysia</option><option>Maldives</option>
-              <option>Mali</option><option>Malta</option><option>Marshall Islands</option>
-              <option>Mauritania</option><option>Mauritius</option><option>Mexico</option>
-              <option>Micronesia</option><option>Moldova</option><option>Monaco</option>
-              <option>Mongolia</option><option>Montenegro</option><option>Morocco</option>
-              <option>Mozambique</option><option>Myanmar</option><option>Namibia</option>
-              <option>Nauru</option><option>Nepal</option><option>Netherlands</option>
-              <option>New Zealand</option><option>Nicaragua</option><option>Niger</option>
-              <option>Nigeria</option><option>North Korea</option><option>North Macedonia</option>
-              <option>Norway</option><option>Oman</option><option>Pakistan</option>
-              <option>Palau</option><option>Panama</option><option>Papua New Guinea</option>
-              <option>Paraguay</option><option>Peru</option><option>Philippines</option>
-              <option>Poland</option><option>Portugal</option><option>Qatar</option>
-              <option>Romania</option><option>Russia</option><option>Rwanda</option>
-              <option>Saudi Arabia</option><option>Senegal</option><option>Serbia</option>
-              <option>Seychelles</option><option>Sierra Leone</option><option>Singapore</option>
-              <option>Slovakia</option><option>Slovenia</option><option>Solomon Islands</option>
-              <option>Somalia</option><option>South Africa</option><option>South Korea</option>
-              <option>South Sudan</option><option>Spain</option><option>Sri Lanka</option>
-              <option>Sudan</option><option>Suriname</option><option>Sweden</option>
-              <option>Switzerland</option><option>Syria</option><option>Taiwan</option>
-              <option>Tajikistan</option><option>Tanzania</option><option>Thailand</option>
-              <option>Timor-Leste</option><option>Togo</option><option>Tonga</option>
-              <option>Trinidad and Tobago</option><option>Tunisia</option><option>Turkey</option>
-              <option>Turkmenistan</option><option>Tuvalu</option><option>Uganda</option>
-              <option>Ukraine</option><option>United Arab Emirates</option><option>United Kingdom</option>
-              <option>United States</option><option>Uruguay</option><option>Uzbekistan</option>
-              <option>Vanuatu</option><option>Vatican City</option><option>Venezuela</option>
-              <option>Vietnam</option><option>Palestine</option><option>Yemen</option>
-              <option>Zambia</option><option>Zimbabwe</option>
+            <label for="recommendationOptions" style="margin-left:8px;">Mark Selected As</label>
+            <select id="recommendationOptions" style="padding:7px 11px; border:1px solid var(--border); border-radius:6px; margin-left:0;">
+              <option value="">— select —</option>
+              <option>Remove</option>
+              <option>Amend</option>
+              <option>Keep</option>
             </select>
           </div>
-          <div class="field-group">
-            <label class="field-label" for="timeline">Timeline</label>
-            <input id="timeline" type="text" placeholder="e.g. Q3 2025" />
+
+          <div></div>
+
+          <button class="add-btn" id="addRequirementBtn" type="button">+ Add Requirement</button>
+
+          <table id="requirementsTable" width="100%" style="border-collapse: collapse; margin-bottom: 20px; margin-top: 4px;">
+            <thead>
+              <tr style="text-align:left; font-size:13px; color:#6b7280;">
+                <td></td>
+                <th style="padding:8px; border-bottom:1px solid #e5e7eb;">Category</th>
+                <th style="padding:8px; border-bottom:1px solid #e5e7eb;">Requirement</th>
+                <th style="padding:8px; border-bottom:1px solid #e5e7eb;">Priority</th>
+                <th style="padding:8px; border-bottom:1px solid #e5e7eb;">Recommendation</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+
+          <div class="btn-row">
+            <button class="btn" id="saveDraft">Save Draft</button>
+            <button class="btn hide" id="submitRequirements">Sign-Off</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div id="tab-analysis" class="tab-panel">
+      <!-- SECTION 0: OVERVIEW -->
+        <div class="section" id="sec-overview">
+          <div class="section-header">
+            <span class="section-eyebrow">Overview</span>
+            <span class="section-title">Match overview</span>
+            <span class="section-header-line"></span>
+          </div>
+
+          <div class="pie-row" id="chartPieRow"></div>
+
+          <div class="card">
+            <div class="card-header">Match score by area</div>
+            <div class="card-body">
+              <div id="heatmapLegend" style="display:flex;flex-wrap:wrap;gap:14px;padding:12px 16px;border-bottom:1px solid #e2e0db;"></div>
+              <div style="padding:16px 16px 8px;">
+                <div id="heatmapBarWrap" style="position:relative;width:100%;height:280px;">
+                  <canvas id="heatmapBarChart" role="img" aria-label="Grouped horizontal bar chart showing vendor match scores per area."></canvas>
+                </div>
+              </div>
+              <table class="heatmap-table" style="border-top:1px solid #e2e0db;">
+                <thead id="heatmapHead"></thead>
+                <tbody id="heatmapBody"></tbody>
+              </table>
+            </div>
           </div>
         </div>
 
-      </div><!-- /.collapse-body -->
-    </div><!-- /.card -->
-
-    <!-- Note bar -->
-    <div class="note">
-      <strong>Note:</strong>
-      <span>You can close this page at any time. All changes are saved automatically.</span>
-    </div>
-
-    <!-- System Requirements Card -->
-    <div class="card">
-      <div class="card-header-block">
-        <h2>System Requirements</h2>
-        <p>Please review your requirements carefully.</p>
-      </div>
-
-      <div class="card-body">
-        <label class="section-title" style="display:block;margin-top:0;">
-          Title
-          <input id="title" type="input" placeholder="e.g. Payroll System *" style="width: 100%; margin-top: 8px;" />
-        </label>
-
-        <!-- Filter bar -->
-        <div class="filter-bar">
-          <label for="categoryFilter">Filter by Category</label>
-          <select id="categoryFilter" style="padding:7px 11px; border:1px solid var(--border); border-radius:6px; margin-left:0;">
-            <option value="">All Categories</option>
-          </select>
-
-          <label for="keepAll" style="margin-left:8px;">Mark All as 'Keep'</label>
-          <input style="transform: scale(1.4); border:1px solid #ccc; border-radius:6px; cursor:pointer;" type="checkbox" name="keepAll" id="keepAll">
-
-          <label for="recommendationOptions" style="margin-left:8px;">Mark Selected As</label>
-          <select id="recommendationOptions" style="padding:7px 11px; border:1px solid var(--border); border-radius:6px; margin-left:0;">
-            <option value="">— select —</option>
-            <option>Remove</option>
-            <option>Amend</option>
-            <option>Keep</option>
-          </select>
+        <!-- SECTION 1: MATCH SCORES -->
+        <div class="section" id="sec-scores">
+          <div class="section-header">
+            <span class="section-eyebrow">01</span>
+            <span class="section-title">Match Scores</span>
+            <span class="section-header-line"></span>
+          </div>
+          <div class="score-grid" id="scoreCards"></div>
+          <!-- <div style="margin-top:14px;">
+            <div class="card">
+              <div class="card-header">Score by area</div>
+              <div class="card-body">
+                <table class="report-table">
+                  <thead id="scoreTableHead"></thead>
+                  <tbody id="scoreTableBody"></tbody>
+                </table>
+              </div>
+            </div> -->
+          </div>
         </div>
-
-        <div></div>
-
-        <table id="requirementsTable" width="100%" style="border-collapse: collapse; margin-bottom: 20px; margin-top: 4px;">
-          <thead>
-            <tr style="text-align:left; font-size:13px; color:#6b7280;">
-              <td></td>
-              <th style="padding:8px; border-bottom:1px solid #e5e7eb;">Category</th>
-              <th style="padding:8px; border-bottom:1px solid #e5e7eb;">Requirement</th>
-              <th style="padding:8px; border-bottom:1px solid #e5e7eb;">Priority</th>
-              <th style="padding:8px; border-bottom:1px solid #e5e7eb;">Recommendation</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-
-        <div class="btn-row">
-          <button class="btn" id="saveDraft">Save Draft</button>
-          <button class="btn hide" id="submitRequirements">Sign-Off</button>
-        </div>
-      </div>
     </div>
-
   </div>
 
   <footer style="margin-bottom: 12px;">
     <span class="footer-text">Powered by Udder.</span>
   </footer>
 
-  <script>
+  <script type="module">
+    import { getParam, lockBtn } from '../assets/js/app.js';
+
+    const t = getParam('tk');
+    if (!t){$('body').html('This link is invalid or has expired.');} 
+    $('#codeGate').removeClass('hide');
+    
+    function unlockPage() {
+      $('#codeGate').remove();
+      $('#loading').addClass('hide');
+    }
+
+    async function attemptUnlock() {
+      const entered = $('#accessCode').val().trim();
+
+      if (!entered) return;
+
+      const reset = lockBtn($('#accessCodeSubmit'));
+      if (!reset) return;
+      
+      const res = await fetch("/api/access-code", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token: t, access_code: entered, link: window.location.href})
+      });
+      
+      const result = await res.json();
+      if (result.error){
+        $('#accessCodeError').text(result.error);
+        $('#accessCodeError').removeClass('hide');
+        $('#accessCode').val('').trigger('focus');
+        reset();
+      }else{  
+        const script = document.createElement('script');
+        script.type = 'module';
+        script.src = `../assets/js/requirements/${result.script}`;
+        document.body.appendChild(script);
+        reset();
+        unlockPage();
+      }
+    }
+
+    $('#accessCodeSubmit').on('click', attemptUnlock);
+    $('#accessCode').on('keydown', function (e) {
+      if (e.key === 'Enter') attemptUnlock();
+    });
+    $('#accessCode').on('input', function () {
+      $('#accessCodeError').addClass('hide');
+    });
+    $('#accessCode').trigger('focus');
+
     // Collapsible client info
     $('#clientInfoToggle').on('click', function () {
       const $body = $('#clientInfoBody');
@@ -793,7 +1052,5 @@
       $body.toggleClass('collapsed', expanded);
     });
   </script>
-
-  <script type="module" src="../assets/js/requirements/client_review.js"></script>
 </body>
 </html>

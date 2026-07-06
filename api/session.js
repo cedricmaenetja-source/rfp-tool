@@ -29,7 +29,8 @@ export default async function handler(req, res) {
             .from('tblrfpusers')
             .select('id, first_name, last_name, email, role')
             .eq('id', decoded.userId)
-            .eq('active', true);
+            .eq('active', true)
+            .single();
 
         if (error) return res.status(500).json({ data: null, error: error.message });
         return res.status(200).json({ data });

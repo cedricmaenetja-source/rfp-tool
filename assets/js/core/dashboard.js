@@ -5,6 +5,12 @@ let formFields = {};
 let fileContents = {};
 let uploadedFileName = '';
 let error = false;
+let errorList = {
+    headings: [],
+    priority: [],
+    area: [],
+    system: []
+};
 
 $(function(){
     if (!App.loggedIn()){
@@ -81,19 +87,19 @@ $(function(){
             $('.description').text('Running checks...');
             $('.card-group').html(`
                 <div class="checklist-item" data-type="headings">
-                    <span>File Headers</span>
+                    <span class="title">File Headers <span id="headings-error"></span></span>
                     <span class="status">❌</span>
                 </div>
                 <div class="checklist-item" data-type="area">
-                    <span class="flash-text" id="areaCheck">Area Listing</span>
+                    <span class="flash-text title" id="areaCheck">Area Listing <span id="area-error"></span></span>
                     <span class="status">❌</span>
                 </div>
                 <div class="checklist-item" data-type="priority">
-                    <span id="priorityCheck">Priority Listing</span>
+                    <span id="priorityCheck" class="title">Priority Listing <span id="priority-error"></span></span>
                     <span class="status">❌</span>
                 </div>
                 <div class="checklist-item" data-type="system">
-                    <span id="systemPartCheck">System Part Listing</span>
+                    <span id="systemPartCheck" class="title">System Part Listing <span id="system-error"></span></span>
                     <span class="status">❌</span>
                 </div>
             `);
@@ -111,9 +117,8 @@ $(function(){
             
             for (var requirement of fileContents){
                 if (!requirement.area || !result.data.area.includes(requirement.area)){
-                    console.log('here 3');
                     error = true;
-                    break;
+                    errorList['area'].push(requirement.area);
                 }
             }
             
@@ -126,7 +131,7 @@ $(function(){
             for (var requirement of fileContents){
                 if (!requirement.priority || !App.priorityList.includes(requirement.priority)){
                     error = true;
-                    break;
+                    errorList['priority'].push(requirement.priority);
                 }
             }
 
@@ -139,7 +144,7 @@ $(function(){
             for (var requirement of fileContents){
                 if (!requirement.system_part || !result.data.system_parts.includes(requirement.system_part)){
                     error = true;
-                    break;
+                    errorList['system'].push(requirement.system_part);
                 }
             }
 
@@ -148,14 +153,13 @@ $(function(){
                 updateChecklist('system', true);
             }
 
+            fileUploadErrors(errorList);
+
             if (!error){
                 $('#nextBtn').prop('disabled', false);
             }
 
             $('#backBtn').show();
-
-            console.info(result.data);
-            console.info(fileContents);
         }
 
         if(currentStep === 3){
@@ -216,7 +220,7 @@ $(function(){
         } else {
             // complete
             var $btn = $(this);
-            console.info($btn);
+           
             const title = $('#title').val();
             const companyName = $('#company_name').val();
             const headcount = $('#headcount').val();
@@ -254,7 +258,7 @@ $(function(){
                 return;
             }
             
-            location.href = `../requirements/draft.html?d=${btoa(JSON.stringify(fileContents))}&id=${result.data.id}`;
+            location.href = `../requirements/draft.html?id=${result.data.id}`;
         }
 
         function resetBtn(){
@@ -281,7 +285,6 @@ $(function(){
     });
 
     $('#openWizard').click(function(){
-        console.log('running');
         currentStep = 1;
         renderStep();
         $('#wizardModal').css('display', 'flex').hide().fadeIn();
@@ -331,7 +334,7 @@ $(function(){
                     validHeaders.forEach(header => {
                         if (json[0][`${header}`] === undefined){
                             hasError = true;
-                            return;
+                            errorList['headings'].push(header);
                         }
                         i++;
                     });
@@ -357,7 +360,7 @@ $(function(){
                         //     return;
                         // }
                         
-                        // location.href = `../requirements/draft.html?d=${btoa(JSON.stringify(json))}&id=${result.data.id}`; 
+                        //location.href = `../requirements/draft.html?id=${result.data.id}`; 
                     }
                 };
 
@@ -371,10 +374,23 @@ $(function(){
 
     function updateChecklist(type, isValid) {
         const item = $(`.checklist-item[data-type="${type}"] .status`);
+        
         if(isValid) {
             item.text('✅').css('color', 'green');
         } else {
             item.text('❌').css('color', 'red');
+        }
+    }
+
+    function fileUploadErrors(errorList){
+        console.log('errorList', errorList);
+        for (const type in errorList){
+            if (errorList[type].length > 0) {
+                errorList[type] = [...new Set(errorList[type])];
+                $(`#${type}-error`).text(' - [' + errorList[type].join(', ') + ']').css('color', 'red');
+            }else{
+                updateChecklist(type, true);
+            }
         }
     }
 
@@ -554,7 +570,7 @@ $(function(){
     $(document).on('click', '.remove-configurations', async function() {
        const field = $(this).data('field');
        const id = $(this).data('id');
-       console.log(id);
+      
        if (id == 'formFieldArea'){
             formFields['area'] = formFields['area'].filter(item => item !== field);
             
@@ -1051,7 +1067,6 @@ async function generateTabs(reqId, vendors, mustHaveResponses, couldHaveResponse
             const $row = $('<tr></tr>');
             $row.append(`<td class="sticky-col">${feedback}</td>`);
             vendors.forEach(vendor => {
-                console.info('vendor', mustHaveResponses[vendor.name]);
                 const mustHave = (mustHaveResponses[vendor.name] === undefined || mustHaveResponses[vendor.name][feedback] === undefined) ? 0 : mustHaveResponses[vendor.name][feedback];
                 const couldHave = (couldHaveResponses[vendor.name] === undefined || couldHaveResponses[vendor.name][feedback] === undefined) ? 0 : couldHaveResponses[vendor.name][feedback];
                 const shouldHave = (shouldHaveResponses[vendor.name] === undefined || shouldHaveResponses[vendor.name][feedback] === undefined) ? 0 : shouldHaveResponses[vendor.name][feedback];

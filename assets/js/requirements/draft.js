@@ -1,18 +1,22 @@
 import * as App from "../app.js";
+import { initAuth, getCurrentUser } from '../core/_auth.js';
 
 let configurationFields;
 let requirementInfo = {};
 let requirementId;
 let isApproved = false;
 
-$(function(){
-    if (!App.loggedIn()){
-        location.href = App.pages.login;
+(async () => {
+    const token = await initAuth();
+    if (token.error){ window.location.href = App.pages.login;return;}
+    
+    const user = await getCurrentUser();
+    if (!user) {
+        window.location.href = App.pages.login;
         return;
     }
 
-    App.hasInternet(location.href);
-
+    window._user = user.data;
     const reqId = App.getParam('id');
     const id = reqId ? reqId : null;
     if (id === null){
@@ -34,7 +38,7 @@ $(function(){
         updateData();
         await autoSaved();
     });
-
+    
     $(document).on('change', '.requirement-select', async function() {
         const field = $(this).data('field');
         const pos = $(this).data('pos');
@@ -96,7 +100,8 @@ $(function(){
         const email = requirementInfo.client !== undefined && requirementInfo.client.email !== undefined || requirementInfo.client.email != '' ? requirementInfo.client.email : '';
         const title = requirementInfo.title !== undefined && requirementInfo.title != '' ? requirementInfo.title : '';
         const company = requirementInfo.client !== undefined && requirementInfo.client.company !== undefined || requirementInfo.client.company != '' ? requirementInfo.client.company : '';
-
+        const name = requirementInfo.client !== undefined && requirementInfo.client.name !== undefined || requirementInfo.client.name != '' ? requirementInfo.client.name : '';
+        
         if (email != '' && title != '' && company != ''){
             App.swal.fire({
                 title: "Are you sure?",
@@ -106,30 +111,49 @@ $(function(){
                 confirmButtonColor: "#3085d6",
                 cancelButtonColor: "#d33",
                 confirmButtonText: "Yes, share it!"
-            }).then((result) => {
+            }).then(async (result) => {
                 if (result.isConfirmed) {
                     const origin = window.location.origin;
-                
-                    $.ajax({
-                        url: 'https://hooks.zapier.com/hooks/catch/25735666/uqhb60x/',   
-                        type: 'POST',
-                        data: JSON.stringify({
-                            email: email,
-                            review_url: `${origin}/client/review.html?id=${id}`,
-                            title: title
-                        }),         
-                        success: function (response) {
-                            App.swal.fire({
-                                title: "Success",
-                                text: "A link has been shared!",
-                                icon: "success"
-                            });
-                        },
-                        error: function (xhr) {
-                            console.error('Error:', xhr.responseText);
-                            App.customError(App.OPERATION_FAILED);
-                        }
+                   
+                    const res = await fetch('/api/send-email?action=clientReqReview', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ 
+                            email: email, 
+                            link: `${origin}/client/review.html?id=${id}`,
+                            clientName: name,
+                            userId: window._user.id,
+                        })
                     });
+                    const result = await res.json();
+                    if (result.error){App.customError(result.error);return;}
+
+                    App.swal.fire({
+                        title: "Success",
+                        text: "A link has been shared!",
+                        icon: "success"
+                    });
+
+                    // $.ajax({
+                    //     url: 'https://hooks.zapier.com/hooks/catch/25735666/uqhb60x/',   
+                    //     type: 'POST',
+                    //     data: JSON.stringify({
+                    //         email: email,
+                    //         review_url: `${origin}/client/review.html?id=${id}`,
+                    //         title: title
+                    //     }),         
+                    //     success: function (response) {
+                    //         App.swal.fire({
+                    //             title: "Success",
+                    //             text: "A link has been shared!",
+                    //             icon: "success"
+                    //         });
+                    //     },
+                    //     error: function (xhr) {
+                    //         console.error('Error:', xhr.responseText);
+                    //         App.customError(App.OPERATION_FAILED);
+                    //     }
+                    // });
                 }
             });
         }else{
@@ -258,6 +282,14 @@ $(function(){
             td.text(value).attr('data-value', value);
         });
     });
+})();
+
+$(function(){
+    // if (!App.loggedIn()){
+    //     location.href = App.pages.login;
+    //     return;
+    // }
+    App.hasInternet(location.href);
 });
 
 async function autoSaved() {
@@ -281,8 +313,6 @@ async function autoSaved() {
         });
         return;
     }
-
-  console.log(requirementInfo);
 }
 
 function updateData(){

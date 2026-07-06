@@ -2,11 +2,12 @@ const origin = window.location.origin;
 
 export const PAGES = {
     dashboard: `${origin}/dashboard`,
-    login: `${origin}/auth/login.html`,
+    login: `${origin}/v2/login.html`,
     draft: `${origin}/requirements/draft.html`,
     vendor_review: `${origin}/vendor/review.html`,
     proposal_submitted: `${origin}/submitted.html`,
     thank_you: `${origin}/thank_you.html`,
+    req_review: `${origin}/requirements/draft.html?id=`,
     presentation: `${origin}/presentation`,
     root: `${origin}/index.html`,
 };

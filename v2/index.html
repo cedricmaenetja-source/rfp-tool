@@ -2099,7 +2099,7 @@ async function loadUsers() {
       + '<td><span class="badge">' + u.role + '</span></td>'
       + '<td><span class="badge">' + status + '</span></td>'
       + '<td style="text-align:right;white-space:nowrap">'
-      +   '<button class="act-btn" onclick="openUserModal(' + u.id + ')">Edit</button> '
+      +   '<button class="act-btn" onclick="openUserModal(\'' + btoa(JSON.stringify(u)) + '\')">Edit</button> '
       +   '<button class="act-btn" onclick="removeUser(\'' + u.id + '\')" style="color:#E24B4A">Remove</button>'
       +   '<div class="row-menu-wrap">'
       +     '<button class="row-menu-btn" onclick="toggleRowMenu(event, \'' + u.id + '\')"><i class="fa-solid fa-ellipsis-vertical"></i></button>'
@@ -2116,10 +2116,10 @@ async function loadUsers() {
   document.getElementById('nav-user-count').textContent = result.data.length;
 }
 
-function openUserModal(id) {
-  editingUserId = id || null;
-  const user = id ? MOCK.users.find(u => u.id === id) : null;
-  document.getElementById('user-panel-title').textContent = user ? 'Edit user' : 'Add user';
+function openUserModal(user) {
+  //editingUserId = id || null;
+ 
+  document.getElementById('user-panel-title').textContent = user !== null ? 'Edit user' : 'Add user';
   document.getElementById('first-name').value = user ? user.first_name : '';
   document.getElementById('last-name').value = user ? user.last_name : '';
   document.getElementById('user-email').value = user ? user.email : '';
@@ -2250,7 +2250,6 @@ function copyPasswordLink(id) {
 
 window.copyPasswordLink = copyPasswordLink;
 window.emailPasswordReset = emailPasswordReset;
-
 window.navigateTo = navigateTo;
 window.openWizard = openWizard;
 window.openClientEditModal = openClientEditModal;

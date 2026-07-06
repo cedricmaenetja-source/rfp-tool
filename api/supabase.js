@@ -17,6 +17,7 @@ export default async function handler(req, res) {
     if (action === 'getVendors') return await getVendors(res);
     if (action === 'getActiveRequirements') return await getActiveRequirements(res);
     if (action === 'getRequirementsById') return await getRequirementsById(res, reqId);
+    if (action === 'getRequirementsByDrafReqId') return await getRequirementsByDrafReqId(res, reqId);
     if (action === 'getFormFields') return await getFormFields(res);
     if (action === 'getAllDraftRequirement') return await getAllDraftRequirement(res);
     if (action === 'getCompletedRequirements') return await getCompletedRequirements(res);
@@ -86,8 +87,8 @@ export default async function handler(req, res) {
         }
 
         try {
-            const { requirement, status } = req.body;
-            return await addNewRequirement(res, requirement, status);
+            const { requirement, status, draft_req_id } = req.body;
+            return await addNewRequirement(res, requirement, status, draft_req_id);
         } catch (err) {
             console.error(err);
             res.status(500).json({ error: 'Internal error' });
@@ -265,7 +266,7 @@ async function deleteUser(res, id) {
 
 async function getUsers(res, session) {
     if (session.role === 'admin') return getAdminUsers(res);
-    
+
   const { data, error } = await supabase
     .from('tblrfpusers')
     .select('id, first_name, last_name, email, role, active')
@@ -321,6 +322,17 @@ async function getRequirementsById(res, requirementId) {
     .from('tblrfprequirements')
     .select('*')
     .eq('id', requirementId)
+    .maybeSingle();
+
+    if (error) return res.status(500).json({ data: null, error: error.message });
+    return res.status(200).json({ data });
+}
+
+async function getRequirementsByDrafReqId(res, requirementId) {
+  const { data, error } = await supabase
+    .from('tblrfprequirements')
+    .select('*')
+    .eq('draft_req_id', requirementId)
     .maybeSingle();
 
     if (error) return res.status(500).json({ data: null, error: error.message });
@@ -414,11 +426,16 @@ async function getFormFields(res) {
     return res.status(200).json({ data });
 }
 
-async function addNewRequirement(res, payload, status = 'pending') {
+async function addNewRequirement(res, payload, status = 'pending', draft_req_id = '') {
    const { data, error } = await supabase
     .from('tblrfprequirements')
-    .insert([
-      { title: payload['title'], client:  payload['client'], requirements: payload['requirements'], status: status},
+    .insert([{ 
+        title: payload['title'], 
+        client:  payload['client'], 
+        requirements: payload['requirements'], 
+        status: status,
+        draft_req_id: draft_req_id
+    },
     ])
     .select('*')
     .single();
