@@ -187,7 +187,7 @@ body{
             const reset = lockBtn($(this));
             if (!reset) return;
 
-            const result = await login(email, password);
+            const result = await login(email, pwd);
             if (result.error) {showNotification(result.error, 'error');reset();return;}
 
             if (result.accessToken) {

@@ -14,13 +14,18 @@ export default async function handler(req, res) {
         
         if (newLink !== decoded.access_link){return res.status(400).json({ error: 'Invalid link.' });}
         if (decoded.access_code != access_code){return res.status(400).json({ error: 'Invalid access code.' });}
-        
-        // res.setHeader('Set-Cookie', [
-        //     `access_granted=true; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=${60 * 60}`
-        // ]);
+
+        const newAcessToken = jwt.sign({
+                access_token: token
+            },
+            process.env.JWT_ACCESS_SECRET,
+        );
+
+        res.setHeader('Set-Cookie', `auth=${token}; HttpOnly; Path=/; SameSite=Strict`);
 
         return res.status(200).json({
             script: 'client_review.js',
+            token: newAcessToken
         });
 
     } catch (err) {

@@ -306,3 +306,17 @@ export const SIGN_OFF = `
 
     [Automated notification from RFP Tool]
     </p>`;
+
+export const VENDOR = `
+    <p>Hi {{CONSULTANT_NAME}},<br/><br/>
+
+    {{CLIENT_NAME}} has signed-off on their requirements list.<br/><br/>
+
+    You can log in to the Udder RFP management tool to see their changes, including any modifications, approvals, rejections, and priority assignments.
+
+    {{LINK}}<br/><br/>
+
+    You will now be able to send it out to vendors.<br/><br/>
+
+    [Automated notification from RFP Tool]
+    </p>`;

@@ -559,9 +559,12 @@ async function loadReport(reqId){
             $('.note').css('background', '#f0f9ff');
         return;
     }
-    
+
     const [reqRes, ffRes] = await Promise.all([
-        fetch(`/api/supabase?action=getRequirementsByDrafReqId&reqId=${reqId}`),
+        fetch(`/api/supabase?action=getRequirementsByDrafReqId&reqId=${reqId}`,{
+            method: "GET",
+            credentials: "include" 
+        }),
         fetch(`/api/supabase?action=getFormFields`)
     ]);
 

@@ -1025,10 +1025,13 @@
         $('#accessCode').val('').trigger('focus');
         reset();
       }else{  
+        localStorage.setItem('token', result.token);
+
         const script = document.createElement('script');
         script.type = 'module';
         script.src = `../assets/js/requirements/${result.script}`;
         document.body.appendChild(script);
+        
         reset();
         unlockPage();
       }

@@ -284,6 +284,15 @@ table.dataTable tbody tr:hover td.sorting_1{background:var(--w) !important}
 .row-menu-item:hover{background:var(--off2)}
 .row-menu-item.danger{color:#E24B4A}
 .row-menu-item.danger:hover{background:#fdecea}
+#editReqPanel{position:fixed;top:0;right:-380px;width:340px;height:100%;background:var(--w);border-left:1px solid var(--b2);padding:14px 16px;transition:right .28s cubic-bezier(.22,.61,.36,1);z-index:1000;overflow-y:auto}
+#editReqPanel.open{right:0}
+#editReqPanel h4{margin:0 0 12px;font-size:14px;font-weight:600;color:var(--t1)}
+#editReqPanel .form-group{display:flex;flex-direction:column;margin-bottom:10px}
+#editReqPanel .form-group label{font-size:10.5px;font-weight:600;letter-spacing:.04em;color:var(--t3);margin-bottom:4px;text-transform:uppercase}
+#editReqPanel .form-group input,#editReqPanel .form-group select,#editReqPanel .form-group textarea{padding:8px 10px;border:1px solid var(--b2);border-radius:var(--radius-btn);font-family:var(--sans);font-size:12.5px;background:var(--w);color:var(--t1);outline:none;transition:border-color .12s,background .12s;resize:vertical}
+#editReqPanel .form-group input:focus,#editReqPanel .form-group select:focus,#editReqPanel .form-group textarea:focus{border-color:var(--b3);background:var(--w)}
+.act-btn:disabled{opacity:.45;cursor:not-allowed;background:var(--off2)}
+.act-btn:disabled:hover{background:var(--off2);color:var(--t2)}
 </style>
 </head>
 <body>
@@ -412,7 +421,7 @@ table.dataTable tbody tr:hover td.sorting_1{background:var(--w) !important}
           </div>
           <div class="header-actions">
             <button class="btn btn-secondary btn-sm" onclick="window.navigateTo('requirements')">View client review</button>
-            <button class="btn btn-primary btn-sm" onclick="window.openWizard()">+ New requirement</button>
+            <button class="btn btn-primary btn-sm" onclick="window.navigateTo('vendor-review')">View vendor review</button>
           </div>
         </div>
         <div id="home-alert" style="display:none" class="alert">
@@ -763,7 +772,7 @@ table.dataTable tbody tr:hover td.sorting_1{background:var(--w) !important}
   <h4 id="user-panel-title">Add user</h4>
   <div class="form-group"><label>First name *</label><input type="text" id="first-name" placeholder="First name"></div>
   <div class="form-group"><label>Last name *</label><input type="text" id="last-name" placeholder="Last name"></div>
-  <div class="form-group"><label>Email *</label><input type="email" id="user-email" placeholder="Email address"></div>
+  <div class="form-group"><label>Email *</label><input type="email" disabled id="user-email" placeholder="Email address"></div>
   <div class="form-group">
     <label>Role</label>
     <select id="user-role">
@@ -782,6 +791,39 @@ table.dataTable tbody tr:hover td.sorting_1{background:var(--w) !important}
   <div class="panel-actions">
     <button class="btn btn-primary btn-sm" id="save-user-btn">Save</button>
     <button class="btn btn-secondary btn-sm" id="cancel-user-modal">Cancel</button>
+  </div>
+</div>
+<div id="editReqPanel">
+  <h4>Edit requirement</h4>
+  <div class="form-group">
+    <label>Category</label>
+    <select id="ereq-area"></select>
+  </div>
+  <div class="form-group"><label>Description</label><textarea id="ereq-requirement" rows="3" placeholder="Requirement description"></textarea></div>
+  <div class="form-group">
+    <label>Priority</label>
+    <select id="ereq-priority">
+      <option>Must-Have</option>
+      <option>Should-Have</option>
+      <option>Could-Have</option>
+    </select>
+  </div>
+  <div class="form-group">
+    <label>System Part</label>
+    <select id="ereq-system-part"></select>
+  </div>
+  <!-- <div class="form-group"><label>Recommendation</label>
+    <select id="ereq-recommendation">
+      <option></option>
+      <option>Amend</option>
+      <option>K</option>
+      <option>Could-Have</option>
+    </select>
+  </div> -->
+  <!-- <div class="form-group"><label>Comment</label><textarea id="ereq-comment" rows="2" placeholder="Optional comment"></textarea></div> -->
+  <div class="panel-actions">
+    <button class="btn btn-primary btn-sm" id="ereq-save-btn">Save</button>
+    <button class="btn btn-secondary btn-sm" id="ereq-cancel-btn">Cancel</button>
   </div>
 </div>
 <div id="edit-vendor-modal" class="modal-overlay">
@@ -826,9 +868,11 @@ table.dataTable tbody tr:hover td.sorting_1{background:var(--w) !important}
   import { customError, showNotification, lockBtn } from '../assets/js/app.js';
   import { initAuth, getCurrentUser } from '../assets/js/core/_auth.js';
 
+  let _user = null;
   (async () => {
       const token = await initAuth();
-      if (token.error){ window.location.href = `${window.location.origin}/v2/login.html`;return;}
+      console.log('token', token);
+      if (!token || token.error){ window.location.href = `${window.location.origin}/v2/login.html`;return;}
       
       const user = await getCurrentUser();
       if (!user) {
@@ -836,7 +880,7 @@ table.dataTable tbody tr:hover td.sorting_1{background:var(--w) !important}
           return;
       }
 
-      window._user = user;
+      _user = user.data;
   })();
 
   let cachedDrafts = [];
@@ -941,9 +985,13 @@ function attentionRow(color, text, meta) {
   return '<div class="attention-row"><div class="attention-dot" style="background:' + (dots[color]||'#888') + '"></div><div><div class="attention-text">' + text + '</div><div class="attention-meta">' + meta + '</div></div></div>';
 }
 let draftsTable = null;
-function loadDrafts() {
+async function loadDrafts() {
   const sidebar = document.getElementById('drafts-sidebar-list');
   sidebar.innerHTML = '';
+
+  const ffRes = await fetch('/api/supabase?action=getFormFields');
+  const ffResult = await ffRes.json();
+  if (!ffResult.error) cachedFormFields = ffResult.data;
 
   cachedDrafts.forEach((row, idx) => {
     const d = row.data;
@@ -968,17 +1016,31 @@ function renderDraftDetail(row) {
   const priorityColor = p => p === 'Must-Have' ? 'color:var(--o)' : p === 'Should-Have' ? 'color:var(--t2)' : 'color:var(--t3)';
 
   let rows = '';
+  let areas = '';
+  let systemParts = '';
+  if (d.requirements.length > 0) d.requirements.sort((a, b) => a.area.localeCompare(b.area));
   (d.requirements || []).forEach((req, idx) => {
-    rows += '<tr>'
+    const rowBgColor = (req.recommendation == 'Keep') ? '#f0f9f0' : 'transparent';
+    rows += '<tr style="background: ' + rowBgColor + '">'
       + '<td style="color:var(--o);font-weight:500">' + (req.area || '—') + '</td>'
       + '<td>' + (req.requirement || '—') + '</td>'
       + '<td style="' + priorityColor(req.priority) + ';font-weight:500;white-space:nowrap">' + (req.priority || '—') + '</td>'
       + '<td>' + (req.system_part || '—') + '</td>'
       + '<td>' + (req.recommendation || '—') + '</td>'
       + '<td>' + (req.comment || '') + '</td>'
-      + '<td><button onclick="removeDraftReq(' + idx + ',\'' + row.id + '\')" style="background:none;border:none;color:#E24B4A;font-size:12.5px;cursor:pointer;font-family:var(--sans)">remove</button></td>'
+      + '<td><button onclick="editDraftReq(' + idx + ',\'' + row.id + '\')" style="background:none;border:none;font-size:12.5px;cursor:pointer;font-family:var(--sans);margin-left:5px" title="edit"><i class="fa-solid fa-pen-to-square"></i></button><button title="remove" id="removeDraftReq-' + row.id + '" onclick="removeDraftReq(' + idx + ',\'' + row.id + '\')" style="background:none;border:none;color:#E24B4A;font-size:12.5px;cursor:pointer;font-family:var(--sans);margin-left:5px"><i class="fa-regular fa-trash-can"></i></button></td>'
       + '</tr>';
   });
+
+  if (cachedFormFields != null){
+    cachedFormFields.area.sort((a, b) => a.localeCompare(b)).forEach(a => {
+      areas += `<option>${a}</option>`;
+    });
+
+    cachedFormFields.system_parts.sort((a, b) => a.localeCompare(b)).forEach(p => {
+      systemParts += `<option>${p}</option>`;
+    });
+  }
 
   panel.innerHTML = ''
     + '<div class="info-card" style="margin-bottom:12px">'
@@ -1009,14 +1071,18 @@ function renderDraftDetail(row) {
     +     '</div>'
     +     '<div style="display:flex;justify-content:flex-end;gap:8px;margin-top:20px">'
     +       '<button class="btn btn-secondary btn-sm" onclick="closeClientEditModal()">Cancel</button>'
-    +       '<button class="btn btn-primary btn-sm" onclick="saveClientEdit(\'' + row.id + '\')">Save</button>'
+    +       '<button class="btn btn-primary btn-sm" id="saveClientEdit-' + row.id + '" onclick="saveClientEdit(\'' + row.id + '\')">Save</button>'
     +     '</div>'
     +   '</div>'
     + '</div>'
     + '<div class="table-card">'
     + '<div class="table-toolbar">'
     +   '<span class="table-title">Requirements *</span>'
-    +   '<button class="act-btn" onclick="openAddReqModal(\'' + row.id + '\')">+ New requirement</button>'
+    +   '<div style="display:flex;gap:8px;align-items:center">'
+    +     '<button class="act-btn" id="sendToClient-' + row.id + '" onclick="sendToClient(\'' + row.id + '\')"><i class="fa-solid fa-paper-plane" style="font-size:11px;margin-right:5px"></i>Send to Client</button>'
+    +     '<button class="act-btn' + (row.approved === 'Y' ? '' : ' act-btn-disabled') + '" id="assignVendors-' + row.id + '" onclick="assignVendors(\'' + row.id + '\')" ' + (row.approved === 'Y' ? '' : 'disabled title="Requires client approval"') + '><i class="fa-solid fa-users" style="font-size:11px;margin-right:5px"></i>Assign Vendors</button>'
+    +     '<button class="act-btn" onclick="openAddReqModal(\'' + row.id + '\')">+ New requirement</button>'
+    +   '</div>'
     + '</div>'
     +   '<div style="overflow-x:auto">'
     +     '<table class="req-table" style="width:100%">'
@@ -1031,16 +1097,16 @@ function renderDraftDetail(row) {
     +     '<button class="close-modal" onclick="closeAddReqModal()">&times;</button>'
     +     '<h2>New requirement</h2>'
     +     '<div style="display:flex;flex-direction:column;gap:10px;margin-top:4px">'
-    +       '<div class="wizard-form"><div class="form-group"><label>Category</label><input type="text" id="areq-area" placeholder="e.g. Absence management"></div></div>'
+    +       '<div class="wizard-form"><div class="form-group"><label>Category</label><select id="areq-area">' + areas + '</select></div></div>'
     +       '<div class="wizard-form"><div class="form-group"><label>Description</label><textarea id="areq-requirement" rows="3" style="padding:8px 10px;border:1px solid var(--b2);border-radius:var(--radius-btn);font-family:var(--sans);font-size:12.5px;background:var(--w);color:var(--t1);outline:none;width:100%;resize:vertical" placeholder="Requirement description"></textarea></div></div>'
     +       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
     +         '<div class="wizard-form"><div class="form-group"><label>Priority</label><select id="areq-priority"><option>Must-Have</option><option>Should-Have</option><option>Could-Have</option></select></div></div>'
-    +         '<div class="wizard-form"><div class="form-group"><label>System Part</label><input type="text" id="areq-system-part" placeholder="e.g. HRIS"></div></div>'
+    +         '<div class="wizard-form"><div class="form-group"><label>System Part</label><select id="areq-system-part">' + systemParts +'</select></div></div>'
     +       '</div>'
     +     '</div>'
     +     '<div style="display:flex;justify-content:flex-end;gap:8px;margin-top:20px">'
     +       '<button class="btn btn-secondary btn-sm" onclick="closeAddReqModal()">Cancel</button>'
-    +       '<button class="btn btn-primary btn-sm" onclick="saveNewReq(\'' + row.id + '\')">Add</button>'
+    +       '<button class="btn btn-primary btn-sm" id="saveNewReq-' + row.id + '" onclick="saveNewReq(\'' + row.id + '\')">Add</button>'
     +     '</div>'
     +   '</div>'
     + '</div>'
@@ -1060,20 +1126,38 @@ function closeAddReqModal() {
   if (modal) modal.classList.remove('open');
 }
 
-function saveNewReq(rowId) {
+async function saveNewReq(rowId) {
   const row = cachedDrafts.find(r => String(r.id) === String(rowId));
   if (!row) return;
-  const area = document.getElementById('areq-area').value.trim();
+  const area = document.getElementById('areq-area').value;
   const requirement = document.getElementById('areq-requirement').value.trim();
-  if (!area || !requirement) return;
+  if (!area || !requirement) {showNotification('Area and description are required.', 'error'); return;}
   row.data.requirements.push({
     area,
     requirement,
     priority:       document.getElementById('areq-priority').value,
-    system_part:    document.getElementById('areq-system-part').value.trim(),
+    system_part:    document.getElementById('areq-system-part').value,
     recommendation: '',
     comment:        '',
   });
+  
+  const reset = lockBtn($(`#saveNewReq-${rowId}`));
+  if (!reset) return;
+
+  const res = await fetch("/api/supabase?action=updateDraftRequirementsRow", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: rowId, payload: row.data})
+  });
+
+  const result = await res.json();
+  if (result.error){
+    showNotification(result.error, 'error');
+  }else{
+    showNotification('Saved!', 'success');
+  }
+  reset();
+
   closeAddReqModal();
   renderDraftDetail(row);
 }
@@ -1096,7 +1180,7 @@ function closeClientEditModal() {
   if (modal) modal.classList.remove('open');
 }
 
-function saveClientEdit(rowId) {
+async function saveClientEdit(rowId) {
   const row = cachedDrafts.find(r => String(r.id) === String(rowId));
   if (!row) return;
   row.data.client = {
@@ -1107,16 +1191,218 @@ function saveClientEdit(rowId) {
     headcount: document.getElementById('cedit-headcount').value.trim(),
     timeline:  document.getElementById('cedit-timeline').value.trim(),
   };
+
+  const reset = lockBtn($(`#saveClientEdit-${rowId}`));
+  if (!reset) return;
+
+  const res = await fetch("/api/supabase?action=updateDraftRequirementsRow", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: rowId, payload: row.data})
+  });
+
+  const result = await res.json();
+  if (result.error){
+    showNotification(result.error, 'error');
+  }else{
+    showNotification('Saved!', 'success');
+  }
+  reset();
   closeClientEditModal();
   renderDraftDetail(row);
 }
 
-function removeDraftReq(idx, rowId) {
+async function assignVendors(rowId){
   const row = cachedDrafts.find(r => String(r.id) === String(rowId));
   if (!row) return;
+
+  const confirmed = await showConfirm(
+    'Ready to Assign Vendors?',
+    `This requirement will now be moved to 'Vendor Review' and no futher changes can be made.`,
+    'Proceed',
+    '<i class="fa-solid fa-users" style="color:var(--t3);font-size:18px"></i>'
+  );
+  if (!confirmed) return;
+
+  const reset = lockBtn($(`#assignVendors-${rowId}`));
+  if (!reset) return;
+
+  const res = await fetch("/api/supabase?action=addNewRequirement", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ requirement: row.data, status: 'active', draft_req_id: rowId})
+  });
+
+  const result = await res.json();
+  if (result.error){
+      showNotification(result.error, 'error');
+      reset();
+      return;
+  }
+
+  const resl = await fetch("/api/supabase?action=lockDraftRequirement", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: rowId})
+  });
+
+  const rl = await resl.json();
+  if (rl.error){
+      showNotification(rl.error, 'error');
+      reset();
+      return;
+  }
+}
+
+async function sendToClient(rowId) {
+  const row = cachedDrafts.find(r => String(r.id) === String(rowId));
+  if (!row) return;
+  
+  const email = row.data.client.email;
+  const name = row.data.client.name;
+  const confirmed = await showConfirm(
+    'Send To Client?',
+    `An email will be sent to ${email} asking them to review the requirement list.`,
+    'Send',
+    '<i class="fa-solid fa-circle-info" style="color:var(--t3);font-size:18px"></i>'
+  );
+  if (!confirmed) return;
+  
+  const reset = lockBtn($(`#sendToClient-${rowId}`));
+  if (!reset) return;
+
+  const origin = window.location.origin;
+  const res = await fetch('/api/send-email?action=clientReqReview', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+          email: email, 
+          link: `${origin}/client/review.html?id=${rowId}`,
+          clientName: name,
+          userId: _user.id,
+      })
+  });
+
+  const result = await res.json();
+  if (result.error){
+    showNotification(result.error, 'error');
+  }else{
+    showNotification('Email Sent!', 'success');
+  }
+
+  reset();
+}
+
+async function removeDraftReq(idx, rowId) {
+  const row = cachedDrafts.find(r => String(r.id) === String(rowId));
+  if (!row) return;
+  
+  const req = row.data.requirements[idx];
+  const confirmed = await showConfirm(
+    'Remove requirement?',
+    'This will permanently remove "' + (req?.requirement || 'this requirement') + '" from the list. This action cannot be undone.',
+    'Remove'
+  );
+  if (!confirmed) return;
   row.data.requirements.splice(idx, 1);
+
+  const reset = lockBtn($(`#removeDraftReq-${rowId}`));
+  if (!reset) return;
+
+  const res = await fetch("/api/supabase?action=updateDraftRequirementsRow", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: rowId, payload: row.data})
+  });
+
+  const result = await res.json();
+  if (result.error){
+    showNotification(result.error, 'error');
+  }
+
+  reset();
   renderDraftDetail(row);
 }
+
+let editReqContext = null; // { rowId, idx }
+
+function editDraftReq(idx, rowId) {
+  const row = cachedDrafts.find(r => String(r.id) === String(rowId));
+  if (!row) return;
+  const req = row.data.requirements[idx];
+  if (!req) return;
+
+  if (cachedFormFields != null){
+    cachedFormFields.area.sort((a, b) => a.localeCompare(b)).forEach(a => {
+      $('#ereq-area').append(`<option>${a}</option>`);
+    });
+
+    cachedFormFields.system_parts.sort((a, b) => a.localeCompare(b)).forEach(p => {
+      $('#ereq-system-part').append(`<option>${p}</option>`);
+    });
+  }
+
+  editReqContext = { rowId, idx };
+  document.getElementById('ereq-area').value = req.area || '';
+  document.getElementById('ereq-requirement').value = req.requirement || '';
+  document.getElementById('ereq-priority').value = req.priority || 'Must-Have';
+  document.getElementById('ereq-system-part').value = req.system_part || '';
+  //document.getElementById('ereq-recommendation').value = req.recommendation || '';
+  //document.getElementById('ereq-comment').value = req.comment || '';
+  document.getElementById('editReqPanel').classList.add('open');
+}
+
+function closeReqEditPanel() {
+  document.getElementById('editReqPanel').classList.remove('open');
+  editReqContext = null;
+}
+
+async function saveReqEdit() {
+  if (!editReqContext) return;
+  const { rowId, idx } = editReqContext;
+  const row = cachedDrafts.find(r => String(r.id) === String(rowId));
+  if (!row) return;
+  const req = row.data.requirements[idx];
+  if (!req) return;
+
+  const area = document.getElementById('ereq-area').value.trim();
+  const requirement = document.getElementById('ereq-requirement').value.trim();
+  const priority = document.getElementById('ereq-priority').value;
+  if (!area || !requirement || !priority) {
+    showNotification('Category and description are required.', 'error');
+    return;
+  }
+
+  req.area = area;
+  req.requirement = requirement;
+  req.priority = priority;
+  req.system_part = document.getElementById('ereq-system-part').value;
+  //req.recommendation = document.getElementById('ereq-recommendation').value.trim();
+  //req.comment = document.getElementById('ereq-comment').value.trim();
+
+  const reset = lockBtn($('#ereq-save-btn'));
+  if (!reset) return;
+  
+  const res = await fetch("/api/supabase?action=updateDraftRequirementsRow", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ id: rowId, payload: row.data })
+  });
+
+  const result = await res.json();
+  if (result.error) {
+    showNotification(result.error, 'error');
+  } else {
+    showNotification('Saved!', 'success');
+  }
+  reset();
+  closeReqEditPanel();
+  renderDraftDetail(row);
+}
+
+document.getElementById('ereq-save-btn').addEventListener('click', saveReqEdit);
+document.getElementById('ereq-cancel-btn').addEventListener('click', closeReqEditPanel);
+
 let activeTable = null;
 async function loadActive() {
   if ($.fn.DataTable.isDataTable('#active-table')) {
@@ -1988,6 +2274,7 @@ async function updateDraftRequirementsCount() {
     const result = await response.json();
    
     if (result.error) { console.error(result.error); return; }
+    
     cachedDrafts = result.data;
     document.getElementById('stat-draft-req').textContent = result.data.length;
     document.getElementById('nav-draft-count').textContent = result.data.length;
@@ -2119,12 +2406,16 @@ async function loadUsers() {
 function openUserModal(user) {
   //editingUserId = id || null;
  
+  user = atob(user);
+  user = JSON.parse(user);
+  
+  user.active = (user.active) ? 'yes' : 'no';
   document.getElementById('user-panel-title').textContent = user !== null ? 'Edit user' : 'Add user';
   document.getElementById('first-name').value = user ? user.first_name : '';
   document.getElementById('last-name').value = user ? user.last_name : '';
   document.getElementById('user-email').value = user ? user.email : '';
   document.getElementById('user-role').value = user ? user.role : 'Editor';
-  document.getElementById('user-status').value = user ? user.status : 'Suspended';
+  document.getElementById('user-status').value = user ? user.active : 'Suspended';
   document.getElementById('userPanel').classList.add('open');
 }
 
@@ -2184,7 +2475,7 @@ async function emailPasswordReset(email){
   const res = await fetch('/api/send-email?action=resetPasswordLink', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: email, host: `${window.location.origin}/v2/reset-password.html`})
+      body: JSON.stringify({ email: email, host: `${window.location.origin}/v2/reset_password.html`})
   });
   const result = await res.json();
   if (result.error){showNotification(result.error, 'error');return;}
@@ -2192,11 +2483,18 @@ async function emailPasswordReset(email){
   showNotification('Email sent!', 'success');
 }
 
-function showConfirm(title, message, confirmLabel = 'Remove') {
+function showConfirm(title, message, confirmLabel = 'Remove', icon = null) {
   return new Promise(resolve => {
     const modal      = document.getElementById('confirm-modal');
     const confirmBtn = document.getElementById('confirm-modal-confirm');
     const cancelBtn  = document.getElementById('confirm-modal-cancel');
+    const modalIcon = document.getElementById('confirm-modal-icon');
+   
+    if (icon != null){
+      document.getElementById('confirm-modal-icon').innerHTML   = icon;
+    }else{
+      document.getElementById('confirm-modal-icon').innerHTML   = '<i class="fa-solid fa-trash-can" style="color:#E24B4A;font-size:18px"></i>';
+    }
 
     document.getElementById('confirm-modal-title').textContent   = title;
     document.getElementById('confirm-modal-message').textContent = message;
@@ -2261,6 +2559,10 @@ window.saveNewReq       = saveNewReq;
 window.openUserModal = openUserModal;
 window.removeUser = removeUser;
 window.toggleRowMenu = toggleRowMenu;
+window.editDraftReq = editDraftReq;
+window.closeReqEditPanel = closeReqEditPanel;
+window.removeDraftReq = removeDraftReq;
+window.sendToClient = sendToClient;
 
 loadHome();
 </script>

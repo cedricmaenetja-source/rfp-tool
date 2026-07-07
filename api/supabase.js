@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { verifySession } from './_verify-session';
+import jwt from 'jsonwebtoken';
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -9,7 +10,20 @@ const supabase = createClient(
 export default async function handler(req, res) {
     const session = await verifySession(req);
     if (!session) {
-        return res.status(401).json({ error: 'Authorization failed.' });
+        // token used for guest users
+        const token = req.cookies.auth;
+        try {    
+            if (!token) {
+                return res.status(400).json({
+                    error: 'Authorization failed.'
+                });
+            }
+    
+            const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
+    
+        } catch (err) {
+            return res.status(401).json({ error: 'Authorization failed.' });
+        }
     }
 
     const { action, reqId } = req.query;
@@ -81,6 +95,20 @@ export default async function handler(req, res) {
         }
     }
     
+    if (action === 'updateDraftRequirementsRow'){
+        if (req.method !== "POST") {
+            return res.status(405).json({ error: "Only POST allowed" });
+        }
+
+        try {
+            const { id, payload } = req.body;
+            return await updateDraftRequirementsRow(res, id, payload);
+        } catch (err) {
+            console.error(err);
+            res.status(500).json({ error: 'Internal error' });
+        }
+    }
+    
     if (action === 'addNewRequirement'){
         if (req.method !== "POST") {
             return res.status(405).json({ error: "Only POST allowed" });
@@ -131,6 +159,20 @@ export default async function handler(req, res) {
         try {
             const { payload } = req.body;
             return await uploadVendorResponse(res, payload);
+        } catch (err) {
+            console.error(err);
+            res.status(500).json({ error: 'Internal error' });
+        }
+    }
+
+    if (action === 'lockDraftRequirement'){
+        if (req.method !== "POST") {
+            return res.status(405).json({ error: "Only POST allowed" });
+        }
+
+        try {
+            const { id } = req.body;
+            return await lockDraftRequirement(res, id);
         } catch (err) {
             console.error(err);
             res.status(500).json({ error: 'Internal error' });
@@ -467,6 +509,16 @@ async function updateRequirements(res, reqId, requirements) {
     return res.status(200).json({ data });
 }
 
+async function updateDraftRequirementsRow(res, reqId, payload) {
+   const { data, error } = await supabase
+    .from('tblrequirementsdraft')
+    .update({data:payload})
+    .eq('id', reqId);
+
+    if (error) return res.status(500).json({ data: null, error: error.message });
+    return res.status(200).json({ data });
+}
+
 async function updateClientRequirementInformation(res, reqId, payload) {
    const { data, error } = await supabase
     .from('tblrfprequirements')
@@ -555,7 +607,8 @@ async function getDraftRequirement(res, id) {
 async function getAllDraftRequirement(res) {
     const { data, error } = await supabase
     .from('tblrequirementsdraft')
-    .select('*');
+    .select('*')
+    .or('locked.is.null,locked.eq.false');
 
     if (error) return res.status(500).json({ data: null, error: error.message });
     return res.status(200).json({ data });
@@ -566,6 +619,18 @@ async function updateDraftRequirement(res, id, requirement) {
     .from('tblrequirementsdraft')
     .update([
       { data: requirement},
+    ])
+    .eq('id', id);
+
+    if (error) return res.status(500).json({ data: null, error: error.message });
+    return res.status(200).json({ data });
+}
+
+async function lockDraftRequirement(res, id){
+    const { data, error } = await supabase
+    .from('tblrequirementsdraft')
+    .update([
+      { locked: true},
     ])
     .eq('id', id);
 
