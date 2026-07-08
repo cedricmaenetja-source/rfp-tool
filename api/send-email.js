@@ -21,7 +21,8 @@ export default async function handler(req, res) {
         'clientReqReview',
         'onReviewChange',
         'onAddNewReq',
-        'signOff'
+        'signOff',
+        'vendorInvite'
     ];
 
     if (action && !VALID_ACTIONS.includes(action)) return res.status(400).json({ error: `Unknown action: "${action}". Did you forget to register it in VALID_ACTIONS?` });
@@ -30,7 +31,7 @@ export default async function handler(req, res) {
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
-    const { to, token, host, otp, body, subject, from, fromName, replyTo, email, link, clientName, userId } = req.body;
+    const { to, token, host, otp, body, subject, from, fromName, replyTo, email, link, clientName, userId,contactPerson, date } = req.body;
 
     let payload;
     if (action === 'resetPassword'){
@@ -198,6 +199,39 @@ export default async function handler(req, res) {
             });
         }
     }
+
+    if (action === 'vendorInvite'){
+        const { data, error } = await supabase
+            .from('tblrfpusers')
+            .select('first_name, last_name, email')
+            .eq('id', userId)
+            .single(); 
+
+        if (error) return res.status(500).json({ data: null, error: error.message });
+        if (!data) return res.status(500).json({ data: null, error: 'This user does not exist on our system.' });
+
+        const code = Math.floor(100000 + Math.random() * 900000);
+        const token = jwt.sign({
+                email: to,
+                access_link: link,
+                access_code: code,
+                consultant_id: userId
+            },
+            process.env.JWT_ACCESS_SECRET
+        );
+
+        payload = {
+            to: to,
+            subject: subject,
+            body: VENDOR_INVITE
+                .replaceAll('{{LINK}}', `${link}&tk=${token}`)
+                .replace('{{CONSULTANT_NAME}}', `${data.first_name}`)
+                .replace('{{CLIENT_NAME}}', clientName)
+                .replace('{{DATE}}', date)
+                .replace('{{VENDOR_NAME}}', contactPerson)
+                .replace('{{ACCESS_CODE}}', code)
+        };
+    }
     
     try {
         const response = await fetch(ZAPIER_SEND_EMAIL, {
@@ -319,4 +353,33 @@ export const VENDOR = `
     You will now be able to send it out to vendors.<br/><br/>
 
     [Automated notification from RFP Tool]
+    </p>`;
+
+export const VENDOR_INVITE = `
+    <p>Hi {{VENDOR_NAME}},<br/><br/>
+
+    Thank you for participating in {{CLIENT_NAME}}'s HR technology selection process. We've finalised the requirements list and are ready for you to submit your response.<br/><br/>
+
+    You can access the requirements <a href="{{LINK}}">here</a>.<br/><br/>
+
+    This is a secured link. If prompted, use the following access code: <strong>{{ACCESS_CODE}}</strong><br/><br/>
+
+    If the link above doesn't work, copy and paste this URL into your browser: {{LINK}}<br/><br/>
+
+    For each requirement, please select the option that best describes your solution's capability:<br/>
+    - Fully meets the requirement via core platform<br/>
+    - Meets the requirement via core platform, minor gaps<br/>
+    - Meets the requirement with workarounds / use of an additional 3rd-party application<br/>
+    - Partially meets the requirement, substantial gaps<br/>
+    - Fails to meet the requirement, or unable to provide
+    <br/><br/>
+
+    You're welcome to add comments where useful, particularly where your answer needs context.<br/><br/>
+
+    The view auto-saves as you go, so you can work through it across multiple sessions. Filters and bulk selection at the top of the page may help you move through the list more efficiently.<br/><br/>
+
+    Please submit your response by <strong>{{DATE}}</strong>. If you have any questions in the meantime, feel free to reach out.<br/><br/>
+
+    Best regards,<br/>
+    {{CONSULTANT_NAME}}
     </p>`;

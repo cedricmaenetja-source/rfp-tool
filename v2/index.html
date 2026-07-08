@@ -159,6 +159,16 @@ table.dataTable tbody tr:hover td.sorting_1{background:var(--w) !important}
 #vendorPanel .form-group label{font-size:10.5px;font-weight:600;letter-spacing:.04em;color:var(--t3);margin-bottom:4px;text-transform:uppercase}
 #vendorPanel .form-group input,#vendorPanel .form-group textarea{padding:8px 10px;border:1px solid var(--b2);border-radius:var(--radius-btn);font-family:var(--sans);font-size:12.5px;background:var(--w);color:var(--t1);outline:none;transition:border-color .12s,background .12s}
 #vendorPanel .form-group input:focus,#vendorPanel .form-group textarea:focus{border-color:var(--b3);background:var(--w)}
+#vendorInvitePanel{position:fixed;top:0;right:-380px;width:340px;height:100%;background:var(--w);border-left:1px solid var(--b2);padding:14px 16px;transition:right .28s cubic-bezier(.22,.61,.36,1);z-index:1000;overflow-y:auto}
+#vendorInvitePanel.open{right:0}
+#vendorInvitePanel h4{margin:0 0 12px;font-size:14px;font-weight:600;color:var(--t1)}
+#vendorInvitePanel .form-group{display:flex;flex-direction:column;margin-bottom:10px}
+#vendorInvitePanel .form-group label{font-size:10.5px;font-weight:600;letter-spacing:.04em;color:var(--t3);margin-bottom:4px;text-transform:uppercase}
+#vendorInvitePanel .form-group input{padding:8px 10px;border:1px solid var(--b2);border-radius:var(--radius-btn);font-family:var(--sans);font-size:12.5px;background:var(--w);color:var(--t1);outline:none}
+.vip-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--b1);border-radius:var(--radius-btn);font-size:12.5px;color:var(--t1);cursor:pointer;transition:background .1s}
+.vip-item:hover{background:var(--off2)}
+.vip-item input{margin:0;flex-shrink:0}
+.vip-item .vip-meta{color:var(--t3);font-size:11px}
 .panel-actions{margin-top:14px;display:flex;justify-content:flex-end;gap:8px}
 .pipeline-grid{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
 .pipe-tile{background:var(--w);border:1px solid var(--b2);border-radius:var(--radius-card);padding:10px 12px;flex:1;min-width:80px;text-align:center}
@@ -293,6 +303,16 @@ table.dataTable tbody tr:hover td.sorting_1{background:var(--w) !important}
 #editReqPanel .form-group input:focus,#editReqPanel .form-group select:focus,#editReqPanel .form-group textarea:focus{border-color:var(--b3);background:var(--w)}
 .act-btn:disabled{opacity:.45;cursor:not-allowed;background:var(--off2)}
 .act-btn:disabled:hover{background:var(--off2);color:var(--t2)}
+.clip-header-table th.clip-header{
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  max-width:110px;
+  cursor:default;
+}
+.clip-header-table td{
+  white-space:nowrap;
+}
 </style>
 </head>
 <body>
@@ -487,7 +507,7 @@ table.dataTable tbody tr:hover td.sorting_1{background:var(--w) !important}
           </div>
           <div style="flex:1;min-width:0;" id="drafts-detail-panel">
             <div style="display:flex;align-items:center;justify-content:center;height:200px;color:var(--t4);font-size:13px;">
-              Select a requirement to view details
+              Loading...
             </div>
           </div>
         </div>
@@ -506,6 +526,36 @@ table.dataTable tbody tr:hover td.sorting_1{background:var(--w) !important}
             </tr></thead>
             <tbody id="active-tbody"></tbody>
           </table>
+        </div>
+      </div>
+      <div class="page" id="page-vendor-detail">
+        <div class="page-header">
+          <div>
+            <div class="page-title" id="vendor-detail-title">Requirement</div>
+            <div class="page-subtitle">Vendors assigned to this requirement</div>
+          </div>
+          <div class="header-actions">
+            <div style="display:flex;flex-direction:column;gap:2px">
+              <label style="font-size:10px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--t3)">Submit by</label>
+              <input type="date" id="vendor-detail-submit-by" style="padding:5px 8px;border:1px solid var(--b2);border-radius:var(--radius-btn);font-family:var(--sans);font-size:12.5px;background:var(--w);color:var(--t1);outline:none">
+            </div>
+            <!-- <button class="btn btn-secondary btn-sm" onclick="window.navigateTo('vendor-review')">
+              <i class="fa-solid fa-arrow-left" style="font-size:11px"></i> Back to Vendor Review
+            </button> -->
+          </div>
+        </div>
+        <div style="display:flex;gap:16px;margin-top: 30px;">
+          <div style="width:200px;flex-shrink:0;border-right:1px solid var(--b2);padding-right:0;margin-right:4px;">
+            <button class="btn btn-secondary btn-sm" style="width:100%;margin-bottom:10px" onclick="openVendorInvitePanel()">
+              <i class="fa-solid fa-plus" style="font-size:11px"></i> Add Vendors
+            </button>
+            <div id="vendor-detail-sidebar-list"></div>
+          </div>
+          <div style="flex:1;min-width:0;" id="vendor-detail-panel">
+            <div style="display:flex;align-items:center;justify-content:center;height:200px;color:var(--t4);font-size:13px;">
+              Select a vendor to view details
+            </div>
+          </div>
         </div>
       </div>
       <div class="page" id="page-completed">
@@ -768,6 +818,21 @@ table.dataTable tbody tr:hover td.sorting_1{background:var(--w) !important}
     <button class="btn btn-secondary btn-sm" id="close-vendor-panel-btn">Cancel</button>
   </div>
 </div>
+<div id="vendorInvitePanel">
+  <h4>Invite vendors</h4>
+  <div class="form-group">
+    <label>Search</label>
+    <input type="text" id="vip-search" placeholder="Search vendors…">
+  </div>
+  <div id="vip-loader" style="display:none;padding:20px 0;text-align:center">
+    <div style="display:inline-block;width:20px;height:20px;border-radius:50%;border:2px solid var(--b2);border-top-color:var(--o);animation:spin .7s linear infinite"></div>
+  </div>
+  <div id="vip-list" style="display:flex;flex-direction:column;gap:6px;max-height:360px;overflow-y:auto;margin-top:8px"></div>
+  <div class="panel-actions">
+    <button class="btn btn-primary btn-sm" id="vip-invite-btn">Send Invite(s)</button>
+    <button class="btn btn-secondary btn-sm" id="vip-cancel-btn">Cancel</button>
+  </div>
+</div>
 <div id="userPanel">
   <h4 id="user-panel-title">Add user</h4>
   <div class="form-group"><label>First name *</label><input type="text" id="first-name" placeholder="First name"></div>
@@ -908,7 +973,7 @@ const MOCK = {
   }
 };
 let formFields = { ...MOCK.formFields };
-const breadcrumbs = { home:'Dashboard', requirements:'Client Review', 'vendor-review':'Vendor Review', completed:'Completed', vendors:'Vendors', users:'Users', resources:'Resources', configurations:'Configurations', 'active-summary':'Summary' };
+const breadcrumbs = { home:'Dashboard', requirements:'Client Review', 'vendor-review':'Vendor Review', completed:'Completed', vendors:'Vendors', users:'Users', resources:'Resources', configurations:'Configurations', 'active-summary':'Summary', 'vendor-detail':'Requirement' };
 function navigateTo(page) {
   const overlay = document.getElementById('page-transition');
 
@@ -945,6 +1010,7 @@ function loadPage(page) {
   if (page === 'active-summary') loadActiveSummary();
   if (page === 'upload-responses') initUploadResponses();
   if (page === 'users') loadUsers();
+  if (page === 'vendor-detail') loadVendorDetail();
 }
 // function loadHome() {
 //   const active = MOCK.active;
@@ -1082,10 +1148,11 @@ function renderDraftDetail(row) {
     +     '<button class="act-btn" id="sendToClient-' + row.id + '" onclick="sendToClient(\'' + row.id + '\')"><i class="fa-solid fa-paper-plane" style="font-size:11px;margin-right:5px"></i>Send to Client</button>'
     +     '<button class="act-btn' + (row.approved === 'Y' ? '' : ' act-btn-disabled') + '" id="assignVendors-' + row.id + '" onclick="assignVendors(\'' + row.id + '\')" ' + (row.approved === 'Y' ? '' : 'disabled title="Requires client approval"') + '><i class="fa-solid fa-users" style="font-size:11px;margin-right:5px"></i>Assign Vendors</button>'
     +     '<button class="act-btn" onclick="openAddReqModal(\'' + row.id + '\')">+ New requirement</button>'
+    +     '<button data-export-table="client-req-review-table" data-export-name="' + (row.data.title || 'requirements') + '_client_review" class="act-btn export-req-btn"><i class="fa-solid fa-download" style="font-size:11px;margin-right:5px"></i>Export</button>'
     +   '</div>'
     + '</div>'
     +   '<div style="overflow-x:auto">'
-    +     '<table class="req-table" style="width:100%">'
+    +     '<table id="client-req-review-table" class="req-table" style="width:100%">'
     +       '<thead><tr>'
     +         '<th>Category</th><th>Description</th><th>Priority</th><th>System Part</th><th>Recommendation</th><th>Comment</th><th></th>'
     +       '</tr></thead>'
@@ -1441,7 +1508,7 @@ async function loadActive() {
         + '<td></td>'
         + '<td>' + (row.created_at ? row.created_at.slice(0,10) : '—') + '</td>'
         + '<td class="cell-primary">' + (row.client?.company || '—') + '</td>'
-        + '<td class="cell-primary"><a href="#" style="color:var(--blue);text-decoration:none">' + (row.title || '—') + '</a></td>'
+        + '<td class="cell-primary"><a href="#" onclick="openVendorDetail(\'' + row.id + '\');return false;" style="color:var(--blue);text-decoration:none">' + (row.title || '—') + '</a></td>'
         + '<td>' + (row.client?.name || '—') + '</td>'
         + '<td>' + (row.client?.email || '—') + '</td>'
         + '<td>' + (row.client?.country || '—') + '</td>'
@@ -1455,6 +1522,303 @@ async function loadActive() {
     tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:28px 14px;color:var(--t3);font-style:italic">Failed to load.</td></tr>';
   }
 }
+
+/* ══ VENDOR REVIEW DETAIL ══ */
+let vendorDetailReq = null;
+let selectedVendorIdx = null;
+let vendorPanelContext = null; // { reqId } when adding a vendor from this screen
+
+async function openVendorDetail(reqId) {
+  const row = cachedActiveRequirements.find(r => String(r.id) === String(reqId));
+  if (!row) return;
+  vendorDetailReq = row;
+  selectedVendorIdx = (row.assigned_vendors && row.assigned_vendors.length) ? 0 : null;
+
+  if (!cachedFormFields) {
+    const ffRes = await fetch('/api/supabase?action=getFormFields');
+    const ffResult = await ffRes.json();
+    if (!ffResult.error) cachedFormFields = ffResult.data;
+  }
+
+  window.navigateTo('vendor-detail');
+}
+
+function loadVendorDetail() {
+  if (!vendorDetailReq) { window.navigateTo('vendor-review'); return; }
+  document.getElementById('vendor-detail-title').innerHTML = `<button style="border-radius:unset;border:none" class="btn btn-secondary btn-sm" onclick="window.navigateTo('vendor-review')">
+              <i class="fa-solid fa-arrow-left" style="font-size:11px"></i>
+            </button> ${vendorDetailReq.title}` || 'Requirement';
+  document.getElementById('breadcrumb-current').textContent = vendorDetailReq.title || 'Requirement';
+  renderVendorDetailSidebar();
+  if (selectedVendorIdx !== null) renderVendorDetailPanel(selectedVendorIdx);
+  else renderVendorDetailPanelEmpty();
+}
+
+function renderVendorDetailSidebar() {
+  const sidebar = document.getElementById('vendor-detail-sidebar-list');
+  const vendors = vendorDetailReq.assigned_vendors || [];
+  let html = '';
+  vendors.forEach((v, idx) => {
+    html += '<div class="req-sidebar-item' + (idx === selectedVendorIdx ? ' active' : '') + '" onclick="selectVendorDetail(' + idx + ')">' + v.name + '</div>';
+  });
+  if (!vendors.length) html += '<p style="font-size:12px;color:var(--t4);padding:8px 0">No vendors assigned yet.</p>';
+  sidebar.innerHTML = html;
+}
+
+function selectVendorDetail(idx) {
+  selectedVendorIdx = idx;
+  renderVendorDetailSidebar();
+  renderVendorDetailPanel(idx);
+}
+
+function renderVendorDetailPanelEmpty() {
+  document.getElementById('vendor-detail-panel').innerHTML =
+    '<div style="display:flex;align-items:center;justify-content:center;height:200px;color:var(--t4);font-size:13px;">Select a vendor to view details, or add one to get started.</div>';
+}
+
+async function renderVendorDetailPanel(idx) {
+  const panel = document.getElementById('vendor-detail-panel');
+  const vendor = (vendorDetailReq.assigned_vendors || [])[idx];
+  const requirements = vendorDetailReq.requirements || [];
+  if (!vendor) { renderVendorDetailPanelEmpty(); return; }
+
+  const feedback = vendor.feedback || [];
+  const priorityColor = p => p === 'Must-Have' ? 'color:var(--o)' : p === 'Should-Have' ? 'color:var(--t2)' : 'color:var(--t3)';
+  const vendorFeedbackValues = (cachedFormFields && cachedFormFields.vendor_feedback) ? cachedFormFields.vendor_feedback : [];
+  const bestFeedbackValue = vendorFeedbackValues[0]; // e.g. "Fully meets the requirement via core platform"
+
+  let rows = '';
+  let notMetRows = '';
+  const areaCounts = {}; // area -> { feedbackValue: count }
+  
+  const vresponse = await fetch(`/api/supabase?action=getVendorById&vendorId=${vendor.id}`);
+  const vresult = await vresponse.json();
+  if (vresult.error) {
+      showNotification(vresult.error, 'error');
+      return;
+  }
+
+  const systemParts = vresult.data.system_parts;
+  requirements.forEach((req, i) => {
+    const fb = feedback[i] || {};
+
+    if (!systemParts.includes(req.system_part)) return;
+
+    rows += '<tr>'
+      + '<td style="color:var(--o);font-weight:500">' + (req.area || '—') + '</td>'
+      + '<td>' + (req.requirement || '—') + '</td>'
+      + '<td style="' + priorityColor(req.priority) + ';font-weight:500;white-space:nowrap">' + (req.priority || '—') + '</td>'
+      + '<td>' + (req.system_part || '—') + '</td>'
+      + '<td>' + (fb.feedback ? '<span class="badge b-blue">' + fb.feedback + '</span>' : '<span class="badge b-gray">Pending</span>') + '</td>'
+      + '<td>' + (fb.comment || '') + '</td>'
+      + '</tr>';
+
+    if (fb.feedback && bestFeedbackValue && fb.feedback !== bestFeedbackValue) {
+      notMetRows += '<tr>'
+        + '<td style="color:var(--o);font-weight:500">' + (req.area || '—') + '</td>'
+        + '<td>' + (req.requirement || '—') + '</td>'
+        + '<td>' + fb.feedback + '</td>'
+        + '</tr>';
+    }
+
+    if (fb.feedback) {
+      if (!areaCounts[req.area]) areaCounts[req.area] = {};
+      areaCounts[req.area][fb.feedback] = (areaCounts[req.area][fb.feedback] || 0) + 1;
+    } else if (!areaCounts[req.area]) {
+      areaCounts[req.area] = {};
+    }
+  });
+
+  // Per-area count table headers
+  let perAreaHead = '<tr><th style="min-width:70px">Area</th>';
+  vendorFeedbackValues.forEach(f => {
+    perAreaHead += '<th class="clip-header" title="' + f + '" style="text-align:center">' + f + '</th>';
+  });
+  perAreaHead += '<th style="text-align:center;min-width:50px">Total</th></tr>';
+
+  let perAreaRows = '';
+  Object.keys(areaCounts).sort().forEach(area => {
+    let total = 0;
+    let row = '<tr><td style="color:var(--o);font-weight:500">' + area + '</td>';
+    vendorFeedbackValues.forEach(f => {
+      const count = areaCounts[area][f] || 0;
+      total += count;
+      row += '<td class="center">' + count + '</td>';
+    });
+    row += '<td class="center" style="font-weight:600">' + total + '</td></tr>';
+    perAreaRows += row;
+  });
+
+  panel.innerHTML = ''
+    + '<div class="info-card" style="margin-bottom:12px">'
+    +   '<div class="info-card-title">Vendor details</div>'
+    +   '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px 24px">'
+    +     '<div class="info-row"><span class="info-key">Company</span><span class="info-val">' + (vendor.name || '—') + '</span></div>'
+    +     '<div class="info-row"><span class="info-key">Contact</span><span class="info-val">' + (vendor.contact_person?.name || '—') + '</span></div>'
+    +     '<div class="info-row"><span class="info-key">Email</span><span class="info-val">' + (vendor.contact_person?.email || '—') + '</span></div>'
+    +     '<div class="info-row"><span class="info-key">Phone</span><span class="info-val">' + (vendor.contact_person?.phone || '—') + '</span></div>'
+    +     '<div class="info-row"><span class="info-key">Responses</span><span class="info-val">' + (feedback.length ? feedback.length + ' / ' + requirements.length : 'Not submitted') + '</span></div>'
+    +   '</div>'
+    + '</div>'
+
+    + '<div class="table-card">'
+    +   '<div class="table-toolbar"><span class="table-title">Requirements &amp; Responses</span></div>'
+    +   '<div style="overflow-x:auto">'
+    +     '<table class="req-table" style="width:100%">'
+    +       '<thead><tr><th>Category</th><th>Description</th><th>Priority</th><th>System Part</th><th>Response</th><th>Comment</th></tr></thead>'
+    +       '<tbody>' + (rows || '<tr><td colspan="6" style="text-align:center;color:var(--t4);font-style:italic;padding:20px">No requirements found.</td></tr>') + '</tbody>'
+    +     '</table>'
+    +   '</div>'
+    + '</div>'
+
+    + '<div class="table-card">'
+    +   '<div class="table-toolbar"><span class="table-title">List of Requirements Not Fully Met</span></div>'
+    +   '<div style="overflow-x:auto">'
+    +     '<table class="req-table" style="width:100%">'
+    +       '<thead><tr><th>Area</th><th>Description</th><th>Response</th></tr></thead>'
+    +       '<tbody>' + (notMetRows || '<tr><td colspan="3" style="text-align:center;color:var(--t4);font-style:italic;padding:20px">All requirements are fully met.</td></tr>') + '</tbody>'
+    +     '</table>'
+    +   '</div>'
+    + '</div>'
+
+   + '<div class="table-card">'
+    +   '<div class="table-toolbar"><span class="table-title">Count of Responses per Area</span></div>'
+    +   '<div style="overflow-x:auto">'
+    +     '<table class="req-table clip-header-table" style="width:100%;table-layout:fixed">'
+    +       '<thead>' + perAreaHead + '</thead>'
+    +       '<tbody>' + (perAreaRows || '<tr><td colspan="' + (vendorFeedbackValues.length + 2) + '" style="text-align:center;color:var(--t4);font-style:italic;padding:20px">No responses yet.</td></tr>') + '</tbody>'
+    +     '</table>'
+    +   '</div>'
+    + '</div>';
+}
+
+/* ══ VENDOR INVITE (multi-select) ══ */
+let vipAllVendors = [];
+
+function openVendorInvitePanel() {
+  if (!vendorDetailReq) return;
+  const submitBy = document.getElementById('vendor-detail-submit-by').value;
+  if (!submitBy){showNotification('You must select a submit by date', 'error');return;}
+  document.getElementById('vip-search').value = '';
+  document.getElementById('vendorInvitePanel').classList.add('open');
+  loadVendorInviteList();
+}
+
+async function loadVendorInviteList() {
+  const listEl = document.getElementById('vip-list');
+  const loaderEl = document.getElementById('vip-loader');
+  listEl.innerHTML = '';
+  loaderEl.style.display = 'block';
+
+  try {
+    const response = await fetch('/api/supabase?action=getVendors');
+    const result = await response.json();
+    if (result.error) { showNotification(result.error, 'error'); loaderEl.style.display = 'none'; return; }
+
+    const assignedIds = (vendorDetailReq.assigned_vendors || []).map(v => String(v.id));
+
+    // Only show vendors that have a contact person, aren't already assigned,
+    // and (if system_parts data is available) match a system part on this requirement
+    const reqSystemParts = (vendorDetailReq.requirements || []).map(r => r.system_part).filter(Boolean);
+
+    vipAllVendors = result.data.filter(v => {
+      const hasContact = v.contact_person && v.contact_person.email;
+      const notAssigned = !assignedIds.includes(String(v.id));
+      const matchesSystemPart = !v.system_parts || !v.system_parts.length || v.system_parts.some(sp => reqSystemParts.includes(sp));
+      return hasContact && notAssigned && matchesSystemPart;
+    });
+
+    renderVendorInviteList(vipAllVendors);
+  } catch (err) {
+    console.error('Failed to fetch vendors:', err);
+    showNotification('Failed to load vendors.', 'error');
+  }
+  loaderEl.style.display = 'none';
+}
+
+function renderVendorInviteList(vendors) {
+  const listEl = document.getElementById('vip-list');
+  if (!vendors.length) {
+    listEl.innerHTML = '<p style="font-size:12px;color:var(--t4);padding:8px 0">No available vendors found.</p>';
+    return;
+  }
+  listEl.innerHTML = vendors.map(v =>
+    '<label class="vip-item">'
+    + '<input type="checkbox" class="vip-checkbox" value="' + v.id + '">'
+    + '<span style="flex:1"><div>' + v.name + '</div><div class="vip-meta">' + (v.contact_person?.email || '') + '</div></span>'
+    + '</label>'
+  ).join('');
+}
+
+document.getElementById('vip-search').addEventListener('input', function() {
+  const term = this.value.toLowerCase();
+  renderVendorInviteList(vipAllVendors.filter(v => v.name.toLowerCase().includes(term)));
+});
+
+document.getElementById('vip-cancel-btn').addEventListener('click', () => {
+  document.getElementById('vendorInvitePanel').classList.remove('open');
+});
+
+document.getElementById('vip-invite-btn').addEventListener('click', async function() {
+  const selectedIds = Array.from(document.querySelectorAll('.vip-checkbox:checked')).map(cb => cb.value);
+  if (!selectedIds.length) { showNotification('Select at least one vendor to invite.', 'error'); return; }
+
+  const reset = lockBtn($('#vip-invite-btn'));
+  if (!reset) return;
+
+  const selectedVendors = vipAllVendors.filter(v => selectedIds.includes(String(v.id)));
+
+  vendorDetailReq.assigned_vendors = vendorDetailReq.assigned_vendors || [];
+  selectedVendors.forEach(v => {
+    vendorDetailReq.assigned_vendors.push({
+      id: v.id,
+      name: v.name,
+      contact_person: v.contact_person,
+      feedback: []
+    });
+  });
+  
+  const res = await fetch("/api/supabase?action=updateVendorList", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ data: vendorDetailReq})
+  });
+
+  const result = await res.json();
+  if (result.error){
+      showNotification(result.error, 'error');
+      return;
+  }
+
+  // Send invite emails, one per vendor, with the submission link they'll use
+  const origin = window.location.origin;
+  await Promise.all(selectedVendors.map(v => {
+    const submissionLink = `${origin}/vendor/review.html?vid=${v.id}&req=${encodeURIComponent(btoa(JSON.stringify(vendorDetailReq.id)))}`;
+    return fetch('/api/send-email?action=vendorInvite', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        to: v.contact_person.email,
+        contactPerson: v.contact_person.name.split(' ')[0],
+        clientName: vendorDetailReq.client?.company,
+        userId: _user.id,
+        link: submissionLink,
+        date: document.getElementById('vendor-detail-submit-by').value,
+        subject: `HR Technology RFP Response- ${vendorDetailReq.client?.company}`
+      })
+    }).then(r => r.json());
+  }));
+
+  showNotification('Invitation(s) sent!', 'success');
+  reset();
+
+  document.getElementById('vendorInvitePanel').classList.remove('open');
+
+  selectedVendorIdx = vendorDetailReq.assigned_vendors.length - 1;
+  renderVendorDetailSidebar();
+  renderVendorDetailPanel(selectedVendorIdx);
+});
+
 let completedTable = null;
 function loadCompleted() {
   const tbody = document.getElementById('completed-tbody');
@@ -2563,6 +2927,9 @@ window.editDraftReq = editDraftReq;
 window.closeReqEditPanel = closeReqEditPanel;
 window.removeDraftReq = removeDraftReq;
 window.sendToClient = sendToClient;
+window.openVendorInvitePanel = openVendorInvitePanel;
+window.openVendorDetail  = openVendorDetail ;
+window.selectVendorDetail = selectVendorDetail;
 
 loadHome();
 </script>

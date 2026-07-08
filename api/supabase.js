@@ -26,7 +26,7 @@ export default async function handler(req, res) {
         }
     }
 
-    const { action, reqId } = req.query;
+    const { action, reqId, vendorId } = req.query;
 
     if (action === 'getVendors') return await getVendors(res);
     if (action === 'getActiveRequirements') return await getActiveRequirements(res);
@@ -38,6 +38,7 @@ export default async function handler(req, res) {
     if (action === 'getDraftRequirement') return await getDraftRequirement(res, reqId);
     if (action === 'getUsers') return await getUsers(res, session);
     if (action === 'getAdminUsers') return await getAdminUsers(res);
+    if (action === 'getVendorById') return await getVendorById(res, vendorId);
 
     if (action === 'updateSystemPartsFormFields'){
         if (req.method !== "PUT") {

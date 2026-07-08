@@ -6,9 +6,9 @@
   <title>Request For Proposal - Vendor Requirements Review</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
   <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" type="text/css" href="../assets/css/common.css" />
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-  <script type="module" src="../assets/js/requirements/vendor_review.js"></script>
   <style>
     :root {
       --bg: #f2f1ee;
@@ -199,6 +199,20 @@
     tbody td select,
     tbody td textarea,
     tbody td input[type="text"] {
+      width: 100%;
+      padding: 7px 10px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      font-family: 'Geist', sans-serif;
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.12s, background 0.12s;
+      appearance: none;
+    }
+
+    #accessCode[type="text"] {
       width: 100%;
       padding: 7px 10px;
       border-radius: 6px;
@@ -474,11 +488,41 @@
   font-size: 13px !important;
   font-weight: 500 !important;
 }
+.comment-note-icon {
+  margin-top: 9px;
+  flex-shrink: 0;
+  font-size: 14px;
+  color: var(--muted);
+  cursor: pointer;
+  transition: color 0.12s;
+}
+.comment-note-icon:hover {
+  color: var(--text);
+}
   </style>
 </head>
 
 <body>
-
+<div id="codeGate" class="hide" style="position:fixed; inset:0; background:var(--bg); display:flex; align-items:center; justify-content:center; z-index:9999; padding:16px;">
+    <div class="card" style="width:360px; max-width:100%; margin:0;">
+      <div class="card-body" style="padding:32px 28px;">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:20px;">
+          <div class="logo-chip">
+            <svg viewBox="0 0 14 14"><path d="M7 1L1 5v8h4V9h4v4h4V5L7 1z"/></svg>
+          </div>
+          <span class="page-brand">Udder <span>&gt; Access</span></span>
+        </div>
+        <h2 style="margin-bottom:6px;">Enter access code</h2>
+        <p style="margin-bottom:18px;">This proposal is protected. Please enter the code you were given to continue.</p>
+        <div class="field-group" style="margin-bottom:6px;">
+          <label class="field-label" for="accessCode">Access code</label>
+          <input id="accessCode" type="text" inputmode="numeric" placeholder="" autocomplete="off" />
+        </div>
+        <p id="accessCodeError" class="hide" style="color:#dc2626; margin:6px 0 4px;">Incorrect code. Please try again.</p>
+        <button class="btn" id="accessCodeSubmit" style="width:100%; margin-top:12px;">Continue</button>
+      </div>
+    </div>
+  </div>
   <!-- Page eyebrow -->
   <div class="page-eyebrow">
     <div class="page-eyebrow-left">
@@ -490,7 +534,7 @@
     <span class="status-chip">Vendor Review</span>
   </div>
 
-  <div class="card">
+  <div class="card hide">
 
     <!-- Header -->
     <div class="card-header-block">
@@ -571,95 +615,67 @@
     <span class="footer-text">Powered by Udder.</span>
   </footer>
 
-  <script>
-    $(function () {
+  <script type="module">
+    import { getParam, lockBtn } from '../assets/js/app.js';
 
-      /* ── FILTER + SEARCH ── */
-      function applyFilters() {
-        const area     = $('#areaFilter').val().toLowerCase();
-        const feedback = $('#feedbackFilter').val().toLowerCase();
-        const keyword  = $('#searchInput').val().toLowerCase();
+    const t = getParam('tk');
+    if (!t){$('body').html('This link is invalid or has expired.');} 
+    $('#codeGate').removeClass('hide');
+    
+    function unlockPage() {
+      $('#codeGate').remove();
+      $('#loading').addClass('hide');
+    }
 
-        let visible = 0;
+    async function attemptUnlock() {
+      const entered = $('#accessCode').val().trim();
 
-        $('#requirementsTable tr').each(function () {
-          const rowArea     = $(this).find('td.col-area').text().toLowerCase();
-          const rowFeedback = $(this).find('td.col-feedback select').val()?.toLowerCase() ?? '';
-          const rowDecision = $(this).find('td.col-decision').text().toLowerCase();
-          const rowComments = $(this).find('td.col-comments textarea').val()?.toLowerCase() ?? '';
+      if (!entered) return;
 
-          const matchArea     = !area     || rowArea === area;
-          const matchFeedback = !feedback || rowFeedback === feedback;
-          const matchKeyword  = !keyword  || rowDecision.includes(keyword) || rowArea.includes(keyword) || rowComments.includes(keyword);
+      const reset = lockBtn($('#accessCodeSubmit'));
+      if (!reset) return;
+      
+      const res = await fetch("/api/access-code", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token: t, access_code: entered, link: window.location.href})
+      });
+      
+      const result = await res.json();
+      if (result.error){
+        $('#accessCodeError').text(result.error);
+        $('#accessCodeError').removeClass('hide');
+        $('#accessCode').val('').trigger('focus');
+        reset();
+      }else{  
+        localStorage.setItem('token', result.token);
 
-          const show = matchArea && matchFeedback && matchKeyword;
-          $(this).toggle(show);
-          if (show) visible++;
-        });
-
-        $('#emptyState').toggleClass('hide', visible > 0);
+        const script = document.createElement('script');
+        script.type = 'module';
+        script.src = `../assets/js/requirements/${result.vendor_review}`;
+        document.body.appendChild(script);
+        
+        reset();
+        unlockPage();
       }
+    }
 
-      $('#areaFilter, #feedbackFilter').on('change', applyFilters);
-      $('#searchInput').on('input', applyFilters);
+    $('#accessCodeSubmit').on('click', attemptUnlock);
+    $('#accessCode').on('keydown', function (e) {
+      if (e.key === 'Enter') attemptUnlock();
+    });
+    $('#accessCode').on('input', function () {
+      $('#accessCodeError').addClass('hide');
+    });
+    $('#accessCode').trigger('focus');
 
-      /* ── SELECT ALL ── */
-      $('#selectAll').on('change', function () {
-        const checked = $(this).is(':checked');
-        $('#requirementsTable tr:visible .row-checkbox').prop('checked', checked);
-        updateBulkBar();
-      });
+    // Collapsible client info
+    $('#clientInfoToggle').on('click', function () {
+      const $body = $('#clientInfoBody');
+      const expanded = $(this).attr('aria-expanded') === 'true';
 
-      $(document).on('change', '.row-checkbox', function () {
-        const total   = $('#requirementsTable tr:visible .row-checkbox').length;
-        const checked = $('#requirementsTable tr:visible .row-checkbox:checked').length;
-        $('#selectAll').prop('indeterminate', checked > 0 && checked < total);
-        $('#selectAll').prop('checked', checked === total && total > 0);
-        updateBulkBar();
-      });
-
-      function updateBulkBar() {
-        const count = $('#requirementsTable .row-checkbox:checked').length;
-        if (count > 0) {
-          $('#bulkCount').text(count + ' row' + (count > 1 ? 's' : '') + ' selected');
-          $('#bulkBar').addClass('visible');
-        } else {
-          $('#bulkBar').removeClass('visible');
-        }
-      }
-
-      /* ── BULK FEEDBACK ── */
-      $('#bulkFeedback').on('change', function () {
-        const val = $(this).val();
-        if (!val) return;
-        $('#requirementsTable .row-checkbox:checked').each(function () {
-          $(this).closest('tr').find('td.col-feedback select').val(val);
-        });
-        $(this).val('');
-        applyFilters();
-      });
-
-      /* ── CLEAR SELECTION ── */
-      $('#bulkClear').on('click', function () {
-        $('#requirementsTable .row-checkbox, #selectAll').prop('checked', false);
-        $('#selectAll').prop('indeterminate', false);
-        updateBulkBar();
-      });
-
-      /* ── HELPER: populate filter dropdowns (called by vendor_review.js after table loads) ── */
-      window.initVendorFilters = function (areas, feedbackOptions) {
-        areas.forEach(function (a) {
-          $('#areaFilter').append(`<option value="${a.toLowerCase()}">${a}</option>`);
-        });
-        feedbackOptions.forEach(function (f) {
-          $('#feedbackFilter').append(`<option value="${f.toLowerCase()}">${f}</option>`);
-          $('#bulkFeedback').append(`<option value="${f}">${f}</option>`);
-        });
-        $('#filterBar').removeClass('hide');
-        $('#mainTable').removeClass('hide');
-        $('#loaderWrap').addClass('hide');
-      };
-
+      $(this).attr('aria-expanded', !expanded);
+      $body.toggleClass('collapsed', expanded);
     });
   </script>
 

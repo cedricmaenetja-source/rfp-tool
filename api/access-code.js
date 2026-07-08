@@ -25,6 +25,7 @@ export default async function handler(req, res) {
 
         return res.status(200).json({
             script: 'client_review.js',
+            vendor_review: 'vendor_review.js',
             token: newAcessToken
         });
 
