@@ -339,6 +339,7 @@ table.dataTable tbody tr:hover td.sorting_1{background:var(--w) !important}
 #editVendorPanel .form-group label{font-size:10.5px;font-weight:600;letter-spacing:.04em;color:var(--t3);margin-bottom:4px;text-transform:uppercase}
 #editVendorPanel .form-group input,#editVendorPanel .form-group textarea{padding:8px 10px;border:1px solid var(--b2);border-radius:var(--radius-btn);font-family:var(--sans);font-size:12.5px;background:var(--w);color:var(--t1);outline:none;transition:border-color .12s,background .12s}
 #editVendorPanel .form-group input:focus,#editVendorPanel .form-group textarea:focus{border-color:var(--b3);background:var(--w)}
+.hide{display: none;}
 </style>
 </head>
 <body>
@@ -387,8 +388,8 @@ table.dataTable tbody tr:hover td.sorting_1{background:var(--w) !important}
         <span class="nav-label">All Vendors</span>
         <span class="nav-badge" id="nav-vendor-count">0</span>
       </div>
-      <div class="nav-group-label" data-requires-role="admin">Users</div>
-      <div class="nav-item" data-page="users" data-requires-role="admin">
+      <div class="nav-group-label hide" data-requires-role="admin">Users</div>
+      <div class="nav-item hide" data-page="users" data-requires-role="admin">
         <i class="fa-solid fa-users" aria-hidden="true"></i>
         <span class="nav-label">Users</span>
         <span class="nav-badge" id="nav-user-count">0</span>
@@ -694,9 +695,9 @@ table.dataTable tbody tr:hover td.sorting_1{background:var(--w) !important}
             </div>
             <div class="config-card">
               <h3>Vendor feedback values</h3>
-              <div class="config-input-row">
+              <div class="config-input-row hide">
                 <input type="text" id="cfg-feedback-input" placeholder="Add feedback value&hellip;" disabled>
-                <button class="config-add-btn" data-cfg="vendor_feedback" disabled>Add</button>
+                <button class="config-add-btn hide" data-cfg="vendor_feedback" disabled>Add</button>
               </div>
               <div class="config-list" id="cfg-feedback-list"></div>
             </div>
@@ -1006,7 +1007,6 @@ table.dataTable tbody tr:hover td.sorting_1{background:var(--w) !important}
       const token = await initAuth();
       
       if (!token || token.error){ window.location.href = `${window.location.origin}/v2/login.html`;return;}
-      
       const user = await getCurrentUser();
       if (!user) {
           window.location.href = `${window.location.origin}/v2/login.html`;
@@ -1091,6 +1091,7 @@ function applyRoleVisibility(userRole) {
     const required = el.dataset.requiresRole.toLowerCase();
     const allowed = required.split(',').map(r => r.trim()).includes(role) || role === 'admin';
     if (!allowed) el.remove();
+    if (allowed) $(el).removeClass('hide');
   });
 }
 
@@ -1992,14 +1993,19 @@ function loadCompleted() {
 let vendorsTable = null;
 async function loadVendors() {
   const tbody = document.getElementById('vendors-tbody');
-  tbody.innerHTML = '';
+  tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:28px 14px"><div style="display:inline-block;width:20px;height:20px;border-radius:50%;border:2px solid var(--b2);border-top-color:var(--o);animation:spin .7s linear infinite"></div></td></tr>';
 
+  const response = await fetch('/api/supabase?action=getVendors');
+  const result = await response.json();
+  if (result.error) { showNotification(result.error, 'error'); return; }
+  MOCK.vendors = result.data;
+  tbody.innerHTML = '';
   MOCK.vendors.forEach(v => {
     const tr = document.createElement('tr');
     const verBadge = v.verified === 'Yes' ? '<span class="badge b-green">Verified</span>' : '<span class="badge b-gray">Unverified</span>';
     tr.innerHTML = ''
    tr.innerHTML = ''
-  + '<td class="cell-primary">' + v.name + '</td><td>' + (capitalize(v.hq_location) || '') + '</td><td>' + (v.contact_person?.name || '') + '</td><td>' + (v.contact_person?.email || '') + '</td><td>' + (v.contact_person?.phone || '—') + '</td><td>' + verBadge + '</td>'
+  + '<td class="cell-primary">' + v.name + '</td><td>' + (v.hq_location || '') + '</td><td>' + (v.contact_person?.name || '') + '</td><td>' + (v.contact_person?.email || '') + '</td><td>' + (v.contact_person?.phone || '—') + '</td><td>' + verBadge + '</td>'
   + '<td style="white-space:nowrap">'
   +   '<button class="row-icon-btn" title="Edit" onclick="editVendorRow(\'' + v.id + '\')"><i class="fa-solid fa-pen-to-square"></i></button>'
   +   '<button class="row-icon-btn danger" title="Delete" data-requires-role="admin" onclick="deleteVendorRow(\'' + v.id + '\')"><i class="fa-solid fa-trash-can"></i></button>'
@@ -2081,7 +2087,7 @@ document.getElementById('close-edit-vendor-panel-btn').addEventListener('click',
   updateEditSystemPartsLabel();
 });
 
-document.getElementById('evp-submit-btn').addEventListener('click', () => {
+document.getElementById('evp-submit-btn').addEventListener('click', async () => {
   const company = document.getElementById('evp-company').value.trim();
   const contact = document.getElementById('evp-contact').value.trim();
   const email = document.getElementById('evp-email').value.trim();
@@ -2089,6 +2095,7 @@ document.getElementById('evp-submit-btn').addEventListener('click', () => {
   if (!editingVendorId) return;
 
   const v = MOCK.vendors.find(v => String(v.id) === String(editingVendorId));
+  
   if (v) {
     v.name = company;
     v.description = document.getElementById('evp-description').value.trim();
@@ -2099,6 +2106,19 @@ document.getElementById('evp-submit-btn').addEventListener('click', () => {
     v.contact_person.phone = document.getElementById('evp-phone').value.trim();
     v.system_parts = selectedEditSystemParts;
   }
+
+  const reset = lockBtn($(this));
+  if (!reset) return;
+
+  const res = await fetch('/api/supabase?action=upsertVendor', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ payload: v })
+  });
+  const result = await res.json();
+  if (result.error) { showNotification(result.error, 'error');reset(); return; }
+  showNotification('Vendor Updated!', 'success');
+  reset();
 
   document.getElementById('editVendorPanel').classList.remove('open');
   editingVendorId = null;
@@ -2128,7 +2148,11 @@ async function deleteVendorRow(id) {
   
 }
 
-function loadConfigurations() {
+async function loadConfigurations() {
+  const ffRes = await fetch('/api/supabase?action=getFormFields');
+  const ffResult = await ffRes.json();
+  if (!ffResult.error) cachedFormFields = ffResult.data;
+  
   renderConfigList('area', 'cfg-area-list', 'cfg-area-input');
   renderConfigList('system_parts', 'cfg-syspart-list', 'cfg-syspart-input');
   renderConfigList('vendor_feedback', 'cfg-feedback-list', 'cfg-feedback-input');
@@ -2136,7 +2160,7 @@ function loadConfigurations() {
 function renderConfigList(key, listId, inputId) {
   const list = document.getElementById(listId);
   list.innerHTML = '';
-  (formFields[key] || []).forEach(val => {
+  (cachedFormFields[key] || []).forEach(val => {
     const div = document.createElement('div');
     div.className = 'config-item';
     div.innerHTML = '<span>' + val + '</span><button data-key="' + key + '" data-val="' + val + '" aria-label="Remove">×</button>';
@@ -2144,25 +2168,75 @@ function renderConfigList(key, listId, inputId) {
   });
 }
 document.querySelectorAll('.config-add-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
+  btn.addEventListener('click', async () => {
     const key = btn.dataset.cfg;
     const inputId = key === 'area' ? 'cfg-area-input' : key === 'system_parts' ? 'cfg-syspart-input' : 'cfg-feedback-input';
     const listId = key === 'area' ? 'cfg-area-list' : key === 'system_parts' ? 'cfg-syspart-list' : 'cfg-feedback-list';
     const input = document.getElementById(inputId);
     const val = input.value.trim();
     if (!val) return;
-    if (!formFields[key]) formFields[key] = [];
-    formFields[key].push(val);
+    if (!cachedFormFields[key]) cachedFormFields[key] = [];
+    cachedFormFields[key].push(val);
     input.value = '';
+    
+    const reset = lockBtn($(this));
+    if (!reset) return;
+
+    let action = null;
+    if (key == 'area') action = 'updateAreaFormFields'
+    if (key == 'system_parts') action = 'updateSystemPartsFormFields';
+    
+    const res = await fetch("/api/supabase?action="+action, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: cachedFormFields.id, fields: cachedFormFields[key]})
+    });
+
+    const result = await res.json();
+    if (result.error){showNotification(result.error, 'error');reset(); return;}
+    reset();
     renderConfigList(key, listId, inputId);
   });
 });
-document.addEventListener('click', e => {
+
+document.addEventListener('click', async e => {
   if (e.target.matches('.config-item button')) {
     const key = e.target.dataset.key;
     const val = e.target.dataset.val;
-    formFields[key] = formFields[key].filter(v => v !== val);
+    cachedFormFields[key] = cachedFormFields[key].filter(v => v !== val);
     const listId = key === 'area' ? 'cfg-area-list' : key === 'system_parts' ? 'cfg-syspart-list' : 'cfg-feedback-list';
+    
+    renderConfigList(key, listId, '');
+  }
+});
+
+document.addEventListener('click', async e => {
+  if (e.target.matches('.config-item button')) {
+    const key = e.target.dataset.key;
+    const val = e.target.dataset.val;
+
+    const confirmed = await showConfirm(
+      'Remove config?',
+      'This will permanently remove the config value from your workspace. This action cannot be undone.',
+      'Remove'
+    );
+    if (!confirmed) return;
+
+    cachedFormFields[key] = cachedFormFields[key].filter(v => v !== val);
+    const listId = key === 'area' ? 'cfg-area-list' : key === 'system_parts' ? 'cfg-syspart-list' : 'cfg-feedback-list';
+
+    let action = null;
+    if (key == 'area') action = 'updateAreaFormFields'
+    if (key == 'system_parts') action = 'updateSystemPartsFormFields';
+   
+    const res = await fetch("/api/supabase?action="+action, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: cachedFormFields.id, fields: cachedFormFields[key]})
+    });
+
+    const result = await res.json();
+    if (result.error){showNotification(result.error, 'error'); return;}
     renderConfigList(key, listId, '');
   }
 });
@@ -2940,7 +3014,7 @@ async function updateVendorCount() {
   try {
     const response = await fetch('/api/supabase?action=getVendors');
     const result = await response.json();
-    if (result.error) { console.error(result.error); return; }
+    if (result.error) { showNotification(result.error, 'error'); return; }
     MOCK.vendors = result.data;
     document.getElementById('stat-vendors').textContent = result.data.length;
     document.getElementById('nav-vendor-count').textContent = result.data.length;
@@ -2988,7 +3062,7 @@ async function updateUsersCount() {
     const response = await fetch(`/api/supabase?action=getUsers`);
     const result = await response.json();
     if (result.error) { console.error(result.error); return; }
-    MOCK.vendors = result.data;
+    
     document.getElementById('nav-user-count').textContent = result.data.length;
   } catch (err) {
     console.error('Failed to fetch users:', err);
