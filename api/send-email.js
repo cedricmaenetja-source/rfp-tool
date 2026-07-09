@@ -22,7 +22,8 @@ export default async function handler(req, res) {
         'onReviewChange',
         'onAddNewReq',
         'signOff',
-        'vendorInvite'
+        'vendorInvite',
+        'submittedResponses'
     ];
 
     if (action && !VALID_ACTIONS.includes(action)) return res.status(400).json({ error: `Unknown action: "${action}". Did you forget to register it in VALID_ACTIONS?` });
@@ -31,7 +32,7 @@ export default async function handler(req, res) {
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
-    const { to, token, host, otp, body, subject, from, fromName, replyTo, email, link, clientName, userId,contactPerson, date } = req.body;
+    const { to, token, host, otp, body, subject, from, fromName, replyTo, email, link, clientName, userId,contactPerson, date, vendorName } = req.body;
 
     let payload;
     if (action === 'resetPassword'){
@@ -232,6 +233,36 @@ export default async function handler(req, res) {
                 .replace('{{ACCESS_CODE}}', code)
         };
     }
+
+    if (action === 'submittedResponses'){
+        if (!token) return res.status(400).json({ error: `Invalid token` });
+        try {
+            const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
+            const { data, error } = await supabase
+                .from('tblrfpusers')
+                .select('first_name, last_name, email')
+                .eq('id', decoded.consultant_id)
+                .single(); 
+
+            if (error) return res.status(500).json({ data: null, error: error.message });
+            if (!data) return res.status(500).json({ data: null, error: 'This user does not exist on our system.' });
+            
+            payload = {
+                to: data.email,
+                subject: subject,
+                body: VENDOR_SUBMITTED_RES
+                    .replaceAll('{{LINK}}', `${link}`)
+                    .replace('{{CONSULTANT_NAME}}', `${data.first_name}`)
+                    .replace('{{CLIENT_NAME}}', clientName)
+                    .replace('{{VENDOR_NAME}}', vendorName)
+            };
+    
+        } catch (err) {
+            return res.status(401).json({
+                error: 'Invalid or expired token'
+            });
+        }
+    }
     
     try {
         const response = await fetch(ZAPIER_SEND_EMAIL, {
@@ -382,4 +413,16 @@ export const VENDOR_INVITE = `
 
     Best regards,<br/>
     {{CONSULTANT_NAME}}
+    </p>`;
+
+export const VENDOR_SUBMITTED_RES = `
+    <p>Hi {{CONSULTANT_NAME}},<br/><br/>
+
+    {{VENDOR_NAME}} has submitted their RFP response for {{CLIENT_NAME}}.<br/><br/>
+
+    You can log in to the RFP tool to view their scores and see the calculated match results.
+
+    {{LINK}}<br/><br/>
+
+    [Automated notification from RFP Tool]
     </p>`;

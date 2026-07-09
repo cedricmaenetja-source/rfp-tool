@@ -27,18 +27,15 @@ export async function login(email, password) {
         credentials: 'include',
         body: JSON.stringify({ email:email, password:password })
     });
-
-    if (!res.ok) {
-        const { error } = await res.json();
-        return JSON.stringify({'error':'Login failed'});
-    }
-
+   
     const data = await res.json();
     return data;
 }
 
 export async function logout() {
-    await fetch('/api/logout', { method: 'POST', credentials: 'include' });
+    const res = await fetch('/api/logout', { method: 'POST', credentials: 'include' });
+    const data = await res.json();
+    return data;
 }
 
 export async function refresh() {

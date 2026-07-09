@@ -26,7 +26,7 @@ export default async function handler(req, res) {
         }
     }
 
-    const { action, reqId, vendorId } = req.query;
+    const { action, reqId, vendorId, vendorName } = req.query;
 
     if (action === 'getVendors') return await getVendors(res);
     if (action === 'getActiveRequirements') return await getActiveRequirements(res);
@@ -38,7 +38,11 @@ export default async function handler(req, res) {
     if (action === 'getDraftRequirement') return await getDraftRequirement(res, reqId);
     if (action === 'getUsers') return await getUsers(res, session);
     if (action === 'getAdminUsers') return await getAdminUsers(res);
-    if (action === 'getVendorById') return await getVendorById(res, vendorId);
+    if (action === 'getVendorById') return await getVendorById(res, vendorId); 
+    
+    if (action === 'getVendorByName') {
+        return await getVendorByName(res, decodeURIComponent(vendorName));
+    }
 
     if (action === 'updateSystemPartsFormFields'){
         if (req.method !== "PUT") {
@@ -277,6 +281,34 @@ export default async function handler(req, res) {
             res.status(500).json({ error: 'Internal error' });
         }
     }
+
+    if (action === 'addVendor'){
+        if (req.method !== "POST") {
+            return res.status(405).json({ error: "Only POST allowed" });
+        }
+
+        try {
+            const { payload } = req.body;
+            return await addVendor(res, payload);
+        } catch (err) {
+            console.error(err);
+            res.status(500).json({ error: 'Internal error' });
+        }
+    }
+
+    if (action === 'deleteVendor'){
+        if (req.method !== "POST") {
+            return res.status(405).json({ error: "Only POST allowed" });
+        }
+
+        try {
+            const { id } = req.body;
+            return await deleteVendor(res, id);
+        } catch (err) {
+            console.error(err);
+            res.status(500).json({ error: 'Internal error' });
+        }
+    }
 }
 
 async function getAssignedVendorsById(res, requirementId) {
@@ -426,7 +458,8 @@ async function getVendorByName(res, name) {
     const { data, error } = await supabase
     .from('tblvendors')
     .select('*')
-    .eq('name', name);
+    .eq('name', name)
+    .maybeSingle();
 
     if (error) return res.status(500).json({ data: null, error: error.message });
     return res.status(200).json({ data });
@@ -642,6 +675,16 @@ async function lockDraftRequirement(res, id){
 async function removeDraftRequirement(res, id) {
     const { data, error } = await supabase
     .from('tblrequirementsdraft')
+    .delete()
+    .eq('id', id);
+
+    if (error) return res.status(500).json({ data: null, error: error.message });
+    return res.status(200).json({ data });
+}
+
+async function deleteVendor(res, id) {
+    const { data, error } = await supabase
+    .from('tblvendors')
     .delete()
     .eq('id', id);
 

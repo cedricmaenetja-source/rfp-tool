@@ -254,14 +254,42 @@ $(function(){
 });
 
 async function updateFeedback(requirementData, autoSave = false){
-    const { data, error } = await updateVendorList(requirementData);
-    if (error) {
+    const response = await fetch('/api/supabase?action=updateVendorList',{
+         method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ data: requirementData})
+    });
+    const result = await response.json();
+    if (result.error) {
         console.error('Updating requirement data failed (updateFeedback):', error);
-        alert('Failed to fetch data');
+        App.customError(App.OPERATION_FAILED);
         return;
     }
 
-    if (!autoSave) location.href = App.pages.thank_you;
+    if (!autoSave) {
+        const vendorId = App.getParam('vid');
+        const token = App.getParam('tk');
+        const origin = window.location.origin;
+
+        let vendorName = '';
+        for (const vendor of requirementData.assigned_vendors) {
+            if (vendor.id == vendorId) {
+                vendorName = vendor.name;
+            }
+        }
+        const res = await fetch('/api/send-email?action=submittedResponses', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                vendorName: vendorName,
+                link: `${origin}/v2`,
+                clientName: requirementData.client.company,
+                subject: ` [RFP Tool] ${vendorName} Has Submitted Their RFP Response- ${requirementData.client.company}`,
+                token: token
+            })
+        });
+        location.href = App.pages.thank_you;
+    }
 }
 
 async function validateVendor(id){

@@ -27,12 +27,12 @@ export default async function handler(req, res) {
     if (error || !user) {
         return res.status(401).json({ error: 'Invalid logins.' });
     }
-
+    
     const passwordMatches = await bcrypt.compare(password, user.password);
     if (!passwordMatches) {
         return res.status(401).json({ error: 'Invalid logins.' });
     }
-
+    
     const payload = { userId: user.id, role: user.role };
     
     const accessToken = jwt.sign(payload, ACCESS_SECRET, { expiresIn: '15m' });
@@ -45,7 +45,6 @@ export default async function handler(req, res) {
     if (refreshError) {
         return res.status(401).json({ error: 'Failed to fetch token.' });
     }
-
     // Refresh token goes in an HttpOnly cookie
     res.setHeader('Set-Cookie', [
         `refreshToken=${refreshToken}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=${7 * 24 * 60 * 60}`

@@ -20,8 +20,7 @@ export default async function handler(req, res) {
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
-    const cookies = parseCookies(req);
-    const refreshToken = cookies.refreshToken;
+    const refreshToken = req.cookies.refreshToken;
 
     if (refreshToken) {
         await supabase.from('tblrfprefreshtokens').delete().eq('token', refreshToken);

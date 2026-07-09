@@ -1197,7 +1197,22 @@
       <span>All rights reserved</span>
     </div>
   </footer>
+  <script type="module">
+    import { customError, showNotification, lockBtn } from '../assets/js/app.js';
+    import { initAuth, getCurrentUser, logout } from '../assets/js/core/_auth.js';
 
+    (async () => {
+        const token = await initAuth();
+        
+        if (!token || token.error){ window.location.href = `${window.location.origin}/v2/login.html`;return;}
+        
+        const user = await getCurrentUser();
+        if (!user) {
+            window.location.href = `${window.location.origin}/v2/login.html`;
+            return;
+        }
+    })();
+    </script>
   <script src="../assets/js/vendor/xlsx.full.min.js"></script>
   <script type="module" src="../assets/js/core/dashboard.js"></script>
   <script type="module" src="../assets/js/core/requirements.js"></script>

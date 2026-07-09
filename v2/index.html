@@ -66,6 +66,13 @@ body{font-family:var(--sans);background:var(--w);height:100vh;display:flex;color
 .topbar-btn:hover{background:var(--off2);color:var(--t1)}
 .topbar-btn:active{transform:scale(.95);opacity:.8}
 .avatar-circle{width:28px;height:28px;border-radius:50%;background:var(--k);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:white;cursor:pointer;flex-shrink:0}
+.avatar-menu-wrap{position:relative;display:inline-block}
+.avatar-menu-dropdown{display:none;position:absolute;top:calc(100% + 8px);right:0;background:var(--w);border:1px solid var(--b2);border-radius:var(--radius-btn);box-shadow:0 4px 16px rgba(0,0,0,.08);min-width:150px;z-index:2000;overflow:hidden}
+.avatar-menu-dropdown.open{display:block}
+.avatar-menu-item{display:flex;align-items:center;gap:8px;width:100%;padding:8px 12px;font-size:12.5px;color:var(--t1);background:none;border:none;cursor:pointer;text-align:left;font-family:var(--sans);transition:background .1s}
+.avatar-menu-item:hover{background:var(--off2)}
+.avatar-menu-item.danger{color:#E24B4A}
+.avatar-menu-item.danger:hover{background:#fdecea}
 #content{flex:1;padding:10px 14px;overflow-y:auto;background:var(--w)}
 .page{display:none}
 .page.active{display:block}
@@ -313,6 +320,25 @@ table.dataTable tbody tr:hover td.sorting_1{background:var(--w) !important}
 .clip-header-table td{
   white-space:nowrap;
 }
+.row-icon-btn{background:none;border:none;cursor:pointer;color:var(--t3);font-size:13px;padding:4px 7px;border-radius:var(--radius-btn);transition:background .1s,color .1s,transform .08s,opacity .08s}
+.row-icon-btn:hover{background:var(--off2);color:var(--t1)}
+.row-icon-btn:active{transform:scale(.92);opacity:.8}
+.row-icon-btn.danger:hover{background:#fdecea;color:#E24B4A}
+.ms-dropdown{position:relative}
+.ms-dropdown-toggle{width:100%;display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border:1px solid var(--b2);border-radius:var(--radius-btn);font-family:var(--sans);font-size:12.5px;background:var(--w);color:var(--t1);cursor:pointer;text-align:left}
+.ms-dropdown-toggle:hover{background:var(--off2)}
+.ms-dropdown-menu{display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;max-height:200px;overflow-y:auto;background:var(--w);border:1px solid var(--b2);border-radius:var(--radius-btn);box-shadow:0 4px 16px rgba(0,0,0,.08);z-index:50;padding:4px}
+.ms-dropdown-menu.open{display:block}
+.ms-dropdown-item{display:flex;align-items:center;gap:8px;padding:7px 8px;font-size:12.5px;color:var(--t1);cursor:pointer;border-radius:4px}
+.ms-dropdown-item:hover{background:var(--off2)}
+.ms-dropdown-item input{margin:0}
+#editVendorPanel{position:fixed;top:0;right:-380px;width:340px;height:100%;background:var(--w);border-left:1px solid var(--b2);padding:14px 16px;transition:right .28s cubic-bezier(.22,.61,.36,1);z-index:1000;overflow-y:auto}
+#editVendorPanel.open{right:0}
+#editVendorPanel h4{margin:0 0 12px;font-size:14px;font-weight:600;color:var(--t1)}
+#editVendorPanel .form-group{display:flex;flex-direction:column;margin-bottom:10px}
+#editVendorPanel .form-group label{font-size:10.5px;font-weight:600;letter-spacing:.04em;color:var(--t3);margin-bottom:4px;text-transform:uppercase}
+#editVendorPanel .form-group input,#editVendorPanel .form-group textarea{padding:8px 10px;border:1px solid var(--b2);border-radius:var(--radius-btn);font-family:var(--sans);font-size:12.5px;background:var(--w);color:var(--t1);outline:none;transition:border-color .12s,background .12s}
+#editVendorPanel .form-group input:focus,#editVendorPanel .form-group textarea:focus{border-color:var(--b3);background:var(--w)}
 </style>
 </head>
 <body>
@@ -361,8 +387,8 @@ table.dataTable tbody tr:hover td.sorting_1{background:var(--w) !important}
         <span class="nav-label">All Vendors</span>
         <span class="nav-badge" id="nav-vendor-count">0</span>
       </div>
-      <div class="nav-group-label admin">Users</div>
-      <div class="nav-item admin" data-page="users">
+      <div class="nav-group-label" data-requires-role="admin">Users</div>
+      <div class="nav-item" data-page="users" data-requires-role="admin">
         <i class="fa-solid fa-users" aria-hidden="true"></i>
         <span class="nav-label">Users</span>
         <span class="nav-badge" id="nav-user-count">0</span>
@@ -396,7 +422,14 @@ table.dataTable tbody tr:hover td.sorting_1{background:var(--w) !important}
         <button class="topbar-btn" onclick="window.openWizard()">
           <i class="fa-solid fa-plus" aria-hidden="true"></i> New Requirement
         </button>
-        <div class="avatar-circle">AD</div>
+        <div class="avatar-menu-wrap">
+        <div class="avatar-circle" id="avatar-circle">--</div>
+        <div class="avatar-menu-dropdown" id="avatar-menu-dropdown">
+          <button class="avatar-menu-item danger" id="avatar-logout-btn">
+            <i class="fa-solid fa-arrow-right-from-bracket" style="font-size:11px"></i> Logout
+          </button>
+        </div>
+      </div>
       </div>
     </div>
     <div id="oldVersionBanner" style="
@@ -553,7 +586,7 @@ table.dataTable tbody tr:hover td.sorting_1{background:var(--w) !important}
           </div>
           <div style="flex:1;min-width:0;" id="vendor-detail-panel">
             <div style="display:flex;align-items:center;justify-content:center;height:200px;color:var(--t4);font-size:13px;">
-              Select a vendor to view details
+              Loading...
             </div>
           </div>
         </div>
@@ -590,7 +623,7 @@ table.dataTable tbody tr:hover td.sorting_1{background:var(--w) !important}
         <div class="table-card">
           <table id="vendors-table" class="rfp-table display nowrap" style="width:100%">
             <thead><tr>
-              <th></th><th>Company</th><th>HQ location</th><th>Contact person</th><th>Email</th><th>Phone</th><th>Verified</th>
+              <th>Company</th><th>HQ location</th><th>Contact person</th><th>Email</th><th>Phone</th><th>Verified</th><th></th>
             </tr></thead>
             <tbody id="vendors-tbody"></tbody>
           </table>
@@ -808,6 +841,16 @@ table.dataTable tbody tr:hover td.sorting_1{background:var(--w) !important}
   <div class="form-group"><label>Company name *</label><input type="text" id="vp-company" placeholder="Enter company name"></div>
   <div class="form-group"><label>Description</label><textarea id="vp-description" rows="3" placeholder="Brief description"></textarea></div>
   <div class="form-group"><label>HQ location</label><input type="text" id="vp-hq" placeholder="City, Country"></div>
+  <div class="form-group">
+    <label>System Part(s)</label>
+    <div class="ms-dropdown" id="vp-system-parts-dropdown">
+      <button type="button" class="ms-dropdown-toggle" id="vp-system-parts-toggle">
+        <span id="vp-system-parts-label">Select system parts…</span>
+        <i class="fa-solid fa-chevron-down" style="font-size:10px"></i>
+      </button>
+      <div class="ms-dropdown-menu" id="vp-system-parts-menu"></div>
+    </div>
+  </div>
   <hr style="border:none;border-top:.5px solid var(--border);margin:16px 0">
   <h4 style="font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600">Contact person</h4>
   <div class="form-group"><label>Full name *</label><input type="text" id="vp-contact" placeholder="Contact person"></div>
@@ -816,6 +859,31 @@ table.dataTable tbody tr:hover td.sorting_1{background:var(--w) !important}
   <div class="panel-actions">
     <button class="btn btn-primary btn-sm" id="vp-submit-btn">Add vendor</button>
     <button class="btn btn-secondary btn-sm" id="close-vendor-panel-btn">Cancel</button>
+  </div>
+</div>
+<div id="editVendorPanel">
+  <h4>Edit vendor</h4>
+  <div class="form-group"><label>Company name *</label><input type="text" id="evp-company" placeholder="Enter company name"></div>
+  <div class="form-group"><label>Description</label><textarea id="evp-description" rows="3" placeholder="Brief description"></textarea></div>
+  <div class="form-group"><label>HQ location</label><input type="text" id="evp-hq" placeholder="City, Country"></div>
+  <div class="form-group">
+    <label>System Part(s)</label>
+    <div class="ms-dropdown" id="evp-system-parts-dropdown">
+      <button type="button" class="ms-dropdown-toggle" id="evp-system-parts-toggle">
+        <span id="evp-system-parts-label">Select system parts…</span>
+        <i class="fa-solid fa-chevron-down" style="font-size:10px"></i>
+      </button>
+      <div class="ms-dropdown-menu" id="evp-system-parts-menu"></div>
+    </div>
+  </div>
+  <hr style="border:none;border-top:.5px solid var(--border);margin:16px 0">
+  <h4 style="font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600">Contact person</h4>
+  <div class="form-group"><label>Full name *</label><input type="text" id="evp-contact" placeholder="Contact person"></div>
+  <div class="form-group"><label>Email *</label><input type="email" id="evp-email" placeholder="Email address"></div>
+  <div class="form-group"><label>Phone</label><input type="tel" id="evp-phone" placeholder="Phone number"></div>
+  <div class="panel-actions">
+    <button class="btn btn-primary btn-sm" id="evp-submit-btn">Save changes</button>
+    <button class="btn btn-secondary btn-sm" id="close-edit-vendor-panel-btn">Cancel</button>
   </div>
 </div>
 <div id="vendorInvitePanel">
@@ -931,12 +999,12 @@ table.dataTable tbody tr:hover td.sorting_1{background:var(--w) !important}
 </div>
 <script type="module">
   import { customError, showNotification, lockBtn } from '../assets/js/app.js';
-  import { initAuth, getCurrentUser } from '../assets/js/core/_auth.js';
+  import { initAuth, getCurrentUser, logout } from '../assets/js/core/_auth.js';
 
   let _user = null;
   (async () => {
       const token = await initAuth();
-      console.log('token', token);
+      
       if (!token || token.error){ window.location.href = `${window.location.origin}/v2/login.html`;return;}
       
       const user = await getCurrentUser();
@@ -946,6 +1014,10 @@ table.dataTable tbody tr:hover td.sorting_1{background:var(--w) !important}
       }
 
       _user = user.data;
+      applyRoleVisibility(_user.role);
+      if (_user.last_name == null) _user.last_name = '';
+      $('#avatar-circle').text(getInitials(`${_user.first_name} ${_user.last_name}`));
+
   })();
 
   let cachedDrafts = [];
@@ -1011,6 +1083,44 @@ function loadPage(page) {
   if (page === 'upload-responses') initUploadResponses();
   if (page === 'users') loadUsers();
   if (page === 'vendor-detail') loadVendorDetail();
+}
+
+function applyRoleVisibility(userRole) {
+  const role = userRole?.toLowerCase();
+  document.querySelectorAll('[data-requires-role]').forEach(el => {
+    const required = el.dataset.requiresRole.toLowerCase();
+    const allowed = required.split(',').map(r => r.trim()).includes(role) || role === 'admin';
+    if (!allowed) el.remove();
+  });
+}
+
+document.getElementById('avatar-circle').addEventListener('click', (e) => {
+  e.stopPropagation();
+  document.getElementById('avatar-menu-dropdown').classList.toggle('open');
+});
+
+document.addEventListener('click', () => {
+  document.getElementById('avatar-menu-dropdown').classList.remove('open');
+});
+
+document.getElementById('avatar-logout-btn').addEventListener('click', async (e) => {
+  e.stopPropagation();
+  document.getElementById('avatar-menu-dropdown').classList.remove('open');
+  await logoutUser();
+});
+
+async function logoutUser() {
+  showNotification('Logging out...', 'warning');
+  await logout();
+  location.href = `${window.location.origin}/v2/login.html`;
+}
+
+function getInitials(name) {
+  if (!name || typeof name !== 'string') return '';
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return '';
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 // function loadHome() {
 //   const active = MOCK.active;
@@ -1319,6 +1429,9 @@ async function assignVendors(rowId){
       reset();
       return;
   }
+
+  showNotification('Proceeding to vendor view...', 'success');
+  window.navigateTo('vendor-review');
 }
 
 async function sendToClient(rowId) {
@@ -1530,6 +1643,7 @@ let vendorPanelContext = null; // { reqId } when adding a vendor from this scree
 
 async function openVendorDetail(reqId) {
   const row = cachedActiveRequirements.find(r => String(r.id) === String(reqId));
+  
   if (!row) return;
   vendorDetailReq = row;
   selectedVendorIdx = (row.assigned_vendors && row.assigned_vendors.length) ? 0 : null;
@@ -1542,6 +1656,50 @@ async function openVendorDetail(reqId) {
 
   window.navigateTo('vendor-detail');
 }
+
+let selectedSystemParts = [];
+
+function populateSystemPartsSelect(selected = []) {
+  selectedSystemParts = selected.slice();
+  const menu = document.getElementById('vp-system-parts-menu');
+  const parts = (cachedFormFields && cachedFormFields.system_parts) ? cachedFormFields.system_parts : (formFields.system_parts || []);
+
+  menu.innerHTML = '';
+  parts.slice().sort((a, b) => a.localeCompare(b)).forEach(p => {
+    const item = document.createElement('label');
+    item.className = 'ms-dropdown-item';
+    item.innerHTML = '<input type="checkbox" value="' + p + '" ' + (selectedSystemParts.includes(p) ? 'checked' : '') + '> <span>' + p + '</span>';
+    item.querySelector('input').addEventListener('change', (e) => {
+      if (e.target.checked) {
+        if (!selectedSystemParts.includes(p)) selectedSystemParts.push(p);
+      } else {
+        selectedSystemParts = selectedSystemParts.filter(x => x !== p);
+      }
+      updateSystemPartsLabel();
+    });
+    menu.appendChild(item);
+  });
+
+  updateSystemPartsLabel();
+}
+
+function updateSystemPartsLabel() {
+  const label = document.getElementById('vp-system-parts-label');
+  label.textContent = selectedSystemParts.length ? selectedSystemParts.join(', ') : 'Select system parts…';
+}
+
+document.getElementById('vp-system-parts-toggle').addEventListener('click', (e) => {
+  e.stopPropagation();
+  document.getElementById('vp-system-parts-menu').classList.toggle('open');
+});
+
+document.getElementById('vp-system-parts-menu').addEventListener('click', (e) => {
+  e.stopPropagation();
+});
+
+document.addEventListener('click', () => {
+  document.getElementById('vp-system-parts-menu').classList.remove('open');
+});
 
 function loadVendorDetail() {
   if (!vendorDetailReq) { window.navigateTo('vendor-review'); return; }
@@ -1832,18 +1990,144 @@ function loadCompleted() {
   completedTable = $('#completed-table').DataTable({ responsive:true, pageLength:10 });
 }
 let vendorsTable = null;
-function loadVendors() {
+async function loadVendors() {
   const tbody = document.getElementById('vendors-tbody');
   tbody.innerHTML = '';
+
   MOCK.vendors.forEach(v => {
     const tr = document.createElement('tr');
     const verBadge = v.verified === 'Yes' ? '<span class="badge b-green">Verified</span>' : '<span class="badge b-gray">Unverified</span>';
-    tr.innerHTML = '<td></td><td class="cell-primary">' + v.name + '</td><td>' + (v.hq_location || '') + '</td><td>' + (v.contact_person?.name || '') + '</td><td>' + (v.contact_person?.email || '') + '</td><td>' + (v.contact_person?.phone || '—') + '</td><td>' + verBadge + '</td>';
-    tbody.appendChild(tr);
+    tr.innerHTML = ''
+   tr.innerHTML = ''
+  + '<td class="cell-primary">' + v.name + '</td><td>' + (capitalize(v.hq_location) || '') + '</td><td>' + (v.contact_person?.name || '') + '</td><td>' + (v.contact_person?.email || '') + '</td><td>' + (v.contact_person?.phone || '—') + '</td><td>' + verBadge + '</td>'
+  + '<td style="white-space:nowrap">'
+  +   '<button class="row-icon-btn" title="Edit" onclick="editVendorRow(\'' + v.id + '\')"><i class="fa-solid fa-pen-to-square"></i></button>'
+  +   '<button class="row-icon-btn danger" title="Delete" data-requires-role="admin" onclick="deleteVendorRow(\'' + v.id + '\')"><i class="fa-solid fa-trash-can"></i></button>'
+  + '</td>';
+      tbody.appendChild(tr);
   });
   if (vendorsTable) { vendorsTable.destroy(); }
   vendorsTable = $('#vendors-table').DataTable({ responsive:true, pageLength:10 });
 }
+
+const capitalize = str => str.charAt(0).toUpperCase() + str.slice(1);
+
+let editingVendorId = null;
+
+function editVendorRow(id) {
+  const v = MOCK.vendors.find(v => String(v.id) === String(id));
+  if (!v) return;
+
+  editingVendorId = id;
+
+  document.getElementById('evp-company').value     = v.name || '';
+  document.getElementById('evp-description').value = v.description || '';
+  document.getElementById('evp-hq').value           = v.hq_location || '';
+  document.getElementById('evp-contact').value      = v.contact_person?.name || '';
+  document.getElementById('evp-email').value        = v.contact_person?.email || '';
+  document.getElementById('evp-phone').value        = v.contact_person?.phone || '';
+  populateEditSystemPartsSelect(v.system_parts || []);
+  document.getElementById('editVendorPanel').classList.add('open');
+}
+
+let selectedEditSystemParts = [];
+
+function populateEditSystemPartsSelect(selected = []) {
+  selectedEditSystemParts = selected.slice();
+  const menu = document.getElementById('evp-system-parts-menu');
+  const parts = (cachedFormFields && cachedFormFields.system_parts) ? cachedFormFields.system_parts : (formFields.system_parts || []);
+
+  menu.innerHTML = '';
+  parts.slice().sort((a, b) => a.localeCompare(b)).forEach(p => {
+    const item = document.createElement('label');
+    item.className = 'ms-dropdown-item';
+    item.innerHTML = '<input type="checkbox" value="' + p + '" ' + (selectedEditSystemParts.includes(p) ? 'checked' : '') + '> <span>' + p + '</span>';
+    item.querySelector('input').addEventListener('change', (e) => {
+      if (e.target.checked) {
+        if (!selectedEditSystemParts.includes(p)) selectedEditSystemParts.push(p);
+      } else {
+        selectedEditSystemParts = selectedEditSystemParts.filter(x => x !== p);
+      }
+      updateEditSystemPartsLabel();
+    });
+    menu.appendChild(item);
+  });
+
+  updateEditSystemPartsLabel();
+}
+
+function updateEditSystemPartsLabel() {
+  const label = document.getElementById('evp-system-parts-label');
+  label.textContent = selectedEditSystemParts.length ? selectedEditSystemParts.join(', ') : 'Select system parts…';
+}
+
+document.getElementById('evp-system-parts-toggle').addEventListener('click', (e) => {
+  e.stopPropagation();
+  document.getElementById('evp-system-parts-menu').classList.toggle('open');
+});
+
+document.getElementById('evp-system-parts-menu').addEventListener('click', (e) => {
+  e.stopPropagation();
+});
+
+document.addEventListener('click', () => {
+  document.getElementById('evp-system-parts-menu').classList.remove('open');
+});
+
+document.getElementById('close-edit-vendor-panel-btn').addEventListener('click', () => {
+  document.getElementById('editVendorPanel').classList.remove('open');
+  editingVendorId = null;
+  selectedEditSystemParts = [];
+  updateEditSystemPartsLabel();
+});
+
+document.getElementById('evp-submit-btn').addEventListener('click', () => {
+  const company = document.getElementById('evp-company').value.trim();
+  const contact = document.getElementById('evp-contact').value.trim();
+  const email = document.getElementById('evp-email').value.trim();
+  if (!company || !contact || !email) { showNotification('Company name, contact name, and email are required.', 'error'); return; }
+  if (!editingVendorId) return;
+
+  const v = MOCK.vendors.find(v => String(v.id) === String(editingVendorId));
+  if (v) {
+    v.name = company;
+    v.description = document.getElementById('evp-description').value.trim();
+    v.hq_location = document.getElementById('evp-hq').value.trim();
+    v.contact_person = v.contact_person || {};
+    v.contact_person.name = contact;
+    v.contact_person.email = email;
+    v.contact_person.phone = document.getElementById('evp-phone').value.trim();
+    v.system_parts = selectedEditSystemParts;
+  }
+
+  document.getElementById('editVendorPanel').classList.remove('open');
+  editingVendorId = null;
+  selectedEditSystemParts = [];
+  updateEditSystemPartsLabel();
+
+  if (document.getElementById('page-vendors').classList.contains('active')) loadVendors();
+});
+
+async function deleteVendorRow(id) {
+  const confirmed = await showConfirm(
+    'Remove vendor?',
+    'This will permanently remove this vendor from your directory. This action cannot be undone.',
+    'Remove'
+  );
+  if (!confirmed) return;
+  
+  const response = await fetch('/api/supabase?action=deleteVendor',{
+    method: "POST",
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id:id })
+  });
+
+  const result = await response.json();
+  if (result.error){showNotification(result.error, 'error');return;}
+  showNotification('Vendor deleted!', 'success');
+  
+}
+
 function loadConfigurations() {
   renderConfigList('area', 'cfg-area-list', 'cfg-area-input');
   renderConfigList('system_parts', 'cfg-syspart-list', 'cfg-syspart-input');
@@ -1890,18 +2174,68 @@ document.querySelectorAll('.htab').forEach(tab => {
     document.getElementById('htab-' + tab.dataset.htab).classList.add('active');
   });
 });
-document.getElementById('open-vendor-panel-btn').addEventListener('click', () => { document.getElementById('vendorPanel').classList.add('open'); });
-document.getElementById('close-vendor-panel-btn').addEventListener('click', () => { document.getElementById('vendorPanel').classList.remove('open'); });
+document.getElementById('open-vendor-panel-btn').addEventListener('click', () => { populateSystemPartsSelect();document.getElementById('vendorPanel').classList.add('open'); });
+document.getElementById('close-vendor-panel-btn').addEventListener('click', () => { document.getElementById('vendorPanel').classList.remove('open');});
 document.getElementById('vp-submit-btn').addEventListener('click', () => {
   const company = document.getElementById('vp-company').value.trim();
   const contact = document.getElementById('vp-contact').value.trim();
   const email = document.getElementById('vp-email').value.trim();
-  if (!company || !contact || !email) { alert('Company name, contact name, and email are required.'); return; }
+  if (!company || !contact || !email) { showNotification('Company name, contact name, and email are required.', 'error'); return; }
   MOCK.vendors.push({ id: MOCK.vendors.length + 1, company, desc: document.getElementById('vp-description').value.trim(), hq: document.getElementById('vp-hq').value.trim(), contact, email, phone: document.getElementById('vp-phone').value.trim(), verified: 'No' });
   document.getElementById('vendorPanel').classList.remove('open');
   ['vp-company','vp-description','vp-hq','vp-contact','vp-email','vp-phone'].forEach(id => document.getElementById(id).value = '');
+
+  const systemParts = selectedSystemParts;
+  const payload = {
+      name: company, 
+      description: document.getElementById('vp-description').value.trim(), 
+      hq_location: document.getElementById('vp-hq').value.trim(), 
+      contact_person: {
+          name: contact,
+          email: email,
+          phone: document.getElementById('vp-phone').value.trim()
+      },
+      system_parts: systemParts
+  };
+
+  const reset = lockBtn($(this));
+  if (!reset) return;
+  fetch('/api/supabase?action=getVendorByName&vendorName=' + encodeURIComponent(payload.name))
+  .then(res => res.json())
+  .then(result => {
+    if (result.error) {
+      showNotification(result.error, 'error');
+      return;
+    }
+
+    if (result.data === null) {
+      return fetch('/api/supabase?action=addVendor', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ payload:payload })
+      })
+        .then(res => res.json())
+        .then(updateResult => {
+          if (updateResult.error) {
+            showNotification(updateResult.error, 'error');
+            return;
+          }
+          showNotification('Vendor Added!', 'success');
+        });
+    }else{
+      showNotification('A vendor with the same name already exists.', 'error');
+      return;
+    }
+  })
+  .catch(err => {
+    console.error('Request failed:', err);
+    showNotification('Something went wrong.', 'error');
+  });
+
+  reset();
   if (document.getElementById('page-vendors').classList.contains('active')) loadVendors();
   document.getElementById('nav-vendor-count').textContent = MOCK.vendors.length;
+  
 });
 document.getElementById('close-edit-modal').addEventListener('click', () => { document.getElementById('edit-vendor-modal').classList.remove('open'); });
 document.getElementById('edit-vendor-modal').addEventListener('click', e => { if (e.target === document.getElementById('edit-vendor-modal')) document.getElementById('edit-vendor-modal').classList.remove('open'); });
@@ -2769,11 +3103,14 @@ async function loadUsers() {
 
 function openUserModal(user) {
   //editingUserId = id || null;
- 
-  user = atob(user);
-  user = JSON.parse(user);
+  if (user != null){
+    user = atob(user);
+    user = JSON.parse(user);
+
+    user.active = (user.active) ? 'yes' : 'no';
+  }
   
-  user.active = (user.active) ? 'yes' : 'no';
+  document.getElementById('user-email').disabled = user !== null;
   document.getElementById('user-panel-title').textContent = user !== null ? 'Edit user' : 'Add user';
   document.getElementById('first-name').value = user ? user.first_name : '';
   document.getElementById('last-name').value = user ? user.last_name : '';
@@ -2930,6 +3267,9 @@ window.sendToClient = sendToClient;
 window.openVendorInvitePanel = openVendorInvitePanel;
 window.openVendorDetail  = openVendorDetail ;
 window.selectVendorDetail = selectVendorDetail;
+window.editVendorRow = editVendorRow;
+window.deleteVendorRow = deleteVendorRow;
+window.assignVendors = assignVendors;
 
 loadHome();
 </script>
