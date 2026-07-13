@@ -999,8 +999,9 @@ table.dataTable tbody tr:hover td.sorting_1{background:var(--w) !important}
   </div>
 </div>
 <script type="module">
-  import { customError, showNotification, lockBtn } from '../assets/js/app.js';
+  import { customError, showNotification, lockBtn, priorityList } from '../assets/js/app.js';
   import { initAuth, getCurrentUser, logout } from '../assets/js/core/_auth.js';
+  import { countryList } from '../assets/js/utils/constants.js';
 
   let _user = null;
   (async () => {
@@ -1170,6 +1171,15 @@ async function loadDrafts() {
   const ffResult = await ffRes.json();
   if (!ffResult.error) cachedFormFields = ffResult.data;
 
+  if (cachedDrafts.length == 0){
+    const response = await fetch('/api/supabase?action=getAllDraftRequirement');
+    const result = await response.json();
+   
+    if (result.error) { console.error(result.error); return; }
+    
+    cachedDrafts = result.data;
+  }
+
   cachedDrafts.forEach((row, idx) => {
     const d = row.data;
     const item = document.createElement('div');
@@ -1183,7 +1193,12 @@ async function loadDrafts() {
     sidebar.appendChild(item);
   });
 
-  if (cachedDrafts.length > 0) renderDraftDetail(cachedDrafts[0]);
+  if (cachedDrafts.length > 0){
+    renderDraftDetail(cachedDrafts[0]);
+  }else{
+    const content = document.getElementById('drafts-detail-panel');
+    content.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:200px;color:var(--t4);font-size:13px;">No data available.</div>';
+  } 
 }
 
 function renderDraftDetail(row) {
@@ -1258,7 +1273,7 @@ function renderDraftDetail(row) {
     +   '<div style="display:flex;gap:8px;align-items:center">'
     +     '<button class="act-btn" id="sendToClient-' + row.id + '" onclick="sendToClient(\'' + row.id + '\')"><i class="fa-solid fa-paper-plane" style="font-size:11px;margin-right:5px"></i>Send to Client</button>'
     +     '<button class="act-btn' + (row.approved === 'Y' ? '' : ' act-btn-disabled') + '" id="assignVendors-' + row.id + '" onclick="assignVendors(\'' + row.id + '\')" ' + (row.approved === 'Y' ? '' : 'disabled title="Requires client approval"') + '><i class="fa-solid fa-users" style="font-size:11px;margin-right:5px"></i>Assign Vendors</button>'
-    +     '<button class="act-btn" onclick="openAddReqModal(\'' + row.id + '\')">+ New requirement</button>'
+    +     '<button class="act-btn" onclick="openAddReqModal(\'' + row.id + '\')">+ Add New</button>'
     +     '<button data-export-table="client-req-review-table" data-export-name="' + (row.data.title || 'requirements') + '_client_review" class="act-btn export-req-btn"><i class="fa-solid fa-download" style="font-size:11px;margin-right:5px"></i>Export</button>'
     +   '</div>'
     + '</div>'
@@ -1441,6 +1456,8 @@ async function sendToClient(rowId) {
   
   const email = row.data.client.email;
   const name = row.data.client.name;
+
+  if (!email){showNotification('An email address is required.', 'error');return;}
   const confirmed = await showConfirm(
     'Send To Client?',
     `An email will be sent to ${email} asking them to review the requirement list.`,
@@ -1760,9 +1777,9 @@ async function renderVendorDetailPanel(idx) {
   const systemParts = vresult.data.system_parts;
   requirements.forEach((req, i) => {
     const fb = feedback[i] || {};
-
+    
     if (!systemParts.includes(req.system_part)) return;
-
+    
     rows += '<tr>'
       + '<td style="color:var(--o);font-weight:500">' + (req.area || '—') + '</td>'
       + '<td>' + (req.requirement || '—') + '</td>'
@@ -1771,7 +1788,7 @@ async function renderVendorDetailPanel(idx) {
       + '<td>' + (fb.feedback ? '<span class="badge b-blue">' + fb.feedback + '</span>' : '<span class="badge b-gray">Pending</span>') + '</td>'
       + '<td>' + (fb.comment || '') + '</td>'
       + '</tr>';
-
+      
     if (fb.feedback && bestFeedbackValue && fb.feedback !== bestFeedbackValue) {
       notMetRows += '<tr>'
         + '<td style="color:var(--o);font-weight:500">' + (req.area || '—') + '</td>'
@@ -2315,11 +2332,13 @@ document.getElementById('close-edit-modal').addEventListener('click', () => { do
 document.getElementById('edit-vendor-modal').addEventListener('click', e => { if (e.target === document.getElementById('edit-vendor-modal')) document.getElementById('edit-vendor-modal').classList.remove('open'); });
 let wizardStep = 1;
 let uploadedFile = null;
-let fileContents = [];
-function openWizard() { wizardStep = 1; uploadedFile = null; fileContents = []; renderWizardStep(); document.getElementById('wizard-modal').classList.add('open'); }
+let fileContents = {};
+let errorList = {};
+let uploadedFileName = null;
+function openWizard() { wizardStep = 1; uploadedFileName = null; uploadedFile = null; fileContents = {}; errorList = {}; renderWizardStep(); document.getElementById('wizard-modal').classList.add('open'); }
 document.getElementById('close-wizard-btn').addEventListener('click', () => { document.getElementById('wizard-modal').classList.remove('open'); });
 document.getElementById('wizard-modal').addEventListener('click', e => { if (e.target === document.getElementById('wizard-modal')) document.getElementById('wizard-modal').classList.remove('open'); });
-function renderWizardStep() {
+async function renderWizardStep() {
   document.querySelectorAll('.wizard-step').forEach((s, i) => { s.classList.toggle('active', i < wizardStep); });
   document.getElementById('wizard-step-label').textContent = 'Step ' + wizardStep;
   document.getElementById('wizard-back-btn').textContent = wizardStep === 1 ? 'Cancel' : 'Back';
@@ -2329,30 +2348,179 @@ function renderWizardStep() {
     document.getElementById('wizard-title').textContent = 'File upload requirements';
     document.getElementById('wizard-desc').innerHTML = 'Use the template below, then upload your Excel file.<br><small style="color:var(--muted)">Only .xlsx / .xls files are accepted.</small>';
     document.getElementById('wizard-body').innerHTML = '<div class="file-upload-box"><p style="font-size:13px;color:var(--muted)">Required columns (case-sensitive):<br><strong>area | requirement | priority | system_part</strong></p><a href="../resources/template.xlsx" download class="upload-label" style="display:inline-block;text-decoration:none;margin-right:8px">Download template</a><label class="upload-label">Choose file<input type="file" id="wizard-file-input" accept=".xlsx,.xls" hidden></label><div id="wizard-file-name" style="margin-top:10px;font-size:12px;color:var(--muted)">No file selected</div></div>';
-    document.getElementById('wizard-file-input').addEventListener('change', function() { uploadedFile = this.files[0]; document.getElementById('wizard-file-name').textContent = uploadedFile ? uploadedFile.name : 'No file selected'; document.getElementById('wizard-next-btn').disabled = !uploadedFile; });
+    document.getElementById('wizard-file-input').addEventListener('change', function() { 
+      uploadedFile = this.files[0]; 
+      if (uploadedFile){
+        uploadedFileName = this.files[0]?.name;
+        const validHeaders = ['area', 'requirement', 'priority', 'system_part'];
+
+        let hasError = false;
+        errorList['headings'] = [];
+        const reader = new FileReader();
+        reader.onload = async function (e) {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+
+          const sheetName = workbook.SheetNames[0];
+          const sheet = workbook.Sheets[sheetName];
+
+          const json = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+          fileContents = json;
+          let i = 0;
+          
+          validHeaders.forEach(header => {
+              if (json[0][`${header}`] === undefined){
+                  hasError = true;
+                  errorList['headings'].push(header);
+              }
+              i++;
+          });
+
+          // if (!hasError){
+          //     updateChecklist('headings', true);
+          // }
+
+          if (!hasError){
+              // const res = await fetch("/api/supabase?action=insertDraftRequirement", {
+              //     method: "POST",
+              //     headers: { "Content-Type": "application/json" },
+              //     body: JSON.stringify({ filename: file.name, requirements: {requirements: json}})
+              // });
+
+              // const result = await res.json();
+              // if (result.error){
+              //     console.error('Error:', result.error);
+              //     App.swal.fire({
+              //         title: "Error",
+              //         text: App.REQUEST_NOT_PROCESSED,
+              //     });
+              //     return;
+              // }
+              
+              //location.href = `../requirements/draft.html?id=${result.data.id}`; 
+          }
+      };
+
+      reader.readAsArrayBuffer(uploadedFile);
+      }
+
+      document.getElementById('wizard-file-name').textContent = uploadedFile ? uploadedFile.name : 'No file selected'; document.getElementById('wizard-next-btn').disabled = !uploadedFile; });
   }
   if (wizardStep === 2) {
     document.getElementById('wizard-title').textContent = 'Requirements validation';
     document.getElementById('wizard-desc').textContent = 'Running checks on your uploaded file…';
     document.getElementById('wizard-next-btn').disabled = true;
-    document.getElementById('wizard-body').innerHTML = '<div class="checklist-item" id="chk-headings"><span>File headers</span><span id="chk-headings-status">⏳</span></div><div class="checklist-item" id="chk-area"><span>Area listing</span><span id="chk-area-status">⏳</span></div><div class="checklist-item" id="chk-priority"><span>Priority listing</span><span id="chk-priority-status">⏳</span></div><div class="checklist-item" id="chk-system"><span>System part listing</span><span id="chk-system-status">⏳</span></div>';
-    setTimeout(() => { ['headings','area','priority','system'].forEach(k => { document.getElementById('chk-' + k + '-status').textContent = '✅'; }); document.getElementById('wizard-next-btn').disabled = false; }, 900);
+    document.getElementById('wizard-body').innerHTML = '<div class="checklist-item" id="chk-headings"><span>File headers</span><span id="headings-error"></span><span id="chk-headings-status">⏳</span></div><div class="checklist-item" id="chk-area"><span>Area listing</span><span id="area-error"></span><span id="chk-area-status">⏳</span></div><div class="checklist-item" id="chk-priority"><span>Priority listing</span><span id="priority-error"></span><span id="chk-priority-status">⏳</span></div><div class="checklist-item" id="chk-system"><span>System part listing</span><span id="system-error"></span><span id="chk-system-status">⏳</span></div>';
+    
+    const response = await fetch(`/api/supabase?action=getFormFields`);
+    const result = await response.json();
+
+    if (result.error) {
+        showNotification(result.error, 'error');
+        return;
+    }
+
+    let error = false;
+    errorList['area'] = [];
+    errorList['priority'] = [];
+    errorList['system'] = [];
+
+    for (var requirement of fileContents){
+        if (!requirement.area || !result.data.area.includes(requirement.area)){
+            errorList['area'].push(requirement.area);
+            error = true;
+        }
+    }
+
+    for (var requirement of fileContents){
+        if (!requirement.priority || !priorityList.includes(requirement.priority)){
+            errorList['priority'].push(requirement.priority);
+            error = true;
+        }
+    }
+
+    for (var requirement of fileContents){
+        if (!requirement.system_part || !result.data.system_parts.includes(requirement.system_part)){
+            errorList['system'].push(requirement.system_part);
+            error = true;
+        }
+    }
+    
+    fileUploadErrors(errorList);
+    if (error) return;
+
+    document.getElementById('wizard-next-btn').disabled = false;
+
+    //setTimeout(() => { ['headings','area','priority','system'].forEach(k => { document.getElementById('chk-' + k + '-status').textContent = '✅'; }); document.getElementById('wizard-next-btn').disabled = false; }, 900);
   }
   if (wizardStep === 3) {
     document.getElementById('wizard-title').textContent = 'Requirement details';
     document.getElementById('wizard-desc').textContent = 'Enter the company and contact details below.';
-    document.getElementById('wizard-body').innerHTML = '<div class="wizard-form"><div class="form-group"><label>Title</label><input type="text" id="wz-title" placeholder="Requirement title"></div><div class="two-form-cols"><div class="form-group"><label>Company name</label><input type="text" id="wz-company" placeholder="Company name"></div><div class="form-group"><label>Country</label><input type="text" id="wz-country" placeholder="Country"></div></div><div class="two-form-cols"><div class="form-group"><label>Contact name</label><input type="text" id="wz-contact" placeholder="Full name"></div><div class="form-group"><label>Email address</label><input type="email" id="wz-email" placeholder="Email"></div></div></div>';
+    document.getElementById('wizard-body').innerHTML = '<div class="wizard-form"><div class="form-group"><label>Title*</label><input type="text" id="wz-title" placeholder="Requirement title"></div><div class="two-form-cols"><div class="form-group"><label>Company name</label><input type="text" id="wz-company" placeholder="Company name"></div><div class="form-group"><label>Country</label><select id="wz-country" name="country" style="width:50%"><option value="">Select a country</option></select></div></div><div class="two-form-cols"><div class="form-group"><label>Contact name</label><input type="text" id="wz-contact" placeholder="Full name"></div><div class="form-group"><label>Email address</label><input type="email" id="wz-email" placeholder="Email"></div></div></div>';
+  
+    let options = countryList.map(country => 
+        `<option value="${country}">${country}</option>`
+    ).join('');
+
+    $('#wz-country').append(options);
   }
 }
-document.getElementById('wizard-next-btn').addEventListener('click', () => {
+
+function updateChecklist(type, isValid) {
+    const item = $(`#chk-${type}-status`);
+    
+    if(isValid) {
+        item.text('✅').css('color', 'green');
+    } else {
+        item.text('❌').css('color', 'red');
+    }
+}
+
+function fileUploadErrors(errorList){
+    for (const type in errorList){
+        if (errorList[type].length > 0) {
+            errorList[type] = [...new Set(errorList[type])];
+            $(`#${type}-error`).text(' Invalid - [' + errorList[type].join(', ') + ']').css({'color':'red', 'font-size':'11px'});
+            updateChecklist(type, false);
+        }else{
+            updateChecklist(type, true);
+        }
+    }
+}
+
+document.getElementById('wizard-next-btn').addEventListener('click', async () => {
   if (wizardStep < 3) { wizardStep++; renderWizardStep(); return; }
+
   const title = document.getElementById('wz-title').value.trim();
   const company = document.getElementById('wz-company').value.trim();
   const contact = document.getElementById('wz-contact').value.trim();
   const email = document.getElementById('wz-email').value.trim();
   const country = document.getElementById('wz-country').value.trim();
-  if (!title || !company) { alert('Title and company name are required.'); return; }
+  if (!title) { showNotification('Title is required.', 'error'); return; }
   MOCK.drafts.push({ company, title, contact, email, phone:'', country });
+
+  const client = {
+      company: company,
+      name: contact,
+      country: country,
+      email: email,
+  };
+
+  const reset = lockBtn($('#wizard-next-btn'));
+  if (!reset) return;
+
+  const res = await fetch("/api/supabase?action=insertDraftRequirement", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ filename: uploadedFileName, requirement: {requirements: fileContents, client: client, title: title}})
+  });
+
+  const result = await res.json();
+  if (result.error){showNotification(result.error, 'error');reset();return;}
+
+  reset();
+  showNotification('Requirements uploaded!', 'success');
+
   document.getElementById('wizard-modal').classList.remove('open');
   document.getElementById('stat-draft-req').textContent = MOCK.drafts.length;
   document.getElementById('nav-draft-count').textContent = MOCK.drafts.length;
@@ -2531,8 +2699,10 @@ function getSolutionMultipliers(vendorFeedback, vendorFormFields, scoring) {
   return multipliers;
 }
 
-function renderMatchScores(req) {
+async function renderMatchScores(req) {
   const contentEl = document.getElementById('req-tab-content');
+  contentEl.innerHTML = '<div style="display:flex;justify-content:center;align-items:center;padding:40px"><i class="fa-solid fa-spinner fa-spin" style="font-size:24px;color:#888"></i></div>';
+
   const vendors = req.assigned_vendors || [];
   const requirements = req.requirements || [];
   const systemParts = (cachedFormFields && cachedFormFields.system_parts) ? cachedFormFields.system_parts : [];
@@ -2543,7 +2713,29 @@ function renderMatchScores(req) {
   const allParts = ['All Areas', ...systemParts];
 
   let thead = '<tr><th>Area</th>';
-  vendors.forEach(v => { thead += '<th>' + v.name + '</th>'; });
+  let vsystemParts = {};
+  try {
+    const results = await Promise.all(
+      vendors.map(v => 
+        fetch(`/api/supabase?action=getVendorById&vendorId=${v.id}`)
+          .then(res => res.json())
+          .then(result => {
+            if (result.error) throw new Error(result.error);
+            return { vendor: v, data: result.data };
+          })
+      )
+    );
+
+    results.forEach(({ vendor, data }) => {
+      thead += '<th>' + vendor.name + '</th>';
+      vsystemParts[vendor.id] = data.system_parts;
+    });
+  } catch (err) {
+    showNotification(err.message, 'error');
+    contentEl.innerHTML = '<div style="padding:20px;text-align:center;color:#888">Failed to load match scores.</div>';
+    return;
+  }
+
   thead += '</tr>';
 
   let tbody = '';
@@ -2553,11 +2745,19 @@ function renderMatchScores(req) {
       if (v.feedback && v.feedback.length) {
         let score = 0;
         const multipliers = getSolutionMultipliers(v.feedback, vendorFeedbackValues, scoring);
-        requirements.forEach((r, idx) => {
-          const inPart = part === 'All Areas' || r.system_part === part;
-          if (inPart) score += (priorityWeighting[r.priority] || 0) * (multipliers[idx] || 0);
+
+        let vReqs = requirements.filter(item => 
+          vsystemParts[v.id]?.includes(item.system_part)
+        );
+
+        if (part !== 'All Areas') {
+          vReqs = vReqs.filter(item => item.system_part === part);
+        }
+
+        vReqs.forEach((r, idx) => {
+          score += (priorityWeighting[r.priority] || 0) * (multipliers[idx] || 0);
         });
-        let pct = requirements.length > 0 ? (score / (requirements.length * 1.5)) * 100 : 0;
+        let pct = vReqs.length > 0 ? (score / (vReqs.length * 1.5)) * 100 : 0;
         if (isNaN(pct)) pct = 0;
         tbody += '<td class="center">' + Math.round(pct) + '%</td>';
       } else {

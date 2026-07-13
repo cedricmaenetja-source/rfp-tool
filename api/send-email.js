@@ -72,7 +72,7 @@ export default async function handler(req, res) {
 
         payload = {
             to: email,
-            subject: 'Password Reset',
+            subject: '[RFP Tool] - Password Reset',
             body: RESET_PASSWORD_EMAIL.replace('{{LINK}}', host) 
         };
     }
