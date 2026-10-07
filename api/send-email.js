@@ -4,7 +4,7 @@ import { verifySession } from './_verify-session';
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
-  process.env.SUPABASE_ANON_KEY
+  process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
 export default async function handler(req, res) {
@@ -280,7 +280,7 @@ export default async function handler(req, res) {
     }
 }
 
-export const ZAPIER_SEND_EMAIL = 'https://hooks.zapier.com/hooks/catch/25735666/uptnlxt/';
+export const ZAPIER_SEND_EMAIL = process.env.ZAPIER_SEND_EMAIL;
 export const RESET_PASSWORD_EMAIL = `
     <p>Hello,<br/><br/>
 

@@ -6,6 +6,14 @@ const BAR_CLASSES          = ['bar-green', 'bar-blue', 'bar-amber', 'bar-orange'
 const PIE_COLORS           = ['#22c55e', '#3b82f6', '#f59e0b', '#f97316', '#ef4444'];
 const VENDOR_COLORS        = ['#378ADD', '#1D9E75', '#BA7517', '#993556', '#D85A30', '#534AB7', '#888780'];
 
+const FEEDBACK_MULTIPLIERS = {
+    'Fully meets the requirement via core platform': 1,
+    'Meets the requirement via core platform, minor gaps': 0.8,
+    'Meets the requirement with workarounds / use of an additional 3rd-party application': 0.6,
+    'Partially meets the requirement, substantial gaps': 0.4,
+    'Fails to meet the requirement, or unable to provide': 0
+};
+
 // ─────────────────────────────────────────────────────────────────
 $(async function () {
     if (!App.loggedIn()) {
@@ -47,7 +55,10 @@ $(async function () {
     renderReport(data, formFields);
 
     $('#backBtn').on('click', () => {
-        location.href = `details.html?req=${requirement}`;
+        localStorage.setItem('page', 'vendor-review');
+        localStorage.setItem('req', requirement);
+
+        location.href = `${window.location.origin}/v2`;
     });
 
     $('#exportBtn').removeClass('hide').on('click', async function () {
@@ -117,39 +128,56 @@ function isMetWithGaps(fbValue) {
     return /minor|workaround|3rd.party|partial/i.test(fbValue);
 }
 
-function buildScoreMap(vendors, reqs, allAreas, fbLabels) {
+function buildScoreMap(vendors, reqs, allAreas, fbLabels,vSystemParts) {
     const map = {};
     vendors.forEach(v => {
         map[v.name] = {};
         const rawFB       = getVendorFB(vendors, v.id);
-        const multipliers = rawFB.map(entry => {
-            const idx = fbLabels.indexOf(entry?.feedback ?? '');
-            return idx >= 0 ? SOLUTION_MULTIPLIERS[idx] : 0;
+        
+        let vReqs = [];
+        rawFB.forEach(f => {
+            let r = reqs[f.pos];
+            r['feedback'] = f.feedback;
+            r['score'] = PRIORITY_MULTIPLIER[r.priority] * (FEEDBACK_MULTIPLIERS[f.feedback] ?? 0);
+            vReqs.push(r);
         });
+        
         allAreas.forEach(part => {
             let score = 0;
-            reqs.forEach((req, i) => {
-                if (part === 'All areas' || req.system_part === part)
-                    score += (PRIORITY_MULTIPLIER[req.priority] ?? 1) * (multipliers[i] ?? 0);
+
+            let scoped = vReqs;
+            if (part !== 'All areas') {
+                scoped = vReqs.filter(item => item.system_part === part);
+            }
+            
+            scoped.forEach((r, idx) => {
+                score += r.score;
             });
-            const pct = reqs.length > 0 ? parseInt((score / (reqs.length * 1.5)) * 100) : 0;
-            map[v.name][part] = Math.min(pct, 100);
+            
+            let pct = scoped.length > 0 ? (score / (scoped.length * 1.5) * 100) : 0;
+            if (isNaN(pct)) pct = 0;
+            map[v.name][part] = Math.round(pct);
         });
     });
+    
     return map;
 }
 
 // ─────────────────────────────────────────────────────────────────
 // SECTION 0 — CHARTS
 // ─────────────────────────────────────────────────────────────────
-function renderCharts(vendors, reqs, fbLabels, sysParts, scoreMap) {
+function renderCharts(vendors, reqs, fbLabels, sysParts, scoreMap, vsystemParts) {
     const allAreas = ['All areas', ...sysParts];
-
+    
     vendors.forEach((v, vi) => {
         const fb    = getVendorFB(vendors, v.id);
         const dist  = fbLabels.map(label =>
-            reqs.filter((_, i) => (fb[i]?.feedback ?? '') === label).length
+           reqs
+            .filter(req => vsystemParts[v.id].includes(req.system_part))
+            .filter(req => (fb.find(e => e?.pos === reqs.indexOf(req))?.feedback ?? '') === label)
+            .length
         );
+       
         const total = dist.reduce((a, b) => a + b, 0);
         const pct   = scoreMap[v.name]['All areas'];
         const c     = heatColor(pct);
@@ -242,13 +270,35 @@ function renderCharts(vendors, reqs, fbLabels, sysParts, scoreMap) {
 // ─────────────────────────────────────────────────────────────────
 // RENDER REPORT
 // ─────────────────────────────────────────────────────────────────
-function renderReport(data, formFields) {
+async function renderReport(data, formFields) {
     const vendors  = data.assigned_vendors ?? [];
     const reqs     = data.requirements ?? [];
     const fbLabels = formFields.vendor_feedback ?? [];
     const sysParts = formFields.system_parts ?? [];
     const allAreas = ['All areas', ...sysParts];
     const mustReqs = reqs.filter(r => r.priority === 'Must-Have');
+
+    let vsystemParts = {};
+
+    try {
+        const results = await Promise.all(
+        vendors.map(v => 
+            fetch(`/api/supabase?action=getVendorById&vendorId=${v.id}`)
+            .then(res => res.json())
+            .then(result => {
+                if (result.error) throw new Error(result.error);
+                return { vendor: v, data: result.data };
+            })
+        )
+        );
+
+        results.forEach(({ vendor, data }) => {
+            vsystemParts[vendor.id] = data.system_parts;
+        });
+    } catch (err) {
+        App.showNotification(err.message, 'error');
+        return;
+    }
 
     // ── Page header ──
     $('#rTitle').text(data.title);
@@ -274,15 +324,15 @@ function renderReport(data, formFields) {
     vendors.forEach(v => {
         const fb = getVendorFB(vendors, v.id);
         totalGaps += mustReqs.filter(req =>
-            (fb[reqs.indexOf(req)]?.feedback ?? '') !== fbLabels[0]
+            (fb.find(e => e?.pos === reqs.indexOf(req))?.feedback ?? '') !== fbLabels[0]
         ).length;
     });
     $('#navGapCount').text(totalGaps);
 
-    const scoreMap = buildScoreMap(vendors, reqs, allAreas, fbLabels);
+    const scoreMap = buildScoreMap(vendors, reqs, allAreas, fbLabels, vsystemParts);
 
     // ── Section 0 ── charts
-    renderCharts(vendors, reqs, fbLabels, sysParts, scoreMap);
+    renderCharts(vendors, reqs, fbLabels, sysParts, scoreMap, vsystemParts);
 
     // ── Section 1 ── Match Scores
     vendors.forEach(v => {
@@ -486,6 +536,8 @@ function renderReport(data, formFields) {
     $('#sidebar').removeClass('hide');
     $('#loadingState').addClass('hide');
     $('#reportContent').removeClass('hide');
+
+    Object.values(Chart.instances).forEach(chart => chart.resize());
 }
 
 // ─────────────────────────────────────────────────────────────────

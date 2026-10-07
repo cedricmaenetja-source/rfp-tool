@@ -10,6 +10,7 @@ export const PAGES = {
     req_review: `${origin}/requirements/draft.html?id=`,
     presentation: `${origin}/presentation`,
     root: `${origin}/index.html`,
+    submitted: `${origin}/submitted.html`
 };
 
 export const countryList = [

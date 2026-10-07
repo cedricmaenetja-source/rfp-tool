@@ -390,6 +390,8 @@ $(function(){
                 });
                 const rtc = await rc.json();
                 if (result.error){console.log(rtc.error)};
+
+                loadRequirementData(id);
             } 
         });
 

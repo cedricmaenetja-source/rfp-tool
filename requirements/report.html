@@ -489,6 +489,27 @@
       height: 100%; background: var(--text);
       width: 0%; transition: width 0.1s linear;
     }
+    .table-scroll {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch; 
+    }
+
+    .heatmap-table,
+    .report-table,
+    .bdt-table {
+      min-width: 600px; 
+    }
+    .heatmap-table th:first-child,
+    .heatmap-table td:first-child,
+    .report-table th:first-child,
+    .report-table td:first-child {
+      position: sticky;
+      left: 0;
+      background: var(--white); 
+      z-index: 1;
+    }
+
+    .heatmap-table thead th:first-child { background: var(--surface); } 
   </style>
 </head>
 <body>
@@ -609,10 +630,12 @@
                   <canvas id="heatmapBarChart" role="img" aria-label="Grouped horizontal bar chart showing vendor match scores per area."></canvas>
                 </div>
               </div>
-              <table class="heatmap-table" style="border-top:1px solid #e2e0db;">
-                <thead id="heatmapHead"></thead>
-                <tbody id="heatmapBody"></tbody>
-              </table>
+              <div class="table-scroll">
+                <table class="heatmap-table" style="border-top:1px solid #e2e0db;">
+                  <thead id="heatmapHead"></thead>
+                  <tbody id="heatmapBody"></tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>
@@ -629,10 +652,12 @@
             <div class="card">
               <div class="card-header">Score by area</div>
               <div class="card-body">
-                <table class="report-table">
-                  <thead id="scoreTableHead"></thead>
-                  <tbody id="scoreTableBody"></tbody>
-                </table>
+                <div class="table-scroll">
+                  <table class="report-table">
+                    <thead id="scoreTableHead"></thead>
+                    <tbody id="scoreTableBody"></tbody>
+                  </table>
+                </div>
               </div>
             </div>
           </div>
@@ -686,7 +711,19 @@
     </main>
   </div><!-- /page-shell -->
 
-  <script>
+  <script type="module">
+    import { initAuth, getCurrentUser, logout } from '../assets/js/core/_auth.js';
+
+    (async () => {
+        const token = await initAuth();
+        
+        if (!token || token.error){ window.location.href = `${window.location.origin}/v2/login.html`;return;}
+        const user = await getCurrentUser();
+        if (!user) {
+            window.location.href = `${window.location.origin}/v2/login.html`;
+            return;
+        }
+    })();
     // ── Sidebar nav active state + scroll spy ──────────────────────
     const SECTIONS = [
       'sec-overview','sec-scores','sec-core',

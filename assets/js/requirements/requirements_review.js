@@ -64,7 +64,6 @@ $(function(){
                     };
 
                     updateFeedback(data);
-                    console.log(data.assigned_vendors);
                 })
                 .catch(err => {
                     console.error('Promise failed:', err);

@@ -1,4 +1,3 @@
-import { getRequirementsById, updateVendorList } from "../services/supabase.js";
 import * as App from "../app.js";
 
 let requirementsData = null;
@@ -43,7 +42,6 @@ function checkRowWarning(pos) {
 }
 
 $(function () {
-
       /* ── FILTER + SEARCH ── */
       function applyFilters() {
         const area     = $('#areaFilter').val().toLowerCase();
@@ -146,7 +144,7 @@ $(function(){
                 requirementsData = data;
 
                 validateVendor(vendorId);
-                //checkSubmission(vendorId);
+                checkSubmission(vendorId);
                 loadData(vendorId);
             })
             .catch(err => {
@@ -179,10 +177,11 @@ $(function(){
         await $('.form-field').each(async function() {
             const type    = $(this).data('type');
             const pos     = $(this).data('pos');
+            const realPos     = $(this).data('realpos');
             const value   = $(this).val();
             const comment = $('textarea[data-type="comment"][data-pos="' + pos + '"]').val();
 
-            feedback.push({ feedback: value, comment: comment });
+            feedback.push({ feedback: value, comment: comment, pos: realPos, });
         });
         
         if (feedback.length) {
@@ -212,6 +211,7 @@ $(function(){
         await $('.form-field').each(async function() {
             const type    = $(this).data('type');
             const pos     = $(this).data('pos');
+            const realPos     = $(this).data('realpos');
             const value   = $(this).val();
             const comment = $('textarea[data-type="comment"][data-pos="' + pos + '"]').val();
             
@@ -223,7 +223,7 @@ $(function(){
                 errors.push('A comment is required on requirement number ' + (pos + 1) + '.');
             }
 
-            feedback.push({ feedback: value, comment: comment });
+            feedback.push({ feedback: value, comment: comment, pos: realPos });
         });
 
         if (errors.length > 0) {
@@ -234,26 +234,31 @@ $(function(){
         $(this).prop('disabled', true);
 
         if (feedback.length) {
+            const reset = App.lockBtn($(this));
+            if (!reset) return;
+
             getRequirementsData(decodedRequirementId)
                 .then(data => {
                     for (const vendor of data.assigned_vendors) {
                         if (vendor.id == vendorId) {
                             vendor.feedback = vendor.feedback ?? [];
                             vendor.feedback = feedback;
+                            vendor.submitted = 'Y';
                         }
                     }
-                    updateFeedback(data);
+                    updateFeedback(data, false, reset);
                 })
                 .catch(err => {
                     console.error('Promise failed:', err);
                     App.customError(App.OPERATION_FAILED);
                     $('#saveDecisions').prop('disabled', false);
+                    reset();
                 });
         }
     });
 });
 
-async function updateFeedback(requirementData, autoSave = false){
+async function updateFeedback(requirementData, autoSave = false, reset = null){
     const response = await fetch('/api/supabase?action=updateVendorList',{
          method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -277,6 +282,7 @@ async function updateFeedback(requirementData, autoSave = false){
                 vendorName = vendor.name;
             }
         }
+
         const res = await fetch('/api/send-email?action=submittedResponses', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -288,6 +294,7 @@ async function updateFeedback(requirementData, autoSave = false){
                 token: token
             })
         });
+        if (reset) reset();
         location.href = App.pages.thank_you;
     }
 }
@@ -298,18 +305,28 @@ async function validateVendor(id){
 }
 
 async function checkSubmission(vendorId){
-    const submissions = App.getVendorFeedback(requirementsData.assigned_vendors, vendorId);
-    if (submissions.length) location.href = App.pages.proposal_submitted + '?id=' + vendorId;
+    let submitted = false;
+    for (const vendor of requirementsData.assigned_vendors) {
+        if (vendor.id == vendorId) {
+            if (vendor.submitted && vendor.submitted == 'Y'){
+                submitted = true;
+                break;
+            }
+        }
+    }
+
+    if (submitted){location.href = App.pages.submitted;return;}
 }
 
 async function getRequirementsData(id){
-    const { data, error } = await getRequirementsById(id);
-    if (error) {
-        console.error('Fetching requirement data failed (getRequirementsById):', error);
+    const response = await fetch(`/api/supabase?action=getRequirementsById&reqId=${id}`);
+    const result = await response.json();
+    if (result.error) {
+        console.error('Fetching requirement data failed (getRequirementsById):', result.error);
         App.customError(App.FAILED_TO_LOAD_DATA);
         return;
     }
-    return data;
+    return result.data;
 }
 
 async function loadData(vendorId) {
@@ -329,16 +346,16 @@ async function loadData(vendorId) {
         App.customError('Failed to verify vendor');
         return;
     }
-
+    
     const systemParts = result.data.system_parts;
-    data.requirements.forEach(function(key) {
+    data.requirements.forEach(function(key, i) {
         if (!uniqueAreas.includes(key.area)) uniqueAreas.push(key.area);
         if (!systemParts.includes(key.system_part)) return;
         
         const feedbackOptions = FEEDBACK_OPTIONS
             .map(function(opt) { return '<option>' + opt + '</option>'; })
             .join('');
-
+        
         $('#requirementsTable').append(
             '<tr>' +
                 '<td>' +
@@ -348,14 +365,14 @@ async function loadData(vendorId) {
                 '<td class="col-decision">' + key.requirement + '</td>' +
                 '<td>' + key.priority + '</td>' +
                 '<td class="col-feedback">' +
-                    '<select data-type="feedback" class="form-field" data-pos="' + index + '">' +
+                    '<select data-type="feedback" class="form-field" data-realpos="' + i +'" data-pos="' + index + '">' +
                         '<option value="">Select</option>' +
                         feedbackOptions +
                     '</select>' +
                 '</td>' +
                 '<td class="col-comments">' +
                     '<div style="display:flex;align-items:flex-start;gap:6px">' +
-                        '<textarea data-type="comment" data-pos="' + index + '" placeholder="Add a comment\u2026"></textarea>' +
+                        '<textarea data-type="comment" data-realpos="' + i +'" data-pos="' + index + '" placeholder="Add a comment\u2026"></textarea>' +
                         '<i data-type="comment-icon" class="fa-regular fa-note-sticky comment-note-icon hide" data-pos="' + index + '" title="A comment is required"></i>' +
                     '</div>' +
                 '</td>' +
