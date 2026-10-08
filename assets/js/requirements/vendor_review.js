@@ -146,6 +146,7 @@ $(function(){
                 validateVendor(vendorId);
                 checkSubmission(vendorId);
                 loadData(vendorId);
+                getPricing(vendorId);
             })
             .catch(err => {
                 console.error('Promise failed:', err);
@@ -203,6 +204,57 @@ $(function(){
         }
     }
 
+    const SUBMIT_SECTIONS = ['requirements', 'pricing'];
+    
+    function showSection(section) {
+        $('.vr-nav-item').removeClass('active')
+            .filter(`[data-section="${section}"]`).addClass('active');
+        $('.vr-section').addClass('hide');
+        $(`#section-${section}`).removeClass('hide');
+        $('#submitBar').toggleClass('hide', !SUBMIT_SECTIONS.includes(section));
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    $('.vr-nav-item').on('click', function () {
+        showSection(this.dataset.section);
+    });
+
+    $('#savePricing').on('click', function(){
+        const licenseCost = $('#licenseCost').val();
+        const implementationCost = $('#implementationCost').val();
+
+        if (!licenseCost && !implementationCost) return;
+
+        const reset = App.lockBtn($(this));
+        if (!reset) return;
+
+        $('#pricing-error-msg').css('display', 'block');
+        getRequirementsData(decodedRequirementId)
+                .then(data => {
+                    for (const vendor of data.assigned_vendors) {
+                        if (vendor.id == vendorId) {
+                            vendor.license_cost = licenseCost;
+                            vendor.implementation_cost = implementationCost;
+                        }
+                    }
+
+                    updateFeedback(data, true, reset);
+                    $('#pricing-error-msg').text('Saved!');
+                    setTimeout(function(){
+                        $('#pricing-error-msg').css('display', 'none');
+                        $('#pricing-error-msg').text('Saving...'); // set text back to default
+                    }, 3000);
+
+                })
+                .catch(err => {
+                    console.error('Promise failed:', err);
+                    App.customError(App.OPERATION_FAILED);
+                    $(this).prop('disabled', false);
+                    reset();
+                });
+
+    });
+
     $('#saveDecisions').on('click', async function () {
         let isError = false;
         let errors = [];
@@ -256,6 +308,18 @@ $(function(){
                 });
         }
     });
+
+
+    function setNavCollapsed(collapsed) {
+        $('#vrNav').toggleClass('collapsed', collapsed);
+        const label = collapsed ? 'Expand menu' : 'Collapse menu';
+        $('#vrNavToggle').attr({ title: label, 'aria-label': label });
+        try { localStorage.setItem('vrNavCollapsed', collapsed ? '1' : '0'); } catch (e) {}
+    }
+
+    $('#vrNavToggle').on('click', () => setNavCollapsed(!$('#vrNav').hasClass('collapsed')));
+
+    try { setNavCollapsed(localStorage.getItem('vrNavCollapsed') === '1'); } catch (e) {}
 });
 
 async function updateFeedback(requirementData, autoSave = false, reset = null){
@@ -268,6 +332,8 @@ async function updateFeedback(requirementData, autoSave = false, reset = null){
     if (result.error) {
         console.error('Updating requirement data failed (updateFeedback):', error);
         App.customError(App.OPERATION_FAILED);
+
+        if (reset != null) reset();
         return;
     }
 
@@ -297,6 +363,8 @@ async function updateFeedback(requirementData, autoSave = false, reset = null){
         if (reset) reset();
         location.href = App.pages.thank_you;
     }
+
+    if (reset != null) reset();
 }
 
 async function validateVendor(id){
@@ -316,6 +384,22 @@ async function checkSubmission(vendorId){
     }
 
     if (submitted){location.href = App.pages.submitted;return;}
+}
+
+function getPricing(vendorId){
+    for (const vendor of requirementsData.assigned_vendors) {
+        if (vendor.id == vendorId) {
+            if (vendor.license_cost){
+                $('#licenseCost').val(vendor.license_cost);
+            }
+
+            if (vendor.implementation_cost){
+                $('#implementationCost').val(vendor.implementation_cost);
+            }
+
+            break;
+        }
+    }
 }
 
 async function getRequirementsData(id){
