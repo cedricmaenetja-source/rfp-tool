@@ -241,6 +241,17 @@
             <div class="page-subtitle" id="vendor-detail-date"></div>
           </div>
           <div class="header-actions">
+            <div style="display:flex;flex-direction:column;gap:2px">
+              <label for="vendor-detail-currency" style="font-size:10px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--t3)">Currency</label>
+              <select id="vendor-detail-currency" style="padding:5px 8px;border:1px solid var(--b2);border-radius:var(--radius-btn);font-family:var(--sans);font-size:12.5px;background:var(--w);color:var(--t1);outline:none;cursor:pointer">
+                <option value="GBP" selected>GBP (£)</option>
+                <option value="EUR">EUR (€)</option>
+                <option value="USD">USD ($)</option>
+                <option value="ZAR">ZAR (R)</option>
+                <option value="AUD">AUD (A$)</option>
+                <option value="CAD">CAD (C$)</option>
+              </select>
+            </div>
             <div style="display:flex;flex-direction:column;gap:2px" data-view="responses">
               <label style="font-size:10px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--t3)">Submit by</label>
               <input type="date" id="vendor-detail-submit-by" style="padding:5px 8px;border:1px solid var(--b2);border-radius:var(--radius-btn);font-family:var(--sans);font-size:12.5px;background:var(--w);color:var(--t1);outline:none">
@@ -337,6 +348,27 @@
             </tr></thead>
             <tbody id="vendors-tbody"></tbody>
           </table>
+        </div>
+      </div>
+      <div class="page" id="page-vendor-profile">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+          <button class="btn btn-secondary btn-sm" style="border-radius:unset;border:none" onclick="window.navigateTo('vendors')" title="Back to vendors">
+            <i class="fa-solid fa-arrow-left" style="font-size:11px"></i>
+          </button>
+          <div>
+            <div id="vpr-title" style="font-size:18px;font-weight:600;color:var(--t1)">Vendor</div>
+            <div id="vpr-meta" style="font-size:12px;color:var(--t3)"></div>
+          </div>
+        </div>
+
+        <div class="vpr-layout" id="vpr-layout">
+          <nav class="vpr-menu">
+            <button class="vpr-menu-toggle" id="vpr-menu-toggle" title="Collapse menu" aria-label="Collapse menu">
+              <i class="fa-solid fa-angles-left"></i>
+            </button>
+            <div id="vpr-menu"></div>
+          </nav>
+          <div class="vpr-content" id="vpr-content"></div>
         </div>
       </div>
       <div class="page" id="page-users">

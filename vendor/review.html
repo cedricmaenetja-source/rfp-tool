@@ -11,6 +11,136 @@
   <link rel="stylesheet" type="text/css" href="../assets/css/vendor.css" />
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+  <style>
+    /* ── Pricing: spreadsheet layout (can be moved into vendor.css) ── */
+    .pr-caption h2 {
+      color: #d0335f;
+      text-transform: uppercase;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+    .pr-caption p { font-weight: 600; }
+
+    .pr-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .pr-block + .pr-block { margin-top: 36px; }
+
+    .pr-table {
+      width: 100%;
+      min-width: 1080px;
+      border-collapse: collapse;
+      table-layout: fixed;
+      font-size: 13px;
+    }
+    .pr-table th,
+    .pr-table td {
+      border: 1px solid #52525b;
+      padding: 6px 8px;
+      vertical-align: middle;
+      /* override global th/td rules (nowrap, ellipsis, fixed height, sticky) */
+      white-space: normal;
+      overflow: visible;
+      text-overflow: clip;
+      overflow-wrap: break-word;
+      word-break: normal;
+      height: auto;
+      line-height: 1.3;
+      text-transform: none;
+      letter-spacing: normal;
+      position: static;
+    }
+    .pr-table th * { white-space: normal; }
+
+    /* Row 1: "Costs By Year" group header */
+    .pr-table th.pr-blank { border: none; background: transparent; }
+    .pr-table th.pr-group {
+      text-align: center;
+      font-weight: 600;
+      background: #fff;
+      border-width: 1.5px;
+    }
+
+    /* Row 2: column headers */
+    .pr-table .pr-head-row th {
+      background: #cfe2f3;
+      font-weight: 600;
+      text-align: center;
+    }
+    .pr-table .pr-head-row th.pr-left { text-align: left; }
+
+    /* Row 3: section line with totals */
+    .pr-table .pr-section-row th {
+      background: #cfe2f3;
+      font-weight: 400;
+      text-align: left;
+      vertical-align: bottom;
+    }
+    .pr-table .pr-item-label strong { display: block; font-size: 15px; font-weight: 600; }
+    .pr-table .pr-item-label span   { display: block; font-size: 14px; }
+    .pr-table th.pr-desc-hint { font-size: 11px; font-weight: 600; line-height: 1.25; vertical-align: top; }
+    .pr-table .pr-section-row th.pr-sum {
+      text-align: center;
+      font-weight: 700;
+      font-size: 16px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Editable rows */
+    .pr-table .pr-row td { background: #fff2cc; padding: 0; }
+    .pr-table .pr-row .pr-input {
+      display: block;
+      width: 100%;
+      min-width: 0;
+      margin: 0;
+      border: 0;
+      border-radius: 0;
+      box-shadow: none;
+      background: transparent;
+      padding: 8px;
+      font: inherit;
+      color: inherit;
+    }
+    .pr-table .pr-row .pr-input:focus { outline: 2px solid #2563eb; outline-offset: -2px; background: #fff; }
+    .pr-table .pr-row .pr-input:disabled { color: #a1a1aa; cursor: not-allowed; }
+    .pr-table .pr-row textarea.pr-input { resize: vertical; min-height: 36px; line-height: 1.3; }
+    .pr-table .pr-row input[type="number"] { -moz-appearance: textfield; text-align: right; font-variant-numeric: tabular-nums; }
+    .pr-table .pr-row input[type="number"]::-webkit-outer-spin-button,
+    .pr-table .pr-row input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+    .pr-table .pr-affix { display: flex; align-items: center; }
+    .pr-table .pr-affix span { color: #71717a; flex: none; }
+    .pr-table .pr-affix .pr-pre  { padding-left: 8px; }
+    .pr-table .pr-affix .pr-post { padding-right: 8px; }
+
+    .pr-table .pr-row td.pr-row-total {
+      padding: 8px;
+      text-align: right;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Remove-row column sits outside the grid */
+    .pr-table th.pr-action-col,
+    .pr-table td.pr-action-col { width: 40px; border: none; background: transparent; text-align: center; padding: 0; }
+    .pr-table .pr-remove {
+      border: none;
+      background: transparent;
+      color: #a1a1aa;
+      cursor: pointer;
+      padding: 6px;
+      min-width: 0;
+      box-shadow: none;
+    }
+    .pr-table .pr-remove:hover,
+    .pr-table .pr-remove:focus-visible { color: #dc2626; }
+
+    .pr-add-row {
+      margin-top: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+  </style>
 </head>
 
 <body>
@@ -137,27 +267,282 @@
 
     <section class="vr-section hide" id="section-pricing">
       <div class="card">
-        <div class="card-header-block">
+        <div class="card-header-block pr-caption">
           <h2>Pricing</h2>
-          <p>Provide your indicative costs for this proposal.</p>
+          <p>Please provide costs inline with the description of service provided and the requirements outlined in this RFP</p>
         </div>
         <div class="card-body">
-          <div class="vr-pricing-grid">
-            <div class="vr-field">
-              <label for="licenseCost">License cost</label>
-              <input type="number" id="licenseCost" class="vr-input" min="0" step="0.01" placeholder="0.00" inputmode="decimal">
+          <div class="pr-block">
+            <div class="pr-table-wrap">
+              <table class="pr-table" data-section="core_licence" data-label="Core System Licence (3 years)">
+                <colgroup>
+                  <col style="width:22%">
+                  <col style="width:18%">
+                  <col style="width:10%">
+                  <col style="width:10%">
+                  <col style="width:10%">
+                  <col style="width:13%">
+                  <col style="width:8%">
+                  <col style="width:9%">
+                  <col style="width:40px">
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th class="pr-blank" colspan="2"></th>
+                    <th class="pr-group" colspan="3">Costs By Year</th>
+                    <th class="pr-blank" colspan="4"></th>
+                  </tr>
+                  <tr class="pr-head-row">
+                    <th></th>
+                    <th class="pr-left">Description</th>
+                    <th data-year="2027">2027</th>
+                    <th data-year="2028">2028</th>
+                    <th data-year="2029">2029</th>
+                    <th>Total Commitment</th>
+                    <th>VAT?</th>
+                    <th>VAT Rate</th>
+                    <th class="pr-action-col"></th>
+                  </tr>
+                  <tr class="pr-section-row">
+                    <th class="pr-item-label">
+                      <strong>Core System Licence (3 years)</strong>
+                      <span>(Add a separate line for each element)</span>
+                    </th>
+                    <th class="pr-desc-hint">Please articulate volumes, fair usage and any other restrictions based on our expected headcount growth</th>
+                    <th class="pr-sum" data-sum="2026">£0.00</th>
+                    <th class="pr-sum" data-sum="2027">£0.00</th>
+                    <th class="pr-sum" data-sum="2028">£0.00</th>
+                    <th class="pr-sum" data-sum="total">£0.00</th>
+                    <th></th>
+                    <th></th>
+                    <th class="pr-action-col"></th>
+                  </tr>
+                </thead>
+                <tbody class="pr-rows"></tbody>
+              </table>
             </div>
-            <div class="vr-field">
-              <label for="implementationCost">Implementation cost</label>
-              <input type="number" id="implementationCost" class="vr-input" min="0" step="0.01" placeholder="0.00" inputmode="decimal">
+            <button type="button" class="btn pr-add-row" data-section="core_licence">
+              <i class="fa-solid fa-plus"></i> Add line
+            </button>
+          </div>
+          <div class="pr-block">
+            <div class="pr-table-wrap">
+              <table class="pr-table" data-section="additional_modules" data-label="Additional Modules (3 years)">
+                <colgroup>
+                  <col style="width:22%">
+                  <col style="width:18%">
+                  <col style="width:10%">
+                  <col style="width:10%">
+                  <col style="width:10%">
+                  <col style="width:13%">
+                  <col style="width:8%">
+                  <col style="width:9%">
+                  <col style="width:40px">
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th class="pr-blank" colspan="2"></th>
+                    <th class="pr-group" colspan="3">Costs By Year</th>
+                    <th class="pr-blank" colspan="4"></th>
+                  </tr>
+                  <tr class="pr-head-row">
+                    <th></th>
+                    <th class="pr-left">Description</th>
+                    <th data-year="2026">2026</th>
+                    <th data-year="2027">2027</th>
+                    <th data-year="2028">2028</th>
+                    <th>Total Commitment</th>
+                    <th>VAT?</th>
+                    <th>VAT Rate</th>
+                    <th class="pr-action-col"></th>
+                  </tr>
+                  <tr class="pr-section-row">
+                    <th class="pr-item-label">
+                      <strong>Additional Modules (3 years)</strong>
+                      <span>(Add a separate line for each element)</span>
+                    </th>
+                    <th class="pr-desc-hint">Please articulate volumes, fair usage and any other restrictions based on our expected headcount growth</th>
+                    <th class="pr-sum" data-sum="2026">£0.00</th>
+                    <th class="pr-sum" data-sum="2027">£0.00</th>
+                    <th class="pr-sum" data-sum="2028">£0.00</th>
+                    <th class="pr-sum" data-sum="total">£0.00</th>
+                    <th></th>
+                    <th></th>
+                    <th class="pr-action-col"></th>
+                  </tr>
+                </thead>
+                <tbody class="pr-rows"></tbody>
+              </table>
             </div>
+            <button type="button" class="btn pr-add-row" data-section="additional_modules">
+              <i class="fa-solid fa-plus"></i> Add line
+            </button>
+          </div>
+          <div class="pr-block">
+            <div class="pr-table-wrap">
+              <table class="pr-table" data-section="implementation" data-label="Implementation and Migration">
+                <colgroup>
+                  <col style="width:22%">
+                  <col style="width:18%">
+                  <col style="width:10%">
+                  <col style="width:10%">
+                  <col style="width:10%">
+                  <col style="width:13%">
+                  <col style="width:8%">
+                  <col style="width:9%">
+                  <col style="width:40px">
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th class="pr-blank" colspan="2"></th>
+                    <th class="pr-group" colspan="3">Costs By Year</th>
+                    <th class="pr-blank" colspan="4"></th>
+                  </tr>
+                  <tr class="pr-head-row">
+                    <th></th>
+                    <th class="pr-left">Description</th>
+                    <th data-year="2026">2026</th>
+                    <th data-year="2027">2027</th>
+                    <th data-year="2028">2028</th>
+                    <th>Total Commitment</th>
+                    <th>VAT?</th>
+                    <th>VAT Rate</th>
+                    <th class="pr-action-col"></th>
+                  </tr>
+                  <tr class="pr-section-row">
+                    <th class="pr-item-label">
+                      <strong>Implementation and Migration</strong>
+                      <span>(Add a separate line for each element)</span>
+                    </th>
+                    <th class="pr-desc-hint">Please articulate volumes, fair usage and any other restrictions based on our expected headcount growth</th>
+                    <th class="pr-sum" data-sum="2026">£0.00</th>
+                    <th class="pr-sum" data-sum="2027">£0.00</th>
+                    <th class="pr-sum" data-sum="2028">£0.00</th>
+                    <th class="pr-sum" data-sum="total">£0.00</th>
+                    <th></th>
+                    <th></th>
+                    <th class="pr-action-col"></th>
+                  </tr>
+                </thead>
+                <tbody class="pr-rows"></tbody>
+              </table>
+            </div>
+            <button type="button" class="btn pr-add-row" data-section="implementation">
+              <i class="fa-solid fa-plus"></i> Add line
+            </button>
+          </div>
+          <div class="pr-block">
+            <div class="pr-table-wrap">
+              <table class="pr-table" data-section="integrations" data-label="Integrations">
+                <colgroup>
+                  <col style="width:22%">
+                  <col style="width:18%">
+                  <col style="width:10%">
+                  <col style="width:10%">
+                  <col style="width:10%">
+                  <col style="width:13%">
+                  <col style="width:8%">
+                  <col style="width:9%">
+                  <col style="width:40px">
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th class="pr-blank" colspan="2"></th>
+                    <th class="pr-group" colspan="3">Costs By Year</th>
+                    <th class="pr-blank" colspan="4"></th>
+                  </tr>
+                  <tr class="pr-head-row">
+                    <th></th>
+                    <th class="pr-left">Description</th>
+                    <th data-year="2026">2026</th>
+                    <th data-year="2027">2027</th>
+                    <th data-year="2028">2028</th>
+                    <th>Total Commitment</th>
+                    <th>VAT?</th>
+                    <th>VAT Rate</th>
+                    <th class="pr-action-col"></th>
+                  </tr>
+                  <tr class="pr-section-row">
+                    <th class="pr-item-label">
+                      <strong>Integrations</strong>
+                      <span>(Add a separate line for each element)</span>
+                    </th>
+                    <th class="pr-desc-hint"></th>
+                    <th class="pr-sum" data-sum="2026">£0.00</th>
+                    <th class="pr-sum" data-sum="2027">£0.00</th>
+                    <th class="pr-sum" data-sum="2028">£0.00</th>
+                    <th class="pr-sum" data-sum="total">£0.00</th>
+                    <th></th>
+                    <th></th>
+                    <th class="pr-action-col"></th>
+                  </tr>
+                </thead>
+                <tbody class="pr-rows"></tbody>
+              </table>
+            </div>
+            <button type="button" class="btn pr-add-row" data-section="integrations">
+              <i class="fa-solid fa-plus"></i> Add line
+            </button>
+          </div>
+          <div class="pr-block">
+            <div class="pr-table-wrap">
+              <table class="pr-table" data-section="other_costs" data-label="Other Costs (Added Value / Optional)">
+                <colgroup>
+                  <col style="width:22%">
+                  <col style="width:18%">
+                  <col style="width:10%">
+                  <col style="width:10%">
+                  <col style="width:10%">
+                  <col style="width:13%">
+                  <col style="width:8%">
+                  <col style="width:9%">
+                  <col style="width:40px">
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th class="pr-blank" colspan="2"></th>
+                    <th class="pr-group" colspan="3">Costs By Year</th>
+                    <th class="pr-blank" colspan="4"></th>
+                  </tr>
+                  <tr class="pr-head-row">
+                    <th></th>
+                    <th class="pr-left">Description</th>
+                    <th data-year="2026">2026</th>
+                    <th data-year="2027">2027</th>
+                    <th data-year="2028">2028</th>
+                    <th>Total Commitment</th>
+                    <th>VAT?</th>
+                    <th>VAT Rate</th>
+                    <th class="pr-action-col"></th>
+                  </tr>
+                  <tr class="pr-section-row">
+                    <th class="pr-item-label">
+                      <strong>Other Costs (Added Value / Optional)</strong>
+                      <span>(Add a separate line for each element)</span>
+                    </th>
+                    <th class="pr-desc-hint">Please articulate volumes, fair usage and any other restrictions based on our expected headcount growth</th>
+                    <th class="pr-sum" data-sum="2026">£0.00</th>
+                    <th class="pr-sum" data-sum="2027">£0.00</th>
+                    <th class="pr-sum" data-sum="2028">£0.00</th>
+                    <th class="pr-sum" data-sum="total">£0.00</th>
+                    <th></th>
+                    <th></th>
+                    <th class="pr-action-col"></th>
+                  </tr>
+                </thead>
+                <tbody class="pr-rows"></tbody>
+              </table>
+            </div>
+            <button type="button" class="btn pr-add-row" data-section="other_costs">
+              <i class="fa-solid fa-plus"></i> Add line
+            </button>
           </div>
         </div>
       </div>
       <div>
         <span id="pricing-error-msg" style="color: var(--muted);margin-top:10px;display: none;font-size: 12px;">Saving...</span>
       </div>
-      <div class="card vr-submit-bar hide" id="submitBar">
+      <div class="card vr-submit-bar" id="pricingSubmitBar">
         <div class="actions">
           <button id="savePricing">Submit</button>
         </div>

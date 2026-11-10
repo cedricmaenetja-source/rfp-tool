@@ -45,7 +45,7 @@ const MOCK = {
   }
 };
 let formFields = { ...MOCK.formFields };
-const breadcrumbs = { home:'Dashboard', requirements:'Client Review', 'vendor-review':'Vendor Review', completed:'Completed', vendors:'Vendors', users:'Users', resources:'Resources', configurations:'Configurations', 'active-summary':'Summary', 'vendor-detail':'Requirement' };
+const breadcrumbs = { home:'Dashboard', requirements:'Client Review', 'vendor-review':'Vendor Review', completed:'Completed', vendors:'Vendors', users:'Users', resources:'Resources', configurations:'Configurations', 'active-summary':'Summary', 'vendor-detail':'Requirement', 'vendor-profile':'Vendor' };
 function navigateTo(page) {
   const overlay = document.getElementById('page-transition');
 
@@ -83,6 +83,7 @@ function loadPage(page) {
   if (page === 'upload-responses') initUploadResponses();
   if (page === 'users') loadUsers();
   if (page === 'vendor-detail') loadVendorDetail();
+  if (page === 'vendor-profile') loadVendorProfile();
 }
 
 function applyRoleVisibility(userRole) {
@@ -928,6 +929,12 @@ document.addEventListener('click', () => {
 
 function loadVendorDetail() {
   if (!vendorDetailReq) { window.navigateTo('vendor-review'); return; }
+
+  trackingStatusFilter = '';
+  const trackingEl = document.getElementById('vd-tracking-content');
+  if (trackingEl) trackingEl.innerHTML = '';
+  showVendorDetailSection('responses');
+
   document.getElementById('vendor-detail-title').innerHTML = `<button style="border-radius:unset;border:none" class="btn btn-secondary btn-sm" onclick="window.navigateTo('vendor-review')">
               <i class="fa-solid fa-arrow-left" style="font-size:11px"></i>
             </button> ${vendorDetailReq.title}` || 'Requirement';
@@ -935,6 +942,7 @@ function loadVendorDetail() {
   document.getElementById('vendor-detail-date').innerHTML = 'Created on ' + formatDayDate(vendorDetailReq.created_at) || '';
   document.getElementById('breadcrumb-current').textContent = vendorDetailReq.title || 'Requirement';
   renderVendorDetailSidebar();
+  
   if (selectedVendorIdx !== null) renderVendorDetailPanel(selectedVendorIdx);
   else renderVendorDetailPanelEmpty();
 }
@@ -1316,7 +1324,7 @@ async function loadVendors() {
     const verBadge = v.verified === 'Yes' ? '<span class="badge b-green">Verified</span>' : '<span class="badge b-gray">Unverified</span>';
     tr.innerHTML = ''
    tr.innerHTML = ''
-  + '<td class="cell-primary">' + v.name + '</td><td>' + (v.hq_location || '') + '</td><td>' + (v.contact_person?.name || '') + '</td><td>' + (v.contact_person?.email || '') + '</td><td>' + (v.contact_person?.phone || '—') + '</td><td>' + verBadge + '</td>'
+  + '<td class="cell-primary"><a href="#" onclick="openVendorProfile(\'' + v.id + '\');return false;" style="color:var(--blue);text-decoration:none">' + escapeHtml(v.name) + '</a></td><td>' + (v.hq_location || '') + '</td><td>' + (v.contact_person?.name || '') + '</td><td>' + (v.contact_person?.email || '') + '</td><td>' + (v.contact_person?.phone || '—') + '</td><td>' + verBadge + '</td>'
   + '<td style="white-space:nowrap">'
   +   '<button class="row-icon-btn" title="Edit" onclick="editVendorRow(\'' + v.id + '\')"><i class="fa-solid fa-pen-to-square"></i></button>'
   +   '<button class="row-icon-btn danger" title="Delete" data-requires-role="admin" onclick="deleteVendorRow(\'' + v.id + '\')"><i class="fa-solid fa-trash-can"></i></button>'
@@ -1325,6 +1333,229 @@ async function loadVendors() {
   });
   if (vendorsTable) { vendorsTable.destroy(); }
   vendorsTable = $('#vendors-table').DataTable({ responsive:true, pageLength:10 });
+}
+
+/* ══ VENDOR PROFILE ══ */
+// Question types: text | url | year | textarea | yesno (Yes/No + details box)
+const VENDOR_PROFILE_SECTIONS = [
+  {
+    key: 'company_profile', label: 'Company Profile & Strategy', icon: 'fa-building',
+    questions: [
+      { key: 'hq_name_address',     type: 'textarea', rows: 2, label: 'Headquarters: Company name and address.' },
+      { key: 'legal_entity',        type: 'text',     label: 'Legal contracting entity' },
+      { key: 'year_founded',        type: 'year',     label: 'What year was your organisation founded?' },
+      { key: 'website',             type: 'url',      label: 'Company Website / Webpage', placeholder: 'https://' },
+      { key: 'registration_number', type: 'text',     label: 'Company Registration Number' },
+      { key: 'company_overview',    type: 'textarea', label: 'Provide a company overview and history.' },
+      { key: 'ownership_change',    type: 'yesno',    label: 'Has there been a change in the company ownership in the last 3 years?', detailsPlaceholder: 'If yes, please provide details…' },
+      { key: 'products_services',   type: 'textarea', label: 'Provide an overview of your products and services.' },
+      { key: 'vision_strategy',     type: 'textarea', label: 'Provide an overview of the vision and development strategy of company, services, and products' },
+      { key: 'values',              type: 'textarea', label: 'What values or principles underpin your work?' },
+      { key: 'financial_status',    type: 'textarea', rows: 5, label: 'Please describe the overall financial status of your organisation, including revenue, net income, and R&D spending for the last three years.' },
+    ]
+  },
+  {
+    key: 'rnd', label: 'Describe your commitment to R&D.', icon: 'fa-flask',
+    questions: [
+      { key: 'rnd_commitment', type: 'textarea', rows: 6, label: 'Describe your commitment to R&D.' },
+    ]
+  },
+  {
+    key: 'client_base', label: 'Client base and relationship', icon: 'fa-handshake',
+    questions: [
+      { key: 'sector_clients',     type: 'textarea', rows: 2, label: 'How many of your current clients are in the charity, social care, or learning disability/autism support sector specifically?' },
+      { key: 'workforce_split',    type: 'textarea', rows: 2, label: 'Of your total client base, what proportion have a workforce split between permanent and casual/relief/bank staff similar to ours?' },
+      { key: 'multi_jurisdiction', type: 'yesno',    label: 'Have you delivered this solution across multiple UK and non-UK jurisdictions simultaneously (e.g. GB, Northern Ireland, Republic of Ireland, Isle of Man, or similar)? If so, provide an example.', detailsPlaceholder: 'If yes, provide an example…' },
+      { key: 'csat',               type: 'textarea', label: 'Please provide outputs from CSAT and end user CSAT surveys.' },
+      { key: 'retention_rate',     type: 'text',     label: 'What is your client retention rate?', placeholder: 'e.g. 95%' },
+      { key: 'client_tenure',      type: 'textarea', rows: 3, label: "What is your average client tenure, and what's the longest-running client relationship you have in this sector?" },
+      { key: 'customer_success',   type: 'textarea', rows: 6, label: "Describe your customer success approach: how you help clients get the most out of the platform, support ongoing optimisation, keep them informed of product updates and releases, and ensure our team stays confident and up to speed with the system's functionality." },
+    ]
+  },
+  {
+    key: 'competitive_advantage', label: 'Competitive Advantage', icon: 'fa-trophy',
+    questions: [
+      { key: 'benefits',              type: 'textarea', label: 'What are the benefits and advantages of choosing your organisation?' },
+      { key: 'expected_improvements', type: 'textarea', label: 'What are the expected improvements once your software is implemented, e.g. processing time, user experience, error rates?' },
+      { key: 'accolades',             type: 'textarea', label: 'What accolades, awards, or recognition have you won in the software industry?' },
+      { key: 'differentiators',       type: 'textarea', label: 'What advantages / differentiators does your firm provide over your competition?' },
+    ]
+  },
+  {
+    key: 'product_roadmap', label: 'Product Roadmap & updates', icon: 'fa-road',
+    questions: [
+      { key: 'roadmap',                   type: 'textarea', rows: 6, label: 'Please provide a functional roadmap for your solution for the next 3-5 years.' },
+      { key: 'roadmap_influence',         type: 'textarea', label: 'What is the process for customers to influence and enhance this roadmap?' },
+      { key: 'update_management',         type: 'textarea', rows: 5, label: 'Please specify how you manage system updates and new feature releases, including your process for communicating changes and ensuring minimal disruption to our operations.' },
+      { key: 'regulatory_responsiveness', type: 'textarea', label: 'How do you keep your product roadmap responsive to CQC, Ofsted, or equivalent regulatory changes affecting the care sector?' },
+    ]
+  },
+  {
+    key: 'csr_ethics', label: 'Corporate Social Responsibility (CSR) & Ethics', icon: 'fa-leaf',
+    questions: [
+      { key: 'dei_policy',          type: 'yesno', label: 'Does your company have a Diversity & Inclusion policy and programme that addresses discrimination, bullying and harassment based on characteristics including but not limited to ethnicity, nationality, gender, sexual orientation, gender identity, religion, age, civil partnership, marital or family status, pregnancy and disability? If yes, please provide a copy (or extract) of the policy and a brief summary of the programme.', detailsPlaceholder: 'Policy extract and programme summary…' },
+      { key: 'human_rights_policy', type: 'yesno', label: 'Do you have a Human Rights Policy?', detailsPlaceholder: 'Details (optional)…' },
+      { key: 'modern_slavery',      type: 'textarea', rows: 5, label: 'Provide your Modern Slavery Statement.' },
+      { key: 'responsible_hiring',  type: 'yesno', label: 'Does your organisation practice socially responsible hiring?', detailsPlaceholder: 'Details (optional)…' },
+    ]
+  },
+];
+
+let vendorProfile = null;
+let vendorProfileSection = VENDOR_PROFILE_SECTIONS[0].key;
+
+function openVendorProfile(id) {
+  const v = MOCK.vendors.find(x => String(x.id) === String(id));
+  if (!v) return;
+  vendorProfile = v;
+  window.navigateTo('vendor-profile');
+}
+
+function loadVendorProfile() {
+  if (!vendorProfile) { window.navigateTo('vendors'); return; }
+
+  document.querySelector('.nav-item[data-page="vendors"]')?.classList.add('active');
+
+  document.getElementById('vpr-title').textContent = vendorProfile.name || 'Vendor';
+  document.getElementById('vpr-meta').textContent =
+    [vendorProfile.hq_location, vendorProfile.contact_person?.name, vendorProfile.contact_person?.email]
+      .filter(Boolean).join(' · ');
+  document.getElementById('breadcrumb-current').textContent = vendorProfile.name || 'Vendor';
+
+  // Always start on the first section for a newly opened vendor
+  showVendorProfileSection(VENDOR_PROFILE_SECTIONS[0].key);
+}
+
+function isQuestionAnswered(q, profile) {
+  const v = profile[q.key];
+  return v !== undefined && v !== null && String(v).trim() !== '';
+}
+
+function sectionProgress(section) {
+  const profile = vendorProfile?.profile || {};
+  const answered = section.questions.filter(q => isQuestionAnswered(q, profile)).length;
+  return { answered, total: section.questions.length };
+}
+
+function renderVendorProfileMenu() {
+  const menu = document.getElementById('vpr-menu');
+
+  menu.innerHTML = VENDOR_PROFILE_SECTIONS.map(s => {
+    const { answered, total } = sectionProgress(s);
+    const complete = answered === total;
+    return '<button class="vpr-menu-item' + (s.key === vendorProfileSection ? ' active' : '') + (complete ? ' complete' : '') + '"'
+      + ' data-key="' + s.key + '" title="' + escapeHtml(s.label) + ' (' + answered + '/' + total + ')">'
+      + '<i class="fa-solid ' + s.icon + '"></i>'
+      + '<span class="vpr-menu-label">' + escapeHtml(s.label) + '</span>'
+      + '<span class="vpr-progress' + (complete ? ' complete' : '') + '">' + answered + '/' + total + '</span>'
+      + '</button>';
+  }).join('');
+
+  menu.querySelectorAll('.vpr-menu-item').forEach(btn =>
+    btn.addEventListener('click', () => showVendorProfileSection(btn.dataset.key)));
+}
+
+function setVprMenuCollapsed(collapsed) {
+  const layout = document.getElementById('vpr-layout');
+  const btn = document.getElementById('vpr-menu-toggle');
+  layout.classList.toggle('collapsed', collapsed);
+  const label = collapsed ? 'Expand menu' : 'Collapse menu';
+  btn.title = label;
+  btn.setAttribute('aria-label', label);
+  try { localStorage.setItem('vprMenuCollapsed', collapsed ? '1' : '0'); } catch (e) {}
+}
+
+document.getElementById('vpr-menu-toggle').addEventListener('click', () => {
+  setVprMenuCollapsed(!document.getElementById('vpr-layout').classList.contains('collapsed'));
+});
+
+// Restore the saved state on load
+try { setVprMenuCollapsed(localStorage.getItem('vprMenuCollapsed') === '1'); } catch (e) {}
+
+function renderProfileInput(q, profile) {
+  const val = profile[q.key] ?? '';
+  const ph = escapeHtml(q.placeholder || '');
+
+  if (q.type === 'text' || q.type === 'url') {
+    return '<input type="' + q.type + '" class="vpr-input" data-key="' + q.key + '" value="' + escapeHtml(val) + '" placeholder="' + ph + '">';
+  }
+
+  if (q.type === 'year') {
+    return '<input type="number" class="vpr-input" style="width:140px" data-key="' + q.key + '" value="' + escapeHtml(val) + '"'
+      + ' min="1800" max="' + new Date().getFullYear() + '" step="1" placeholder="YYYY">';
+  }
+
+  if (q.type === 'yesno') {
+    const details = profile[q.key + '_details'] ?? '';
+    return '<select class="vpr-select" data-key="' + q.key + '">'
+      +   '<option value="">Select…</option>'
+      +   '<option' + (val === 'Yes' ? ' selected' : '') + '>Yes</option>'
+      +   '<option' + (val === 'No'  ? ' selected' : '') + '>No</option>'
+      + '</select>'
+      + '<textarea class="vpr-textarea" rows="3" data-key="' + q.key + '_details" placeholder="' + escapeHtml(q.detailsPlaceholder || 'Details…') + '">'
+      +   escapeHtml(details)
+      + '</textarea>';
+  }
+
+  // default: textarea
+  return '<textarea class="vpr-textarea" rows="' + (q.rows || 4) + '" data-key="' + q.key + '" placeholder="' + (ph || 'Enter response…') + '">'
+    + escapeHtml(val)
+    + '</textarea>';
+}
+
+function showVendorProfileSection(key) {
+  vendorProfileSection = key;
+  renderVendorProfileMenu();
+
+  const section = VENDOR_PROFILE_SECTIONS.find(s => s.key === key);
+  const profile = vendorProfile?.profile || {};
+
+  const rows = section.questions.map((q, i) =>
+    '<div class="vpr-q-row">'
+    +   '<div class="vpr-q-label"><span class="vpr-q-num">' + (i + 1) + '.</span>' + escapeHtml(q.label) + '</div>'
+    +   '<div class="vpr-q-input">' + renderProfileInput(q, profile) + '</div>'
+    + '</div>'
+  ).join('');
+
+  document.getElementById('vpr-content').innerHTML = ''
+    + '<div class="info-card">'
+    +   '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">'
+    +     '<span class="info-card-title" style="margin-bottom:0">' + escapeHtml(section.label) + '</span>'
+    +     '<span class="vpr-save-state" id="vpr-save-state"></span>'
+    +   '</div>'
+    +   rows
+    + '</div>';
+
+  // Save each field when it loses focus (inputs/textareas) or changes (selects), only if the value changed
+  document.querySelectorAll('#vpr-content [data-key]').forEach(el =>
+    el.addEventListener('change', () => saveVendorProfileField(el.dataset.key, el.value.trim())));
+}
+
+async function saveVendorProfileField(key, value) {
+  const state = document.getElementById('vpr-save-state');
+  vendorProfile.profile = vendorProfile.profile || {};
+  const previous = vendorProfile.profile[key];
+  vendorProfile.profile[key] = value;
+
+  if (state) state.innerHTML = '<span class="dot-spinner sm muted"><span></span><span></span><span></span></span>';
+
+  try {
+    const res = await fetch('/api/supabase?action=upsertVendor', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ payload: vendorProfile })
+    });
+    const result = await res.json();
+    if (result.error) throw new Error(result.error);
+
+    if (state) state.textContent = 'Saved';
+    setTimeout(() => { if (state && state.textContent === 'Saved') state.textContent = ''; }, 2000);
+    renderVendorProfileMenu(); // refresh answered/total counts
+  } catch (err) {
+    vendorProfile.profile[key] = previous; // roll back the local change
+    if (state) state.textContent = '';
+    showNotification(err.message || 'Failed to save.', 'error');
+  }
 }
 
 const capitalize = str => str.charAt(0).toUpperCase() + str.slice(1);
@@ -2830,5 +3061,6 @@ window.selectVendorDetail = selectVendorDetail;
 window.editVendorRow = editVendorRow;
 window.deleteVendorRow = deleteVendorRow;
 window.assignVendors = assignVendors;
+window.openVendorProfile = openVendorProfile;
 
 loadHome();
